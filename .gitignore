@@ -1,0 +1,11 @@
+.env
+
+frontend/node_modules
+frontend/src/environments/environment.template.ts
+
+backend/.env
+backend/node_modules
+backend/config/database/migrations.lock
+backend/imagesSaved/*.png
+backend/imagesSaved/*.jpg
+backend/imagesSaved/*.jpeg

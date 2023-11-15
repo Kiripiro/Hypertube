@@ -1,0 +1,76 @@
+version: '3.9'
+
+# Services
+services:
+
+  # Node Service
+  node:
+    build: ./backend
+    restart: unless-stopped
+    working_dir: /app
+    volumes:
+      - ./backend:/app
+    container_name: nodejs
+    ports:
+      - 3000:3000
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      - TZ=Europe/Paris
+
+  # Angular Service
+  angular:
+    container_name: angular
+    build: ./frontend
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./frontend:/app
+    depends_on:
+      - mysql
+    environment:
+      - TZ=Europe/Paris
+
+  # MySQL Service
+  mysql:
+    image: mysql:8.1.0
+    restart: unless-stopped
+    environment:
+      - MYSQL_HOST=${MYSQL_HOST}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - TZ=Europe/Paris
+    ports:
+      - 3307:3306
+    volumes:
+      - mysqldata:/var/lib/mysql
+    container_name: mysql
+    healthcheck:
+      test: mysqladmin ping -h 127.0.0.1 -u $$MYSQL_USER --password=$$MYSQL_PASSWORD
+      start_period: 5s
+      interval: 5s
+      timeout: 5s
+      retries: 55
+
+  # Adminer Service
+  adminer:
+    image: adminer:latest
+    restart: unless-stopped
+    ports:
+      - 8080:8080
+    depends_on:
+      - mysql
+    container_name: adminer
+    volumes:
+      - adminerdata:/var/lib/adminer
+    environment:
+      - TZ=Europe/Paris
+
+volumes:
+  mysqldata:
+  adminerdata:
