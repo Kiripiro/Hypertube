@@ -1,0 +1,8 @@
+<div id="dialogDiv">
+    <h2>{{title}}</h2>
+    <p>{{text}}</p>
+    <div id="dialogButtonDiv" [ngStyle]="{'justify-content': buttonDivJustifyContent}">
+        <button mat-button *ngIf="text_yes_button.length > 0" (click)="yesCallback()">{{text_yes_button}}</button>
+        <button mat-button *ngIf="text_no_button.length > 0" (click)="noCallback()">{{text_no_button}}</button>
+    </div>
+</div>

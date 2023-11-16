@@ -1,0 +1,141 @@
+$background: #FAFAFA;
+$primary: #FDBABA;
+$surface: #3E2266;
+$surfaceAlt: #6DB1BF;
+$surfaceAltDark: #2e7280;
+$onPrimary: #3E2266;
+$onSurface: white;
+$onPrimaryAlt: #6DB1BF;
+$greyInfos: #9a9fa3;
+$greyInfosDark: #333435;
+
+mat-label {
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: $onPrimary;
+    margin-bottom: 0.3rem;
+}
+
+.userInfos {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+}
+
+.profile-pictures {
+    label {
+        font-size: 16px;
+    }
+
+    .pictures-container {
+        display: flex;
+        flex-direction: row;
+
+        .profile-picture {
+            width: 100px;
+            height: 100px;
+            margin: 5px;
+            padding: 5px;
+
+            img {
+                max-width: 100%;
+                max-height: 100%;
+                object-fit: cover;
+            }
+        }
+
+        .new-pictures {
+            margin-bottom: 10px;
+        }
+    }
+}
+
+.inputDivSettings {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: auto;
+    width: 100%;
+    border-radius: 20px;
+    background-color: $surfaceAlt;
+    box-shadow: 5px 5px 15px rgba(70, 70, 70, 0.12), -1px -1px 50px rgba(70, 70, 70, 0.12);
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: $onSurface;
+
+    label {
+        width: 100%;
+        height: 100%;
+        text-align: center;
+        line-height: 60px;
+    }
+
+    .fileInput {
+        opacity: 0;
+        position: absolute;
+        z-index: -1;
+    }
+}
+
+.biography {
+    display: flex;
+    flex-direction: column;
+    min-height: auto;
+}
+
+.gender {
+    display: flex;
+    flex-direction: column;
+}
+
+.location {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+
+    .subtitle {
+        font-size: 16px;
+        font-weight: 500;
+        margin-bottom: 10px;
+    }
+
+    .location-input {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        margin-bottom: 10px;
+
+        .location-icon {
+            margin-right: 10px;
+        }
+    }
+}
+
+.delete {
+    display: flex;
+    flex-direction: column;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    color: white;
+    border-radius: 5px;
+    padding: 5px;
+
+    .delete-button {
+        margin-top: 10px;
+        background-color: red !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .inputDivSettings {
+        width: 90%;
+        font-size: 0.8rem;
+        padding: 10px;
+
+        label {
+            font-size: 1rem;
+            line-height: 30px;
+        }
+    }
+}

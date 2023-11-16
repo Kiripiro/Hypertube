@@ -1,0 +1,86 @@
+<div class="centerDiv">
+	<div class="formCard">
+		<div class="settings-container" *ngIf="user">
+			<p class="title">Settings</p>
+			<form (ngSubmit)="onSubmit()" [formGroup]="updateForm">
+				<div class="userInfos">
+					<mat-label>Username</mat-label>
+					<mat-form-field>
+						<input matInput formControlName="username" placeholder="{{user.username}}">
+					</mat-form-field>
+					<mat-label>Last name</mat-label>
+					<mat-form-field>
+						<input matInput formControlName="last_name" placeholder="{{user.last_name}}">
+					</mat-form-field>
+					<mat-label>First name</mat-label>
+					<mat-form-field>
+						<input matInput formControlName="first_name" placeholder="{{user.first_name}}">
+					</mat-form-field>
+					<mat-form-field>
+						<input matInput formControlName="email" placeholder="Email" type="email">
+					</mat-form-field>
+					<mat-form-field>
+						<input matInput formControlName="password" type="password" placeholder="Password">
+					</mat-form-field>
+					<mat-form-field>
+						<input matInput formControlName="confirm_password" type="password"
+							placeholder="Confirm password">
+					</mat-form-field>
+				</div>
+
+				<!-- Profile Pictures -->
+				<div class="profile-pictures">
+					<mat-label>Profile Pictures</mat-label>
+					<div class="pictures-container current-pictures">
+						<div class="profile-picture" *ngFor="let picture of actualImg">
+							<img [src]="picture" alt="Profile Picture">
+						</div>
+					</div>
+				</div>
+				<div class="inputDivSettings">
+					<label for="inputPictures">Upload your new pictures !</label>
+					<input id="inputPictures" type="file" class="fileInput" multiple
+						(change)="onChangeFileInput($event)" accept=".png, .jpeg, .jpg" />
+				</div>
+				<div class="profile-pictures" *ngIf="newImg && newImg.length > 0">
+					<mat-label>New Profile Pictures</mat-label>
+					<div class="pictures-container new-pictures">
+						<div class="profile-picture" *ngFor="let picture of newImg">
+							<img [src]="picture" alt="New Profile Picture">
+						</div>
+					</div>
+				</div>
+
+				<!-- Biography -->
+				<div class="biography">
+					<mat-label>Biography</mat-label>
+					<mat-form-field>
+						<textarea matInput cdkTextareaAutosize #autosize="cdkTextareaAutosize" cdkAutosizeMinRows="1"
+							cdkAutosizeMaxRows="5" maxlength="400" formControlName="biography"
+							placeholder="{{user.biography}}"></textarea>
+					</mat-form-field>
+				</div>
+
+				<!-- Gender -->
+				<div class="gender">
+					<div class="radioButtonsDiv">
+						<mat-label>Gender</mat-label>
+						<mat-radio-group formControlName="gender">
+							<mat-radio-button value="Male">Male</mat-radio-button>
+							<mat-radio-button value="Female">Female</mat-radio-button>
+							<mat-radio-button value="Non-binary">Non-binary</mat-radio-button>
+							<mat-radio-button value="Other">Other</mat-radio-button>
+						</mat-radio-group>
+					</div>
+				</div>
+
+				<button type="submit" [disabled]="updateForm.invalid" mat-raised-button>Update</button>
+			</form>
+			<!-- Delete Account -->
+			<div class="delete">
+				<mat-label>Delete Account</mat-label>
+				<button class="delete-button" mat-raised-button (click)="deleteAccount()">Delete Account</button>
+			</div>
+		</div>
+	</div>
+</div>

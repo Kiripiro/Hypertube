@@ -2,6 +2,7 @@ const Sequelize = require('sequelize');
 const UserModel = require('./models/user');
 const express = require('express');
 const app = express();
+const cors = require('cors');
 const sequelize = require('./config/db');
 const mainRouter = require('./routes/mainRouter');
 
@@ -24,6 +25,12 @@ sequelize.sync({ alter: false })
         }
     });
 
+var corsOptions = {
+    origin: 'http://localhost:4200',
+    credentials: true,
+    optionsSuccessStatus: 200
+};
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(mainRouter);

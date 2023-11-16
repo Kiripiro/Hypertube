@@ -1,0 +1,24 @@
+#dialogDiv {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: space-between;
+    height: auto;
+    width: 20vw;
+    padding: 10px;
+
+    h2 {
+        width: 100%;
+        text-align: center;
+    }
+
+    p {
+        width: 100%;
+    }
+
+    #dialogButtonDiv {
+        width: 100%;
+        display: flex;
+        // justify-content: space-between;
+    }
+}

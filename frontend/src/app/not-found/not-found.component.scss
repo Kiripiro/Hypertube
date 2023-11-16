@@ -1,0 +1,32 @@
+$background: #FAFAFA;
+$primary: #FDBABA;
+$surface: #3E2266;
+$surfaceAlt: #6DB1BF;
+$surfaceAltDark: #2e7280;
+$onPrimary: #3E2266;
+$onSurface: white;
+$onPrimaryAlt: #6DB1BF;
+$greyInfos: #9a9fa3;
+$greyInfosDark: #333435;
+$error: red;
+
+
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: $primary;
+    height: auto;
+    margin-inline: 2rem;
+    padding: 2rem;
+    border-radius: 20px;
+    margin-top: 1rem;
+    box-shadow: 5px 5px 15px rgba(70, 70, 70, 0.12), -1px -1px 50px rgba(70, 70, 70, 0.12);
+
+    .title {
+        font-size: 2.0rem;
+        font-weight: 600;
+        color: $onPrimary;
+    }
+}
