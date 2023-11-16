@@ -18,7 +18,6 @@
   <div class="mobile">
     <button mat-button *ngIf="isLoggedIn" class="menu-burger-login" (click)="sideNavToggle()">
       <mat-icon>menu</mat-icon>
-      <mat-badge [matBadge]="notificationCount" matBadgeColor="warn" matBadgeSize="small"></mat-badge>
     </button>
     <button mat-button *ngIf="!isLoggedIn" class="menu-burger" (click)="sideNavToggle()">
       <mat-icon>menu</mat-icon>
@@ -35,27 +34,8 @@
     </div>
     <div *ngIf="isLoggedIn">
       <a mat-list-item class="secondaryButton" [routerLink]="['search']">Search</a>
-      <a mat-list-item class="secondaryButton" [routerLink]="['chat']">Chat</a>
       <a mat-list-item class="secondaryButton" [routerLink]="['profile/' + username]">Profile</a>
       <a mat-list-item class="secondaryButton" [routerLink]="['settings']">Settings</a>
-      <button mat-list-item [matMenuTriggerFor]="menu" [disabled]="!notificationCount">
-        <mat-icon>notifications</mat-icon>
-        <mat-badge [matBadge]="notificationCount" matBadgeColor="warn" matBadgeSize="small"></mat-badge>
-      </button>
-      <mat-menu class="menu" #menu="matMenu">
-        <div *ngFor="let notification of notifications">
-          <mat-card class="notification-card">
-            <mat-card-content>
-              <p>{{ notification.message }} <strong>{{notification.strong}}</strong></p>
-            </mat-card-content>
-            <mat-card-actions>
-              <div class="buttons">
-                <button mat-button (click)="notificationsService.removeNotification(notification)">Delete</button>
-              </div>
-            </mat-card-actions>
-          </mat-card>
-        </div>
-      </mat-menu>
       <a mat-list-item class="secondaryButton" (click)="logOut()">Log out</a>
     </div>
   </mat-nav-list>

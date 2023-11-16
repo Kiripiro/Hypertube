@@ -39,9 +39,7 @@ export interface RegisterResponseData {
 		email: string,
 		first_name: string,
 		last_name: string,
-		age: number,
 		email_checked: boolean,
-		location_permission: boolean
 	};
 }
 

@@ -25,9 +25,8 @@ export class RegisterComponent implements OnInit {
     }
     this.registerForm = this.fb.group({
       username: ['', Validators.required],
-      first_name: ['', [Validators.required, Validators.pattern("^[A-Z][a-zA-Z]*$")]],
-      last_name: ['', [Validators.required, Validators.pattern("^[A-Z][a-zA-Z]*$")]],
-      age: ['', Validators.required],
+      firstName: ['', [Validators.required, Validators.pattern("^[A-Z][a-zA-Z]*$")]],
+      lastName: ['', [Validators.required, Validators.pattern("^[A-Z][a-zA-Z]*$")]],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(8)]],
       repeat_password: ['', [Validators.required, Validators.minLength(8)]],
@@ -36,7 +35,7 @@ export class RegisterComponent implements OnInit {
 
   onSubmit(): void {
     if (this.registerForm.valid) {
-      const { username, first_name, last_name, age, email, password, repeat_password } = this.registerForm.value;
+      const { username, firstName, lastName, email, password, repeat_password } = this.registerForm.value;
       if (password !== repeat_password) {
         const data = {
           title: 'Error',
@@ -48,7 +47,7 @@ export class RegisterComponent implements OnInit {
         this.dialogService.openDialog(data);
         return;
       }
-      this.authService.register(username, first_name, last_name, age, email, password);
+      this.authService.register(username, firstName, lastName, email, password);
     }
   }
 }

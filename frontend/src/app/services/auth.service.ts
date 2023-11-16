@@ -69,19 +69,20 @@ export class AuthService {
     });
   }
 
-  register(username: string, first_name: string, last_name: string, age: number, email: string, password: string): any {
-    this.http.post<RegisterResponseData>(this.url + '/user/register', { username, first_name, last_name, age, email, password }, { withCredentials: true })
+  register(username: string, firstName: string, lastName: string, email: string, password: string): any {
+    this.http.post<RegisterResponseData>(this.url + '/user/register', { username, firstName, lastName, email, password }, { withCredentials: true })
       .subscribe({
         next: (response) => {
           const dialogData = {
-            title: 'Check yours emails',
-            text: "An email has been sent to you for check your email address",
+            title: 'Check your emails',
+            text: "An email has been sent to you, please check your email address",
             text_yes_button: "",
             text_no_button: "Close",
             yes_callback: () => { },
             no_callback: () => { this.router.navigate(['/auth/login']); },
             reload: false
           };
+          console.log(response);
           this.dialogService.openDialog(dialogData);
         },
         error: (error) => {
@@ -94,6 +95,7 @@ export class AuthService {
             no_callback: () => { },
             reload: false
           };
+          console.error('Registration failed:', error);
           this.dialogService.openDialog(dialogData);
         }
       });
