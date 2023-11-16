@@ -5,7 +5,7 @@ frontend/src/environments/environment.template.ts
 
 backend/.env
 backend/node_modules
-backend/config/database/migrations.lock
+backend/config/config.json
 backend/imagesSaved/*.png
 backend/imagesSaved/*.jpg
 backend/imagesSaved/*.jpeg

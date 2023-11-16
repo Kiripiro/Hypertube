@@ -1,11 +1,28 @@
+const Sequelize = require('sequelize');
+const UserModel = require('./models/user');
 const express = require('express');
 const app = express();
-const port = 3000;
+const sequelize = require('./config/db');
 
-app.get('/', (req, res) => {
-    res.send('Hello World!');
-});
+require('./config/checkEnv');
+const port = process.env.NODE_PORT;
+
+const User = UserModel(sequelize, Sequelize);
+
+sequelize.sync({ alter: false })
+    .then(() => {
+        console.log('Tables synchronized successfully');
+    })
+    .catch((err) => {
+        if (err.name === 'SequelizeConnectionRefusedError') {
+            console.error('Unable to connect to the database:', err);
+        } else if (err.name === 'SequelizeValidationError') {
+            console.error('Validation error:', err);
+        } else {
+            console.error('Error while synchronizing tables', err);
+        }
+    });
 
 app.listen(port, () => {
-    console.log(`Example app listening at http://localhost:${port}`);
+    console.log(`Server started on port ${port}`);
 });
