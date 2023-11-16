@@ -3,7 +3,6 @@ const { DataTypes } = require('sequelize');
 
 module.exports = {
   up: async (queryInterface) => {
-    console.log('Creating users table...');
     await queryInterface.createTable('users', {
       id: {
         allowNull: false,

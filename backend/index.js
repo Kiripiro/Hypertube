@@ -3,6 +3,7 @@ const UserModel = require('./models/user');
 const express = require('express');
 const app = express();
 const sequelize = require('./config/db');
+const mainRouter = require('./routes/mainRouter');
 
 require('./config/checkEnv');
 const port = process.env.NODE_PORT;
@@ -22,6 +23,10 @@ sequelize.sync({ alter: false })
             console.error('Error while synchronizing tables', err);
         }
     });
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(mainRouter);
 
 app.listen(port, () => {
     console.log(`Server started on port ${port}`);
