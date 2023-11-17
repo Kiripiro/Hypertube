@@ -62,28 +62,10 @@ export interface GetUserResponseData {
 	user: {
 		id: number,
 		username: string,
-		first_name: string,
-		last_name: string,
-		age: number,
+		firstName: string,
+		lastName: string,
 		email_checked: boolean,
-		complete_register: boolean,
-		gender: string,
-		sexual_preferences: string[],
-		biography: string,
-		picture_1: string,
-		picture_2: string,
-		picture_3: string,
-		picture_4: string,
-		picture_5: string,
-		tags: string[],
-		fame_rating: number,
-		you_blocked_he: boolean,
-		he_blocked_you: boolean,
-		you_reported_he: boolean,
-		latitude: number,
-		longitude: number,
-		city: string,
-		location_permission: boolean
+		avatar: string,
 	};
 }
 

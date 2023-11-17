@@ -25,7 +25,7 @@ module.exports = (sequelize, Sequelize) => {
     },
     password: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     passwordReset: {
       type: DataTypes.BOOLEAN,

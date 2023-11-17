@@ -16,6 +16,14 @@ userRouter.post('/login', validateUserLogin, async (req, res) => {
     try {
         await UserController.login(req, res);
     } catch (error) {
+        // console.error(error);
+    }
+});
+
+userRouter.post('/login42', async (req, res) => {
+    try {
+        await UserController.login42(req, res);
+    } catch (error) {
         console.error(error);
     }
 });

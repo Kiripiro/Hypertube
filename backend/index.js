@@ -11,7 +11,7 @@ const port = process.env.NODE_PORT;
 
 const User = UserModel(sequelize, Sequelize);
 
-sequelize.sync({ alter: false })
+sequelize.sync({ alter: false }) //enable alter to update tables, disable to prevent data loss
     .then(() => {
         console.log('Tables synchronized successfully');
     })

@@ -52,8 +52,8 @@ export class AuthService {
         this.localStorageService.setMultipleItems(
           { key: localStorageName.id, value: response.user.id || -1 },
           { key: localStorageName.username, value: response.user.username || "" },
-          { key: localStorageName.firstName, value: response.user.first_name || "" },
-          { key: localStorageName.lastName, value: response.user.last_name || "" },
+          { key: localStorageName.firstName, value: response.user.firstName || "" },
+          { key: localStorageName.lastName, value: response.user.lastName || "" },
           { key: localStorageName.emailChecked, value: response.user.email_checked || false },
         );
         this.logEmitChange(true);
@@ -130,6 +130,38 @@ export class AuthService {
           this.dialogService.openDialog(dialogData);
         }
       });
+  }
+
+  login42(code: string) {
+    this.http.post<LoginResponseData>(this.url + '/user/login42', { code }, { withCredentials: true }).subscribe({
+      next: (response) => {
+        console.log(response);
+        this.localStorageService.setMultipleItems(
+          { key: localStorageName.id, value: response.user.id || -1 },
+          { key: localStorageName.username, value: response.user.username || "" },
+          { key: localStorageName.firstName, value: response.user.first_name || "" },
+          { key: localStorageName.lastName, value: response.user.last_name || "" },
+          { key: localStorageName.emailChecked, value: response.user.email_checked || false },
+          { key: localStorageName.avatar, value: response.user.avatar || "" },
+        );
+        this.router.navigate(['']);
+        location.reload();
+        this.logEmitChange(true);
+      },
+      error: (error) => {
+        console.log(error);
+        const dialogData = {
+          title: 'Login failed',
+          text: error.error,
+          text_yes_button: "",
+          text_no_button: "Close",
+          yes_callback: () => { },
+          no_callback: () => { },
+          reload: false
+        };
+        this.dialogService.openDialog(dialogData);
+      }
+    });
   }
 
   logout() {

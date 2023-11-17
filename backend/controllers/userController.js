@@ -2,6 +2,8 @@ const { User, InvalidTokens } = require('../models');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid')
+const axios = require('axios');
+require('dotenv').config();
 
 var nodemailer = require('nodemailer');
 var transporter = nodemailer.createTransport({
@@ -102,6 +104,62 @@ class UserController {
             res.cookie('accessToken', accessToken, { httpOnly: true, maxAge: 900000 });
             res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: 86400000 });
             return res.status(200).json({ message: 'User logged in successfully', user: user });
+        } catch (error) {
+            console.error('Error logging in user:', error);
+            return res.status(500).json({ message: 'Internal Server Error' });
+        }
+    };
+
+    login42 = async (req, res) => {
+        try {
+            const code = req.body.code;
+            console.log(code);
+            if (!code) {
+                if (req.query.error) {
+                    return res.status(401).json({ message: "42 API error: " + req.query.error });
+                }
+                return res.status(401).json({ message: "42 API error: No code provided" });
+            }
+            const response = await axios.post('https://api.intra.42.fr/oauth/token', {
+                grant_type: 'authorization_code',
+                client_id: process.env.CLIENT_UID_42,
+                client_secret: process.env.CLIENT_SECRET_42,
+                code: code,
+                redirect_uri: 'http://localhost:4200/auth/login',
+            });
+            const accessToken42 = response.data.access_token;
+
+            const data = await axios.get('https://api.intra.42.fr/v2/me', {
+                headers: {
+                    Authorization: `Bearer ${accessToken42}`,
+                },
+            });
+            // console.log(data);
+            const userExists = await User.findOne({ where: { username: data.data.login } });
+            let newUser = null;
+            if (!userExists) {
+                newUser = await User.create({
+                    username: data.data.login,
+                    firstName: data.data.first_name,
+                    lastName: data.data.last_name,
+                    email: data.data.email,
+                    password: null,
+                });
+            }
+
+            const accessToken = this._generateToken(newUser ? newUser.id : userExists.id);
+            const refreshToken = uuidv4();
+
+            const dataToUpdate = {
+                token: refreshToken,
+                tokenCreationDate: this._getTimestampString(),
+                tokenExpirationDate: this._getTimestampString(1)
+            };
+            await User.update(dataToUpdate, { where: { username: newUser ? newUser.username : userExists.username } });
+            res.cookie('accessToken', accessToken, { httpOnly: true, maxAge: 900000 });
+            res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: 86400000 });
+
+            return res.status(200).json({ message: 'User logged in successfully', user: newUser ? newUser : userExists });
         } catch (error) {
             console.error('Error logging in user:', error);
             return res.status(500).json({ message: 'Internal Server Error' });
