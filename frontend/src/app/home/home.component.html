@@ -4,7 +4,7 @@
             <app-carousel [images]="img" [title]="userDisplayed.username"></app-carousel>
         </div>
         <div class="mainDivProfil">
-            <p id="nameAge">{{userDisplayed.first_name}} {{userDisplayed.last_name}} - {{userDisplayed.age}} years</p>
+            <p id="nameAge">{{userDisplayed.firstName}} {{userDisplayed.lastName}} - {{userDisplayed.age}} years</p>
         </div>
         <div class="errorCard" *ngIf="error">
             <p>User not found</p>

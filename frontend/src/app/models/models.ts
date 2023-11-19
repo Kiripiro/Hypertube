@@ -9,8 +9,8 @@ export interface Block {
 export interface User {
 	id: number;
 	username: string;
-	first_name: string;
-	last_name: string;
+	firstName: string;
+	lastName: string;
 	picture_1: string;
 	status: string;
 	block: Block;
@@ -37,8 +37,8 @@ export interface RegisterResponseData {
 		id: number,
 		username: string,
 		email: string,
-		first_name: string,
-		last_name: string,
+		firstName: string,
+		lastName: string,
 		email_checked: boolean,
 	};
 }
@@ -48,8 +48,8 @@ export interface LoginResponseData {
 	user: {
 		id: number,
 		username: string,
-		first_name: string,
-		last_name: string,
+		firstName: string,
+		lastName: string,
 		age: number,
 		gender: string,
 		email_checked: boolean,
@@ -72,8 +72,8 @@ export interface GetUserResponseData {
 export interface HomeUserData {
 	id: number,
 	username: string,
-	first_name: string,
-	last_name: string,
+	firstName: string,
+	lastName: string,
 	age: number,
 	complete_register: boolean,
 	gender: string,
@@ -238,8 +238,8 @@ export interface UserSimplified {
 	latitude: number,
 	longitude: number,
 	fame_rating: number,
-	first_name: string,
-	last_name: string,
+	firstName: string,
+	lastName: string,
 	city: string
 }
 
@@ -299,8 +299,8 @@ export interface GetSearchResultResponseData {
 /* Settings */
 export interface UserSettings {
 	username: string;
-	first_name: string;
-	last_name: string;
+	firstName: string;
+	lastName: string;
 	email: string;
 	password: string;
 	confirm_password: string;

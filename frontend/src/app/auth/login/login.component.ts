@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from 'src/app/services/auth.service';
 import { Router, ActivatedRoute } from '@angular/router';
+import { AuthStateService } from '../../services/authState.service';
+
 
 @Component({
   selector: 'app-login',
@@ -15,16 +17,16 @@ export class LoginComponent implements OnInit {
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private authStateService: AuthStateService
   ) { }
 
   ngOnInit(): void {
-    const code = this.route.snapshot.queryParamMap.get('code');
-    if (code) {
-      this.authService.login42(code);
+    if (this.route.snapshot.queryParams['code'] && !this.authService.checkLog()) {
+      console.log(this.route.snapshot.queryParams['code']);
+      this.authService.login42(this.route.snapshot.queryParams['code']);
     }
-
-    if (this.authService.checkLog()) {
+    else if (this.authService.checkLog()) {
       this.router.navigate(['']);
     }
     this.loginForm = this.fb.group({
@@ -41,6 +43,6 @@ export class LoginComponent implements OnInit {
   }
 
   login42(): void {
-    window.open('https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-7feb0047cfee4fa23be912df2417939b20af1e2b7a2869b4fd1048b77d85d2bb&redirect_uri=http%3A%2F%2Flocalhost%3A4200%2Fauth%2Flogin&response_type=code', '_self');
+    window.location.href = 'https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-7feb0047cfee4fa23be912df2417939b20af1e2b7a2869b4fd1048b77d85d2bb&redirect_uri=http%3A%2F%2Flocalhost%3A4200%2Fauth%2Flogin&response_type=code';
   }
 }

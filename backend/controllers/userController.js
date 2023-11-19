@@ -65,7 +65,9 @@ class UserController {
             if (!userExists) {
                 return res.status(401).json({ message: 'Invalid credentials' });
             }
-
+            if (!userExists.password) {
+                return res.status(401).json({ message: 'Invalid credentials - or you may have signed up with the 42\'s API' });
+            }
             const isPasswordValid = await bcrypt.compare(password, userExists.password);
             if (!isPasswordValid) {
                 return res.status(401).json({ message: 'Invalid password' });
@@ -112,54 +114,47 @@ class UserController {
 
     login42 = async (req, res) => {
         try {
-            const code = req.body.code;
-            console.log(code);
-            if (!code) {
-                if (req.query.error) {
-                    return res.status(401).json({ message: "42 API error: " + req.query.error });
-                }
-                return res.status(401).json({ message: "42 API error: No code provided" });
-            }
+            const { code } = req.body;
             const response = await axios.post('https://api.intra.42.fr/oauth/token', {
                 grant_type: 'authorization_code',
                 client_id: process.env.CLIENT_UID_42,
                 client_secret: process.env.CLIENT_SECRET_42,
                 code: code,
-                redirect_uri: 'http://localhost:4200/auth/login',
+                redirect_uri: 'http://localhost:4200/auth/login'
             });
-            const accessToken42 = response.data.access_token;
-
-            const data = await axios.get('https://api.intra.42.fr/v2/me', {
-                headers: {
-                    Authorization: `Bearer ${accessToken42}`,
-                },
+            console.log('response = ' + response);
+            const accessToken = response.data.access_token;
+            console.log('accessToken = ' + accessToken);
+            const headers = { Authorization: 'Bearer ' + accessToken };
+            const user = await axios.get('https://api.intra.42.fr/v2/me', {
+                headers: headers
             });
-            // console.log(data);
-            const userExists = await User.findOne({ where: { username: data.data.login } });
-            let newUser = null;
-            if (!userExists) {
-                newUser = await User.create({
-                    username: data.data.login,
-                    firstName: data.data.first_name,
-                    lastName: data.data.last_name,
-                    email: data.data.email,
-                    password: null,
-                });
-            }
-
-            const accessToken = this._generateToken(newUser ? newUser.id : userExists.id);
+            const userExists = await User.findOne({ where: { username: user.data.login } });
             const refreshToken = uuidv4();
-
+            if (!userExists) {
+                const newUser = await User.create({
+                    username: user.data.login,
+                    firstName: user.data.first_name,
+                    lastName: user.data.last_name,
+                    email: user.data.email,
+                    avatar: user.data.image_url,
+                    token: refreshToken,
+                    tokenCreationDate: this._getTimestampString(),
+                    tokenExpirationDate: this._getTimestampString(1)
+                });
+                res.cookie('accessToken', this._generateToken(newUser.id), { httpOnly: true, maxAge: 900000 });
+                res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: 86400000 });
+                return res.status(201).json({ message: 'User registered successfully', user: newUser });
+            }
             const dataToUpdate = {
                 token: refreshToken,
                 tokenCreationDate: this._getTimestampString(),
                 tokenExpirationDate: this._getTimestampString(1)
             };
-            await User.update(dataToUpdate, { where: { username: newUser ? newUser.username : userExists.username } });
-            res.cookie('accessToken', accessToken, { httpOnly: true, maxAge: 900000 });
+            await User.update(dataToUpdate, { where: { username: user.data.login } });
+            res.cookie('accessToken', this._generateToken(userExists.id), { httpOnly: true, maxAge: 900000 });
             res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: 86400000 });
-
-            return res.status(200).json({ message: 'User logged in successfully', user: newUser ? newUser : userExists });
+            return res.status(200).json({ message: 'User logged in successfully', user: userExists });
         } catch (error) {
             console.error('Error logging in user:', error);
             return res.status(500).json({ message: 'Internal Server Error' });

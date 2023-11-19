@@ -43,8 +43,8 @@ export class SettingsComponent implements OnInit {
   ngOnInit(): void {
     this.updateForm = this.fb.group({
       username: ['', [Validators.pattern("^[a-zA-Z0-9]*$")]],
-      first_name: ['', [Validators.pattern("^[A-Z][a-zA-Z- ]*$")]],
-      last_name: ['', [Validators.pattern("^[A-Z][a-zA-Z- ]*$")]],
+      firstName: ['', [Validators.pattern("^[A-Z][a-zA-Z- ]*$")]],
+      lastName: ['', [Validators.pattern("^[A-Z][a-zA-Z- ]*$")]],
       email: ['', [Validators.pattern("^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$")]],
       password: ['', Validators.minLength(8)],
       confirm_password: ['', Validators.minLength(8)],
@@ -241,8 +241,8 @@ export class SettingsComponent implements OnInit {
     const formValues = this.updateForm.value;
     const fieldsToCheck = [
       "username",
-      "last_name",
-      "first_name",
+      "lastName",
+      "firstName",
       "email",
       "password",
       "confirm_password",

@@ -1,6 +1,6 @@
 import { HttpClient, HttpEvent, HttpHandler, HttpRequest } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { Observable, Subject } from 'rxjs';
 
 import { LocalStorageService, localStorageName } from './local-storage.service';
@@ -17,6 +17,7 @@ export class AuthService {
   constructor(
     private http: HttpClient,
     private router: Router,
+    private route: ActivatedRoute,
     private localStorageService: LocalStorageService,
     private dialogService: DialogService,
   ) {
@@ -108,8 +109,8 @@ export class AuthService {
           this.localStorageService.setMultipleItems(
             { key: localStorageName.id, value: response.user.id || -1 },
             { key: localStorageName.username, value: response.user.username || "" },
-            { key: localStorageName.firstName, value: response.user.first_name || "" },
-            { key: localStorageName.lastName, value: response.user.last_name || "" },
+            { key: localStorageName.firstName, value: response.user.firstName || "" },
+            { key: localStorageName.lastName, value: response.user.lastName || "" },
             { key: localStorageName.emailChecked, value: response.user.email_checked || false },
             { key: localStorageName.avatar, value: response.user.avatar || "" },
           );
@@ -120,7 +121,7 @@ export class AuthService {
         error: (error) => {
           const dialogData = {
             title: 'Login failed',
-            text: error.error,
+            text: error.message,
             text_yes_button: "",
             text_no_button: "Close",
             yes_callback: () => { },
@@ -139,8 +140,8 @@ export class AuthService {
         this.localStorageService.setMultipleItems(
           { key: localStorageName.id, value: response.user.id || -1 },
           { key: localStorageName.username, value: response.user.username || "" },
-          { key: localStorageName.firstName, value: response.user.first_name || "" },
-          { key: localStorageName.lastName, value: response.user.last_name || "" },
+          { key: localStorageName.firstName, value: response.user.firstName || "" },
+          { key: localStorageName.lastName, value: response.user.lastName || "" },
           { key: localStorageName.emailChecked, value: response.user.email_checked || false },
           { key: localStorageName.avatar, value: response.user.avatar || "" },
         );
@@ -149,10 +150,9 @@ export class AuthService {
         this.logEmitChange(true);
       },
       error: (error) => {
-        console.log(error);
         const dialogData = {
           title: 'Login failed',
-          text: error.error,
+          text: error.message,
           text_yes_button: "",
           text_no_button: "Close",
           yes_callback: () => { },
