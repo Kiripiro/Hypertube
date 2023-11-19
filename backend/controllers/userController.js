@@ -4,6 +4,8 @@ const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid')
 const axios = require('axios');
 require('dotenv').config();
+const { OAuth2Client } = require('google-auth-library');
+const client = new OAuth2Client();
 
 var nodemailer = require('nodemailer');
 var transporter = nodemailer.createTransport({
@@ -161,6 +163,28 @@ class UserController {
         }
     };
 
+    loginGoogle = async (req, res) => {
+        try {
+            const token = req.body.credential;
+            console.log(req);
+            console.log('tokenId = ' + token);
+
+            const payload = await this._verify(token);
+            console.log('Google User Payload:', JSON.stringify(payload, null, 2));
+            console.log('payload.email = ' + payload.email);
+            console.log('payload.name = ' + payload.name);
+            console.log('payload.picture = ' + payload.picture);
+            console.log('payload.family_name = ' + payload.family_name);
+
+            const userExists = await User.findOne({ where: { email: payload.email } });
+            console.log('userExists = ' + userExists);
+            return res.status(200).json({ message: 'User logged in successfully' });
+        } catch (error) {
+            console.error('Error logging in user:', error);
+            return res.status(500).json({ message: 'Internal Server Error' });
+        }
+    };
+
     logout = async (req, res) => {
         try {
             const accessToken = this._parseCookie(req, 'accessToken');
@@ -298,6 +322,20 @@ class UserController {
             }
         }
         return null;
+    }
+
+    async _verify(token) {
+        try {
+            const ticket = await client.verifyIdToken({
+                idToken: token,
+                audience: process.env.GOOGLE_CLIENT_ID,
+            });
+            const payload = ticket.getPayload();
+            const userid = payload['sub'];
+            return payload;
+        } catch (error) {
+            console.error(error);
+        }
     }
 }
 

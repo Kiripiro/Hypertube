@@ -16,5 +16,18 @@
             </div>
         </form>
     </div>
-    <button (click)="login42()">Sign In with 42</button>
+    <div class="apiButtonDiv">Or
+        <button (click)="login42()">Sign In with 42</button>
+        <div id="g_id_onload" data-client_id="263416825212-susfcn7ch7prvfsv6k1llfprtqtcj5ca.apps.googleusercontent.com"
+            data-context="signin" data-ux_mode="popup" data-login_uri="http://localhost:3000/user/loginGoogle"
+            data-auto_select="true" data-itp_support="false">
+        </div>
+
+        <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="outline" data-text="signin_with"
+            data-size="large" data-logo_alignment="left">
+        </div>
+    </div>
+
+
 </div>
+<script src="https://apis.google.com/js/platform.js" async defer></script>
