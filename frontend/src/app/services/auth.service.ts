@@ -164,6 +164,27 @@ export class AuthService {
     });
   }
 
+  loginGoogle(user: any) {
+    console.log(user);
+    try {
+      if (user) {
+        this.localStorageService.setMultipleItems(
+          { key: localStorageName.id, value: user.id || -1 },
+          { key: localStorageName.username, value: user.username || "" },
+          { key: localStorageName.firstName, value: user.firstName || "" },
+          { key: localStorageName.lastName, value: user.lastName || "" },
+          { key: localStorageName.avatar, value: user.avatar || "" },
+          { key: localStorageName.emailChecked, value: user.emailChecked || "" },
+        );
+        this.router.navigate(['']);
+        location.reload();
+        this.logEmitChange(true);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   logout() {
     this.http.post(this.url + '/user/logout', {}, { withCredentials: true })
       .subscribe({

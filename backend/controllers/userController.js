@@ -6,8 +6,10 @@ const axios = require('axios');
 require('dotenv').config();
 const { OAuth2Client } = require('google-auth-library');
 const client = new OAuth2Client();
+const url = require('url');
 
 var nodemailer = require('nodemailer');
+const { query } = require('express');
 var transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -166,19 +168,55 @@ class UserController {
     loginGoogle = async (req, res) => {
         try {
             const token = req.body.credential;
-            console.log(req);
-            console.log('tokenId = ' + token);
+            // console.log(req);
+            // console.log('tokenId = ' + token);
 
             const payload = await this._verify(token);
             console.log('Google User Payload:', JSON.stringify(payload, null, 2));
-            console.log('payload.email = ' + payload.email);
-            console.log('payload.name = ' + payload.name);
-            console.log('payload.picture = ' + payload.picture);
-            console.log('payload.family_name = ' + payload.family_name);
 
             const userExists = await User.findOne({ where: { email: payload.email } });
+            const refreshToken = uuidv4();
+            if (!userExists) {
+                const newUser = await User.create({
+                    username: payload.name,
+                    firstName: payload.given_name,
+                    lastName: payload?.family_name,
+                    email: payload.email,
+                    avatar: payload.picture,
+                    token: refreshToken,
+                    tokenCreationDate: this._getTimestampString(),
+                    tokenExpirationDate: this._getTimestampString(1)
+                });
+                res.cookie('accessToken', this._generateToken(newUser.id), { httpOnly: true, maxAge: 900000 });
+                res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: 86400000 });
+                const redirectUrl = url.format({
+                    protocol: 'http',
+                    host: 'localhost:4200',
+                    pathname: '/auth/login',
+                    query: {
+                        user: JSON.stringify(newUser)
+                    }
+                });
+                return res.status(301).redirect(redirectUrl);
+            }
+            const dataToUpdate = {
+                token: refreshToken,
+                tokenCreationDate: this._getTimestampString(),
+                tokenExpirationDate: this._getTimestampString(1)
+            };
             console.log('userExists = ' + userExists);
-            return res.status(200).json({ message: 'User logged in successfully' });
+            await User.update(dataToUpdate, { where: { email: payload.email } });
+            res.cookie('accessToken', this._generateToken(userExists.id), { httpOnly: true, maxAge: 900000 });
+            res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: 86400000 });
+            const redirectUrl = url.format({
+                protocol: 'http',
+                host: 'localhost:4200',
+                pathname: '/auth/login',
+                query: {
+                    user: JSON.stringify(userExists)
+                }
+            });
+            return res.status(301).redirect(redirectUrl);
         } catch (error) {
             console.error('Error logging in user:', error);
             return res.status(500).json({ message: 'Internal Server Error' });
@@ -330,13 +368,28 @@ class UserController {
                 idToken: token,
                 audience: process.env.GOOGLE_CLIENT_ID,
             });
+
             const payload = ticket.getPayload();
-            const userid = payload['sub'];
             return payload;
         } catch (error) {
             console.error(error);
         }
     }
+
+    async _getUserInfo(accessToken) {
+        try {
+            const response = await axios.get('https://www.googleapis.com/oauth2/v1/userinfo', {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            });
+            console.log('response.data = ' + response.data);
+            return response.data;
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
 }
 
 module.exports = new UserController();
