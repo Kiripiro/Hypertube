@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from 'src/app/services/auth.service';
 import { Router, ActivatedRoute } from '@angular/router';
+import { GoogleApiService } from 'src/app/services/google-api.service';
 
 @Component({
   selector: 'app-login',
@@ -15,6 +16,7 @@ export class LoginComponent implements OnInit {
     private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute,
+    private googleApiService: GoogleApiService,
   ) { }
 
   ngOnInit(): void {
@@ -23,11 +25,11 @@ export class LoginComponent implements OnInit {
       this.authService.login42(this.route.snapshot.queryParams['code']);
     }
     else if (this.route.snapshot.queryParams['user'] && !this.authService.checkLog()) {
-      console.log(typeof this.route.snapshot.queryParams['user']);
       const user = JSON.parse(this.route.snapshot.queryParams['user']);
       this.authService.loginGoogle(user);
     }
     else if (this.authService.checkLog()) {
+      console.log('redirect home');
       this.router.navigate(['']);
     }
     this.loginForm = this.fb.group({
@@ -45,5 +47,9 @@ export class LoginComponent implements OnInit {
 
   login42(): void {
     window.location.href = 'https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-7feb0047cfee4fa23be912df2417939b20af1e2b7a2869b4fd1048b77d85d2bb&redirect_uri=http%3A%2F%2Flocalhost%3A4200%2Fauth%2Flogin&response_type=code';
+  }
+
+  loginGoogle(): void {
+    this.googleApiService.loginWithGoogle();
   }
 }

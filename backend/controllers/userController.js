@@ -167,56 +167,40 @@ class UserController {
 
     loginGoogle = async (req, res) => {
         try {
-            const token = req.body.credential;
-            // console.log(req);
-            // console.log('tokenId = ' + token);
-
-            const payload = await this._verify(token);
-            console.log('Google User Payload:', JSON.stringify(payload, null, 2));
-
-            const userExists = await User.findOne({ where: { email: payload.email } });
+            const userData = req.body.user;
+            const userExists = await User.findOne({ where: { email: userData.email } });
             const refreshToken = uuidv4();
+            let newUser = null;
             if (!userExists) {
-                const newUser = await User.create({
-                    username: payload.name,
-                    firstName: payload.given_name,
-                    lastName: payload?.family_name,
-                    email: payload.email,
-                    avatar: payload.picture,
+                newUser = await User.create({
+                    username: userData.name,
+                    firstName: userData.given_name,
+                    lastName: userData?.family_name,
+                    email: userData.email,
+                    avatar: userData.picture,
                     token: refreshToken,
                     tokenCreationDate: this._getTimestampString(),
                     tokenExpirationDate: this._getTimestampString(1)
                 });
-                res.cookie('accessToken', this._generateToken(newUser.id), { httpOnly: true, maxAge: 900000 });
-                res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: 86400000 });
-                const redirectUrl = url.format({
-                    protocol: 'http',
-                    host: 'localhost:4200',
-                    pathname: '/auth/login',
-                    query: {
-                        user: JSON.stringify(newUser)
-                    }
-                });
-                return res.status(301).redirect(redirectUrl);
             }
             const dataToUpdate = {
                 token: refreshToken,
                 tokenCreationDate: this._getTimestampString(),
                 tokenExpirationDate: this._getTimestampString(1)
             };
-            console.log('userExists = ' + userExists);
-            await User.update(dataToUpdate, { where: { email: payload.email } });
-            res.cookie('accessToken', this._generateToken(userExists.id), { httpOnly: true, maxAge: 900000 });
+            await User.update(dataToUpdate, { where: { email: userData.email } });
+            const user = {
+                "id": userExists ? userExists.id : newUser.id,
+                "username": userData.name,
+                "firstName": userData.given_name,
+                "lastName": userData?.family_name,
+                "avatar": userData.picture,
+                "email_checked": true
+            };
+
+            res.cookie('accessToken', this._generateToken(user.id), { httpOnly: true, maxAge: 900000 });
             res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: 86400000 });
-            const redirectUrl = url.format({
-                protocol: 'http',
-                host: 'localhost:4200',
-                pathname: '/auth/login',
-                query: {
-                    user: JSON.stringify(userExists)
-                }
-            });
-            return res.status(301).redirect(redirectUrl);
+            return res.status(200).json({ message: 'User logged in successfully', user: user });
         } catch (error) {
             console.error('Error logging in user:', error);
             return res.status(500).json({ message: 'Internal Server Error' });

@@ -6,6 +6,7 @@ import { NotificationsService } from 'src/app/services/notifications.service';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { Notification } from 'src/app/models/models';
 import { trigger, state, style, animate, transition } from '@angular/animations';
+declare var handleSignOut: any;
 
 @Component({
   selector: 'app-nav-bar',
@@ -35,7 +36,7 @@ export class NavBarComponent implements OnInit {
     private router: Router,
     private authService: AuthService,
     private localStorageService: LocalStorageService,
-    protected notificationsService: NotificationsService
+    protected notificationsService: NotificationsService,
   ) {
     this.isLoggedIn = this.authService.checkLog();
     if (this.isLoggedIn) {
@@ -59,6 +60,7 @@ export class NavBarComponent implements OnInit {
   }
 
   logOut() {
+    // handleSignOut();
     this.authService.logout();
   }
 

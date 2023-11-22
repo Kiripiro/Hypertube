@@ -64,7 +64,6 @@ export class SettingsComponent implements OnInit {
       fileStatus: false,
       latitude: null,
       longitude: null,
-      location_permission: null,
       city: ''
     });
     this.getUser();
@@ -105,7 +104,6 @@ export class SettingsComponent implements OnInit {
         }
         this.user.latitude = this.user.latitude;
         this.user.longitude = this.user.longitude;
-        this.localStorageService.setItem('location_permission', this.user.location_permission);
       }
     });
   }

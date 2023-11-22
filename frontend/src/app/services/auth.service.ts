@@ -142,7 +142,7 @@ export class AuthService {
           { key: localStorageName.username, value: response.user.username || "" },
           { key: localStorageName.firstName, value: response.user.firstName || "" },
           { key: localStorageName.lastName, value: response.user.lastName || "" },
-          { key: localStorageName.emailChecked, value: response.user.email_checked || false },
+          { key: localStorageName.emailChecked, value: true },
           { key: localStorageName.avatar, value: response.user.avatar || "" },
         );
         this.router.navigate(['']);
@@ -182,6 +182,16 @@ export class AuthService {
       }
     } catch (error) {
       console.error(error);
+      const dialogData = {
+        title: 'Login failed',
+        text: 'Please try to log in again using Google.',
+        text_yes_button: "",
+        text_no_button: "Close",
+        yes_callback: () => { },
+        no_callback: () => { },
+        reload: false
+      };
+      this.dialogService.openDialog(dialogData);
     }
   }
 
@@ -215,6 +225,7 @@ export class AuthService {
     this.logEmitChange(false);
     this.localStorageService.removeAllUserItem();
     this.router.navigate(['auth/login']);
+    window.location.reload();
     if (error.length > 0) {
       const dialogData = {
         title: 'Server error',

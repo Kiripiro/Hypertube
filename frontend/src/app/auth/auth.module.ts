@@ -13,6 +13,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { OAuthModule } from 'angular-oauth2-oidc';
 @NgModule({
   declarations: [RegisterComponent, LoginComponent],
   imports: [

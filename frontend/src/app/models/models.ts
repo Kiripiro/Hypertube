@@ -50,14 +50,24 @@ export interface LoginResponseData {
 		username: string,
 		firstName: string,
 		lastName: string,
-		age: number,
-		gender: string,
 		email_checked: boolean,
 		avatar: string,
 	};
 }
 
 export interface GetUserResponseData {
+	message: string;
+	user: {
+		id: number,
+		username: string,
+		firstName: string,
+		lastName: string,
+		email_checked: boolean,
+		avatar: string,
+	};
+}
+
+export interface loginGoogleResponseData {
 	message: string;
 	user: {
 		id: number,
@@ -89,7 +99,6 @@ export interface HomeUserData {
 	you_blocked_he: boolean,
 	he_blocked_you: boolean,
 	you_reported_he: boolean,
-	location_permission: boolean
 }
 
 export interface CompleteRegisterResponseData {
@@ -316,7 +325,6 @@ export interface UserSettings {
 	latitude: number;
 	longitude: number;
 	city: string;
-	location_permission: boolean;
 }
 
 /* Tags */

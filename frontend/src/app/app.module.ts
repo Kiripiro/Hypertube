@@ -43,6 +43,7 @@ import { HomeService } from 'src/app/services/home.service';
 import { WaitComponent } from './wait/wait.component';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { ResetComponent } from './reset/reset.component';
+import { OAuthModule } from 'angular-oauth2-oidc';
 
 @NgModule({
   declarations: [
@@ -84,6 +85,7 @@ import { ResetComponent } from './reset/reset.component';
     MatRadioModule,
     MatCheckboxModule,
     MatBadgeModule,
+    OAuthModule.forRoot(),
   ],
   providers: [
     {

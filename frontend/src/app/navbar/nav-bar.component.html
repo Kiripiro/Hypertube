@@ -11,7 +11,7 @@
         <button mat-button class="primaryButton" [routerLink]="['search']">Search</button>
         <button mat-button class="primaryButton" [routerLink]="['profile/' + username]">Profile</button>
         <button mat-button class="primaryButton" [routerLink]="['settings']">Settings</button>
-        <button mat-button class="secondaryButton" (click)="logOut()">Log out</button>
+        <button mat-button class="secondaryButton g_id_signout" (click)="logOut()">Log out</button>
       </div>
     </div>
   </div>
@@ -36,7 +36,7 @@
       <a mat-list-item class="secondaryButton" [routerLink]="['search']">Search</a>
       <a mat-list-item class="secondaryButton" [routerLink]="['profile/' + username]">Profile</a>
       <a mat-list-item class="secondaryButton" [routerLink]="['settings']">Settings</a>
-      <a mat-list-item class="secondaryButton" (click)="logOut()">Log out</a>
+      <a mat-list-item class="secondaryButton g_id_signout" (click)="logOut()">Log out</a>
     </div>
   </mat-nav-list>
 </div>

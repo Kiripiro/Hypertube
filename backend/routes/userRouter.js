@@ -29,7 +29,7 @@ userRouter.post('/login42', async (req, res) => {
     }
 });
 
-userRouter.post('/loginGoogle', googleAuth, async (req, res) => {
+userRouter.post('/loginGoogle', async (req, res) => {
     try {
         await UserController.loginGoogle(req, res);
     } catch (error) {
