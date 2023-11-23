@@ -17,7 +17,7 @@ userRouter.post('/login', validateUserLogin, async (req, res) => {
     try {
         await UserController.login(req, res);
     } catch (error) {
-        // console.error(error);
+        console.error(error);
     }
 });
 
@@ -45,7 +45,7 @@ userRouter.post('/logout', auth, async (req, res) => {
     }
 });
 
-userRouter.post('/refresh', async (req, res) => {
+userRouter.post('/refreshToken', async (req, res) => {
     try {
         await UserController.refresh(req, res);
     } catch (error) {
@@ -66,6 +66,14 @@ userRouter.get('/id', auth, async (req, res) => {
         await UserController.getPersonalUser(req, res);
     } catch (error) {
         console.error(error);
+    }
+});
+
+userRouter.post('/settingsUpdate', auth, async (req, res) => {
+    try {
+        await UserController.settingsUpdateInfos(req, res);
+    } catch (error) {
+        console.log(error);
     }
 });
 

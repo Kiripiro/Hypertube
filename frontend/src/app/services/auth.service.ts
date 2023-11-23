@@ -56,6 +56,8 @@ export class AuthService {
           { key: localStorageName.firstName, value: response.user.firstName || "" },
           { key: localStorageName.lastName, value: response.user.lastName || "" },
           { key: localStorageName.emailChecked, value: response.user.email_checked || false },
+          { key: localStorageName.avatar, value: response.user.avatar || "" },
+          { key: localStorageName.loginApi, value: response.user.loginApi || "" },
         );
         this.logEmitChange(true);
       },
@@ -113,6 +115,7 @@ export class AuthService {
             { key: localStorageName.lastName, value: response.user.lastName || "" },
             { key: localStorageName.emailChecked, value: response.user.email_checked || false },
             { key: localStorageName.avatar, value: response.user.avatar || "" },
+            { key: localStorageName.loginApi, value: response.user.loginApi || "" },
           );
           this.router.navigate(['']);
           location.reload();
@@ -144,6 +147,7 @@ export class AuthService {
           { key: localStorageName.lastName, value: response.user.lastName || "" },
           { key: localStorageName.emailChecked, value: true },
           { key: localStorageName.avatar, value: response.user.avatar || "" },
+          { key: localStorageName.loginApi, value: response.user.loginApi },
         );
         this.router.navigate(['']);
         location.reload();
@@ -163,38 +167,6 @@ export class AuthService {
       }
     });
   }
-
-  loginGoogle(user: any) {
-    console.log(user);
-    try {
-      if (user) {
-        this.localStorageService.setMultipleItems(
-          { key: localStorageName.id, value: user.id || -1 },
-          { key: localStorageName.username, value: user.username || "" },
-          { key: localStorageName.firstName, value: user.firstName || "" },
-          { key: localStorageName.lastName, value: user.lastName || "" },
-          { key: localStorageName.avatar, value: user.avatar || "" },
-          { key: localStorageName.emailChecked, value: user.emailChecked || "" },
-        );
-        this.router.navigate(['']);
-        location.reload();
-        this.logEmitChange(true);
-      }
-    } catch (error) {
-      console.error(error);
-      const dialogData = {
-        title: 'Login failed',
-        text: 'Please try to log in again using Google.',
-        text_yes_button: "",
-        text_no_button: "Close",
-        yes_callback: () => { },
-        no_callback: () => { },
-        reload: false
-      };
-      this.dialogService.openDialog(dialogData);
-    }
-  }
-
   logout() {
     this.http.post(this.url + '/user/logout', {}, { withCredentials: true })
       .subscribe({

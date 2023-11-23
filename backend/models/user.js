@@ -45,6 +45,10 @@ module.exports = (sequelize, Sequelize) => {
       type: DataTypes.STRING,
       allowNull: true,
     },
+    avatar: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     token: {
       type: DataTypes.STRING,
       allowNull: true,
@@ -57,6 +61,11 @@ module.exports = (sequelize, Sequelize) => {
       type: DataTypes.DATE,
       allowNull: true,
     },
+    loginApi: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    }
   });
 
   return User;

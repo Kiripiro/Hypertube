@@ -19,7 +19,7 @@ export interface GoogleUser {
   name: string;
   given_name: string;
   family_name: string;
-  picture: string;
+  avatar: string;
   email: string;
   email_verified: boolean;
 }
@@ -54,15 +54,17 @@ export class GoogleApiService {
       if (!this.oAuthService.hasValidAccessToken()) {
         this.oAuthService.initImplicitFlow();
       } else {
+        console.log('Google');
         this.oAuthService.loadUserProfile().then((user: any) => {
           console.log(user);
           const infos = JSON.stringify(user.info);
           const { name, given_name, family_name, picture, email, email_verified } = JSON.parse(infos);
+          console.log(infos);
           this.user = {
             name,
             given_name,
             family_name,
-            picture,
+            avatar: picture,
             email,
             email_verified
           };
@@ -76,7 +78,9 @@ export class GoogleApiService {
                   { key: localStorageName.username, value: response.user.username || "" },
                   { key: localStorageName.firstName, value: response.user.firstName || "" },
                   { key: localStorageName.lastName, value: response.user.lastName || "" },
-                  { key: localStorageName.emailChecked, value: response.user.email_checked },
+                  { key: localStorageName.avatar, value: response.user.avatar || false },
+                  { key: localStorageName.emailChecked, value: true },
+                  { key: localStorageName.loginApi, value: response.user.loginApi }
                 );
               }
               this.authService.logEmitChange(true);
@@ -87,9 +91,12 @@ export class GoogleApiService {
               console.error('Error fetching Google user:', error);
             }
           });
+        }).catch((err) => {
+          console.log('Error fetching Google user:', err);
         });
       }
-    }).catch((err) => {
+    }
+    ).catch((err) => {
       console.log('Google user not logged in');
     });
   }

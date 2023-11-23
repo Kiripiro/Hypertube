@@ -5,7 +5,7 @@ import { Observable, catchError, concatMap, of, throwError } from 'rxjs';
 import { UserSettings } from 'src/app/models/models';
 import { AuthService } from 'src/app/services/auth.service';
 import { DialogService } from 'src/app/services/dialog.service';
-import { LocalStorageService } from 'src/app/services/local-storage.service';
+import { LocalStorageService, localStorageName } from 'src/app/services/local-storage.service';
 import { SettingsService } from 'src/app/services/settings.service';
 
 @Component({
@@ -18,10 +18,8 @@ export class SettingsComponent implements OnInit {
   user: UserSettings | undefined;
   userTags: string[] = [];
   allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
-  files: string[] = [];
-  actualImg: string[] = [];
-  sexualPreferences: string[] = [];
-  newImg: string[] = [];
+  file!: string;;
+  actualImg!: string;
   id!: number;
 
   constructor(
@@ -48,23 +46,7 @@ export class SettingsComponent implements OnInit {
       email: ['', [Validators.pattern("^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$")]],
       password: ['', Validators.minLength(8)],
       confirm_password: ['', Validators.minLength(8)],
-      gender: '',
-      biography: '',
-      maleSexualPreference: false,
-      femaleSexualPreference: false,
-      nonBinarySexualPreference: false,
-      otherSexualPreference: false,
-      sexual_preferences: [[], (control: AbstractControl<Array<string>>) => {
-        if (control.value === null) {
-          return { empty: true };
-        }
-        return null;
-      }],
-      tags: false,
-      fileStatus: false,
-      latitude: null,
-      longitude: null,
-      city: ''
+      fileStatus: [false],
     });
     this.getUser();
   }
@@ -72,38 +54,14 @@ export class SettingsComponent implements OnInit {
   getUser() {
     this.authService.getUserInfosById(this.id).subscribe((userJson: any) => {
       this.user = userJson.user;
+      console.log(this.user);
       if (this.user) {
-        console.log(this.user);
-        const sexualPreferences = this.user.sexual_preferences || [];
-        const maleSexualPreference = sexualPreferences.includes('Male');
-        const femaleSexualPreference = sexualPreferences.includes('Female');
-        const nonBinarySexualPreference = sexualPreferences.includes('Non-binary');
-        const otherSexualPreference = sexualPreferences.includes('Other');
-
-        this.updateForm.patchValue({
-          gender: this.user.gender,
-          maleSexualPreference,
-          femaleSexualPreference,
-          nonBinarySexualPreference,
-          otherSexualPreference,
-        });
-        if (this.user.picture_1) {
-          this.actualImg.push("data:image/jpeg;base64," + this.user.picture_1);
+        if (this.user.avatar) {
+          if (this.user.avatar.includes("http") || this.user.avatar.includes("https"))
+            this.actualImg = this.user.avatar;
+          else
+            this.actualImg = "data:image/png;base64," + this.user.avatar;
         }
-        if (this.user.picture_2) {
-          this.actualImg.push("data:image/jpeg;base64," + this.user.picture_2);
-        }
-        if (this.user.picture_3) {
-          this.actualImg.push("data:image/jpeg;base64," + this.user.picture_3);
-        }
-        if (this.user.picture_4) {
-          this.actualImg.push("data:image/jpeg;base64," + this.user.picture_4);
-        }
-        if (this.user.picture_5) {
-          this.actualImg.push("data:image/jpeg;base64," + this.user.picture_5);
-        }
-        this.user.latitude = this.user.latitude;
-        this.user.longitude = this.user.longitude;
       }
     });
   }
@@ -133,30 +91,17 @@ export class SettingsComponent implements OnInit {
   }
 
   async onChangeFileInput(event: any) {
-    const files = event.target.files;
-    this.newImg = [];
-    this.files = [];
+    const file = event.target.files[0];
     let validMimeTypes = true;
 
-    if (files.length > 5) {
-      const data = {
-        title: 'Error',
-        text: 'You can only upload a maximum of 5 pictures.',
-        text_yes_button: 'Ok',
-        yes_callback: () => { },
-        reload: false,
-      };
-      this.dialogService.openDialog(data);
+    if (!file) {
+      this.updateForm.get('fileStatus')?.setValue(false);
       return;
     }
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const mimeType = await this._getMimeTypes(file);
-      if (this.allowedTypes.indexOf(mimeType) === -1) {
-        validMimeTypes = false;
-        break;
-      }
+    const mimeType = await this._getMimeTypes(file);
+    if (this.allowedTypes.indexOf(mimeType) === -1) {
+      validMimeTypes = false;
     }
 
     if (!validMimeTypes) {
@@ -176,29 +121,21 @@ export class SettingsComponent implements OnInit {
       return;
     }
 
-    for (let i = 0; i < files.length; i++) {
-      let file = files[i];
-      const reader = new FileReader();
-      reader.onload = () => {
-        const img = new Image();
-        img.src = window.URL.createObjectURL(file);
-        img.onload = () => {
-          const res = (reader.result || '') as string;
-          this.files.push(res);
-          this.newImg.push(res);
-
-          if (this.files.length === files.length) {
-            this.updateForm.get('fileStatus')?.setValue(true);
-          }
-        }
-        img.onerror = () => {
-          alert('Invalid image file');
-          event.target.value = '';
-        };
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.src = window.URL.createObjectURL(file);
+      img.onload = () => {
+        const res = (reader.result || '') as string;
+        this.file = res;
+        this.updateForm.get('fileStatus')?.setValue(true);
+      }
+      img.onerror = () => {
+        alert('Invalid image file');
+        event.target.value = '';
       };
-      reader.readAsDataURL(file);
-    }
-    this.updateForm.get('fileStatus')?.setValue(true);
+    };
+    reader.readAsDataURL(file);
   }
 
   _getMimeTypes(file: File): Promise<string> {
@@ -241,16 +178,84 @@ export class SettingsComponent implements OnInit {
       "username",
       "lastName",
       "firstName",
-      "email",
-      "password",
-      "confirm_password",
     ];
 
     const updatedFields: Partial<UserSettings> = {};
 
+    let hasChanges = false;
+
     fieldsToCheck.forEach((field) => {
       if (formValues[field] !== this.user?.[field as keyof UserSettings] && formValues[field] !== "" && formValues[field] !== null) {
         updatedFields[field as keyof UserSettings] = formValues[field];
+        hasChanges = true;
+      }
+    });
+
+    if (!this.user?.loginApi) {
+      if (formValues.email !== this.user?.email && formValues.email !== "" && formValues.email !== null) {
+        updatedFields.email = formValues.email;
+        hasChanges = true;
+      }
+      if (formValues.password !== "" && formValues.password !== null) {
+        updatedFields.password = formValues.password;
+        hasChanges = true;
+      }
+      if (formValues.confirm_password !== "" && formValues.confirm_password !== null) {
+        updatedFields.confirm_password = formValues.confirm_password;
+        hasChanges = true;
+      }
+      if (updatedFields.password && updatedFields.confirm_password && updatedFields.password !== updatedFields.confirm_password) {
+        const data = {
+          title: 'Error',
+          text: 'Passwords do not match.',
+          text_yes_button: 'Ok',
+          yes_callback: () => { },
+          reload: false,
+        };
+        this.dialogService.openDialog(data);
+        return;
+      }
+    }
+
+    if (!hasChanges && !this.file) {
+      const dialogData = {
+        title: 'Error',
+        text: 'Please update at least one field to update your profile.',
+        text_yes_button: 'Ok',
+        yes_callback: () => { },
+        reload: false,
+      };
+      this.dialogService.openDialog(dialogData);
+      return;
+    }
+
+    this.settingsService.updateUser(updatedFields, this.file).subscribe({
+      next: (response) => {
+        console.log(response);
+        if (response.message === "User updated") {
+          this.localStorageService.setMultipleItems(
+            { key: localStorageName.username, value: response.user.username || "" },
+            { key: localStorageName.firstName, value: response.user.firstName || "" },
+            { key: localStorageName.lastName, value: response.user.lastName || "" },
+            { key: localStorageName.emailChecked, value: response.user.email_checked || false },
+            { key: localStorageName.avatar, value: response.user.avatar || "" },
+            { key: localStorageName.loginApi, value: response.user.loginApi || "" },
+          );
+          const data = {
+            title: 'Success',
+            text: 'Your profile has been updated.',
+            text_yes_button: 'Ok',
+            yes_callback: () => { },
+            reload: false,
+          };
+          this.dialogService.openDialog(data);
+          this.file = "";
+          this.updateForm.reset();
+          this.getUser();
+        }
+      },
+      error: (error) => {
+        console.error('post updateUser failed:', error);
       }
     });
   }

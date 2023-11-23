@@ -20,14 +20,14 @@ export class SettingsService {
 	}
 
 	public getUser(): Observable<GetUserResponseData> {
-		return this.http.get<GetUserResponseData>(this.url + `/users/id`, { withCredentials: true });
+		return this.http.get<GetUserResponseData>(this.url + `/user/id`, { withCredentials: true });
 	}
 
-	public updateUser(user: Partial<UserSettings>, files: string[] | null): Observable<any> {
-		return this.http.post(this.url + `/users/settingsUpdate`, { user, files }, { withCredentials: true });
+	public updateUser(user: Partial<UserSettings>, file: string | null): Observable<any> {
+		return this.http.post<UserSettings>(this.url + `/user/settingsUpdate`, { user, file }, { withCredentials: true });
 	}
 
 	public deleteUser(): Observable<any> {
-		return this.http.post(this.url + `/users/delete`, null, { withCredentials: true });
+		return this.http.post(this.url + `/user/delete`, null, { withCredentials: true });
 	}
 }

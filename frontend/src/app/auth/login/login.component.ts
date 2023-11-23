@@ -24,10 +24,6 @@ export class LoginComponent implements OnInit {
       console.log(this.route.snapshot.queryParams['code']);
       this.authService.login42(this.route.snapshot.queryParams['code']);
     }
-    else if (this.route.snapshot.queryParams['user'] && !this.authService.checkLog()) {
-      const user = JSON.parse(this.route.snapshot.queryParams['user']);
-      this.authService.loginGoogle(user);
-    }
     else if (this.authService.checkLog()) {
       console.log('redirect home');
       this.router.navigate(['']);

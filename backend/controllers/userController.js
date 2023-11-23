@@ -6,7 +6,7 @@ const axios = require('axios');
 require('dotenv').config();
 const { OAuth2Client } = require('google-auth-library');
 const client = new OAuth2Client();
-const url = require('url');
+const fs = require('fs');
 
 var nodemailer = require('nodemailer');
 const { query } = require('express');
@@ -19,6 +19,7 @@ var transporter = nodemailer.createTransport({
 });
 
 class UserController {
+
     register = async (req, res) => {
         try {
             const { username, firstName, lastName, email, password } = req.body;
@@ -64,13 +65,12 @@ class UserController {
     login = async (req, res) => {
         try {
             const { username, password } = req.body;
-
             const userExists = await User.findOne({ where: { username } });
             if (!userExists) {
                 return res.status(401).json({ message: 'Invalid credentials' });
             }
             if (!userExists.password) {
-                return res.status(401).json({ message: 'Invalid credentials - or you may have signed up with the 42\'s API' });
+                return res.status(401).json({ message: 'Invalid credentials. You may have signed up with the 42 or Google\'s API' });
             }
             const isPasswordValid = await bcrypt.compare(password, userExists.password);
             if (!isPasswordValid) {
@@ -133,7 +133,7 @@ class UserController {
             const user = await axios.get('https://api.intra.42.fr/v2/me', {
                 headers: headers
             });
-            const userExists = await User.findOne({ where: { username: user.data.login } });
+            const userExists = await User.findOne({ where: { username: user.data.email } });
             const refreshToken = uuidv4();
             if (!userExists) {
                 const newUser = await User.create({
@@ -141,10 +141,11 @@ class UserController {
                     firstName: user.data.first_name,
                     lastName: user.data.last_name,
                     email: user.data.email,
-                    avatar: user.data.image_url,
+                    avatar: user.data.image.link,
                     token: refreshToken,
                     tokenCreationDate: this._getTimestampString(),
-                    tokenExpirationDate: this._getTimestampString(1)
+                    tokenExpirationDate: this._getTimestampString(1),
+                    loginApi: true,
                 });
                 res.cookie('accessToken', this._generateToken(newUser.id), { httpOnly: true, maxAge: 900000 });
                 res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: 86400000 });
@@ -170,37 +171,33 @@ class UserController {
             const userData = req.body.user;
             const userExists = await User.findOne({ where: { email: userData.email } });
             const refreshToken = uuidv4();
-            let newUser = null;
             if (!userExists) {
-                newUser = await User.create({
+                const newUser = await User.create({
                     username: userData.name,
                     firstName: userData.given_name,
-                    lastName: userData?.family_name,
+                    lastName: userData?.family_name || null,
                     email: userData.email,
-                    avatar: userData.picture,
+                    email_checked: true,
+                    avatar: userData.avatar,
+                    token: refreshToken,
+                    tokenCreationDate: this._getTimestampString(),
+                    tokenExpirationDate: this._getTimestampString(1),
+                    loginApi: true,
+                });
+                res.cookie('accessToken', this._generateToken(newUser.id), { httpOnly: true, maxAge: 900000 });
+                res.cookie('refreshToken', userData.sub, { httpOnly: true, maxAge: 86400000 });
+                return res.status(201).json({ message: 'User registered successfully', user: newUser });
+            } else {
+                const dataToUpdate = {
                     token: refreshToken,
                     tokenCreationDate: this._getTimestampString(),
                     tokenExpirationDate: this._getTimestampString(1)
-                });
+                };
+                await User.update(dataToUpdate, { where: { email: userData.email } });
+                res.cookie('accessToken', this._generateToken(userExists.id), { httpOnly: true, maxAge: 900000 });
+                res.cookie('refreshToken', userData.sub, { httpOnly: true, maxAge: 86400000 });
+                return res.status(200).json({ message: 'User logged in successfully', user: userExists });
             }
-            const dataToUpdate = {
-                token: refreshToken,
-                tokenCreationDate: this._getTimestampString(),
-                tokenExpirationDate: this._getTimestampString(1)
-            };
-            await User.update(dataToUpdate, { where: { email: userData.email } });
-            const user = {
-                "id": userExists ? userExists.id : newUser.id,
-                "username": userData.name,
-                "firstName": userData.given_name,
-                "lastName": userData?.family_name,
-                "avatar": userData.picture,
-                "email_checked": true
-            };
-
-            res.cookie('accessToken', this._generateToken(user.id), { httpOnly: true, maxAge: 900000 });
-            res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: 86400000 });
-            return res.status(200).json({ message: 'User logged in successfully', user: user });
         } catch (error) {
             console.error('Error logging in user:', error);
             return res.status(500).json({ message: 'Internal Server Error' });
@@ -238,7 +235,7 @@ class UserController {
             if (!refreshToken) {
                 return res.status(401).json({ message: 'Refresh token missing' });
             }
-            if (!InvalidTokensController.findInvalidToken(null, refreshToken)) {
+            if (await InvalidTokens.findOne({ where: { refreshToken } })) {
                 return res.status(401).json({ message: 'Invalid token' });
             }
             const user = User.findOne({ where: { token: refreshToken } });
@@ -265,12 +262,17 @@ class UserController {
             if (!user) {
                 return res.status(404).json({ message: 'User not found' });
             } else {
+                let avatar = user.avatar;
+                if (!avatar.includes("http://") && !avatar.includes("https://")) {
+                    avatar = await this._getPictureDataFromPath("/app/imagesSaved/" + avatar);
+                }
                 const userData = {
                     "id": user.id,
                     "username": user.username,
                     "firstName": user.firstName,
                     "lastName": user.lastName,
-                    "avatar": user.avatar,
+                    "avatar": avatar,
+                    "loginApi": user.loginApi,
                 };
                 return res.status(200).json({ message: 'User found', user: userData });
             }
@@ -292,6 +294,8 @@ class UserController {
                     "firstName": user.firstName,
                     "lastName": user.lastName,
                     "avatar": user.avatar,
+                    "loginApi": user.loginApi,
+                    "email_checked": user.email_checked,
                 };
                 return res.status(200).json({ message: 'User found', user: userData });
             }
@@ -300,6 +304,57 @@ class UserController {
             return res.status(500).json({ message: 'Internal Server Error' });
         }
     };
+
+    async settingsUpdateInfos(req, res) {
+        try {
+            const userId = req.user.userId;
+            const userData = req.body.user;
+            const file = req.body.file;
+            if (!userData) {
+                res.status(400).json({ error: 'Missing data' });
+                return;
+            }
+
+            if (userData.username && (await User.findOne({ where: { username: userData.username } })) !== null) {
+                res.status(400).json({ error: 'Username already in use' });
+                return;
+            }
+            if (userData.email && (await this.model.findByEmail(userData.email)) !== null) {
+                res.status(400).json({ error: 'Email already in use' });
+                return;
+            }
+
+            if (file) {
+                try {
+                    const avatar = await this._savePicture(file, userId);
+                    if (avatar) {
+                        userData.avatar = avatar;
+                    }
+                } catch (error) {
+                    console.error('Error saving picture:', error);
+                }
+            }
+            if (userData.password) {
+                const hashedPassword = await bcrypt.hash(userData.password, 10);
+                userData.password = hashedPassword;
+            }
+            await User.update(userData, { where: { id: userId } });
+            const user = await User.findOne({ where: { id: userId } });
+            const userReturn = {
+                "id": user.id,
+                "username": user.username,
+                "firstName": user.firstName,
+                "lastName": user.lastName,
+                "avatar": user.avatar,
+                "loginApi": user.loginApi,
+                "email_checked": user.email_checked,
+            };
+            return res.status(200).json({ message: 'User updated', user: userReturn });
+        } catch (error) {
+            console.error('Error updating user:', error);
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
 
     _generateToken(userId) {
         const secretKey = process.env.JWT_SECRET;
@@ -360,18 +415,58 @@ class UserController {
         }
     }
 
-    async _getUserInfo(accessToken) {
-        try {
-            const response = await axios.get('https://www.googleapis.com/oauth2/v1/userinfo', {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                },
+    async _savePicture(file, userId) {
+        return new Promise((resolve, reject) => {
+            const fileExtension = file.substring("data:image/".length, file.indexOf(";base64"));
+            const filename = 'avatar_' + userId + '.' + fileExtension;
+            const path = "/app/imagesSaved/" + filename;
+            const base64Data = file.replace(/^data:image\/(png|jpeg|jpg);base64,/, "");
+
+            fs.writeFile(path, base64Data, 'base64', (error) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve(filename);
+                }
             });
-            console.log('response.data = ' + response.data);
-            return response.data;
-        } catch (error) {
-            console.error(error);
+        });
+    }
+
+    async _removePicture(filename) {
+        fs.readdir("/app/imagesSaved/", (error, files) => {
+            if (error) {
+                return null;
+            }
+            const fileToRemove = files.find((file) =>
+                file.startsWith(filename)
+            );
+            if (fileToRemove && fileToRemove.length > 0) {
+                const pathToRemove = "/app/imagesSaved/" + fileToRemove;
+                fs.unlink(pathToRemove, (error) => {
+                    if (error) {
+                        return null;
+                    } else {
+                        return true;
+                    }
+                });
+            }
+        });
+    }
+
+    async _getPictureDataFromPath(path) {
+        if (!path || path.length <= 0) {
+            return "";
         }
+        return new Promise((resolve, reject) => {
+            fs.readFile(path, (error, data) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    const imageString = data.toString('base64');
+                    resolve(imageString);
+                }
+            });
+        });
     }
 
 }

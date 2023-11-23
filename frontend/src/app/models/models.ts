@@ -52,6 +52,7 @@ export interface LoginResponseData {
 		lastName: string,
 		email_checked: boolean,
 		avatar: string,
+		loginApi: boolean,
 	};
 }
 
@@ -64,6 +65,7 @@ export interface GetUserResponseData {
 		lastName: string,
 		email_checked: boolean,
 		avatar: string,
+		loginApi: boolean,
 	};
 }
 
@@ -76,6 +78,7 @@ export interface loginGoogleResponseData {
 		lastName: string,
 		email_checked: boolean,
 		avatar: string,
+		loginApi: boolean,
 	};
 }
 
@@ -313,18 +316,21 @@ export interface UserSettings {
 	email: string;
 	password: string;
 	confirm_password: string;
-	gender: string;
-	sexual_preferences: string[];
-	biography: string;
-	picture_1: string;
-	picture_2: string;
-	picture_3: string;
-	picture_4: string;
-	picture_5: string;
-	tags: string[];
-	latitude: number;
-	longitude: number;
-	city: string;
+	avatar: string;
+	loginApi: boolean;
+}
+
+export interface UserSettingsUpdate {
+	message: string
+	user: {
+		id: number,
+		username: string,
+		firstName: string,
+		lastName: string,
+		email_checked: boolean,
+		avatar: string,
+		loginApi: boolean,
+	};
 }
 
 /* Tags */
