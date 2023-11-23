@@ -133,7 +133,7 @@ class UserController {
             const user = await axios.get('https://api.intra.42.fr/v2/me', {
                 headers: headers
             });
-            const userExists = await User.findOne({ where: { username: user.data.email } });
+            const userExists = await User.findOne({ where: { email: user.data.email } });
             const refreshToken = uuidv4();
             if (!userExists) {
                 const newUser = await User.create({
@@ -141,6 +141,7 @@ class UserController {
                     firstName: user.data.first_name,
                     lastName: user.data.last_name,
                     email: user.data.email,
+                    email_checked: true,
                     avatar: user.data.image.link,
                     token: refreshToken,
                     tokenCreationDate: this._getTimestampString(),
@@ -156,7 +157,7 @@ class UserController {
                 tokenCreationDate: this._getTimestampString(),
                 tokenExpirationDate: this._getTimestampString(1)
             };
-            await User.update(dataToUpdate, { where: { username: user.data.login } });
+            await User.update(dataToUpdate, { where: { email: user.data.email } });
             res.cookie('accessToken', this._generateToken(userExists.id), { httpOnly: true, maxAge: 900000 });
             res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: 86400000 });
             return res.status(200).json({ message: 'User logged in successfully', user: userExists });
