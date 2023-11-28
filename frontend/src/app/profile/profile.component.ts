@@ -56,7 +56,19 @@ export class ProfileComponent implements OnInit {
           this.loading = false;
         },
         error: (error) => {
-          console.error(error);
+          console.log(error);
+          if (error.message == "User not found")
+            this.error = true;
+          else {
+            const dialogData = {
+              title: "Error",
+              content: "An error occured, please try again later",
+              positive: "Ok",
+              negative: "",
+              action: "error"
+            };
+            this.dialogService.openDialog(dialogData);
+          }
         }
       });
     });
