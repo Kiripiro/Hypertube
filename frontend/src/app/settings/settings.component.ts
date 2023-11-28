@@ -77,6 +77,8 @@ export class SettingsComponent implements OnInit {
           next: (response) => {
             if (response.message === "User deleted") {
               this.router.navigate(['auth/login']);
+              this.authService.logEmitChange(false);
+              this.localStorageService.removeAllUserItem();
             }
           },
           error: (error) => {
@@ -214,8 +216,22 @@ export class SettingsComponent implements OnInit {
         };
         this.dialogService.openDialog(data);
         return;
+      } else if ((updatedFields.password && !updatedFields.confirm_password) || (!updatedFields.password && updatedFields.confirm_password)) {
+        const data = {
+          title: 'Error',
+          text: 'Please enter both password and confirm password.',
+          text_yes_button: 'Ok',
+          yes_callback: () => { },
+          reload: false,
+        };
+        this.dialogService.openDialog(data);
+        return;
+      } else if (updatedFields.password && updatedFields.confirm_password && updatedFields.password === updatedFields.confirm_password) {
+        hasChanges = true;
       }
     }
+
+
 
     if (!hasChanges && !this.file) {
       const dialogData = {
@@ -255,7 +271,14 @@ export class SettingsComponent implements OnInit {
         }
       },
       error: (error) => {
-        console.error('post updateUser failed:', error);
+        const dialogData = {
+          title: 'Update failed',
+          text: error.error,
+          text_yes_button: 'Ok',
+          yes_callback: () => { },
+          reload: false,
+        };
+        this.dialogService.openDialog(dialogData);
       }
     });
   }

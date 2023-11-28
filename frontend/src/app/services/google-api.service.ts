@@ -6,6 +6,7 @@ import { LocalStorageService, localStorageName } from './local-storage.service';
 import { loginGoogleResponseData } from '../models/models';
 import { AuthService } from './auth.service';
 import { Router } from '@angular/router';
+import { DialogService } from './dialog.service';
 
 const oAuthConfig = {
   issuer: 'https://accounts.google.com',
@@ -35,6 +36,7 @@ export class GoogleApiService {
     private readonly oAuthService: OAuthService,
     private http: HttpClient,
     private localStorageService: LocalStorageService,
+    private dialogService: DialogService,
     private authService: AuthService,
     private router: Router,
 
@@ -54,12 +56,9 @@ export class GoogleApiService {
       if (!this.oAuthService.hasValidAccessToken()) {
         this.oAuthService.initImplicitFlow();
       } else {
-        console.log('Google');
         this.oAuthService.loadUserProfile().then((user: any) => {
-          console.log(user);
           const infos = JSON.stringify(user.info);
           const { name, given_name, family_name, picture, email, email_verified } = JSON.parse(infos);
-          console.log(infos);
           this.user = {
             name,
             given_name,
@@ -70,8 +69,6 @@ export class GoogleApiService {
           };
           this.http.post<loginGoogleResponseData>(this.url + '/user/loginGoogle', { user: this.user }, { withCredentials: true }).subscribe({
             next: (response) => {
-              console.log(response);
-              console.log('User log:', response.user);
               if (response.message == "User logged in successfully" && response.user) {
                 this.localStorageService.setMultipleItems(
                   { key: localStorageName.id, value: response.user.id || -1 },
@@ -88,7 +85,16 @@ export class GoogleApiService {
               location.reload();
             },
             error: (error) => {
-              console.error('Error fetching Google user:', error);
+              const dialogData = {
+                title: 'Login error',
+                text: error.error,
+                text_yes_button: "",
+                text_no_button: "Close",
+                yes_callback: () => { },
+                no_callback: () => { },
+                reload: false
+              };
+              this.dialogService.openDialog(dialogData);
             }
           });
         }).catch((err) => {

@@ -1,0 +1,15 @@
+@import '../../app.component.scss';
+
+form {
+    width: 45%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+
+    mat-hint {
+        color: $onPrimary;
+        margin-bottom: 0.3rem;
+    }
+}

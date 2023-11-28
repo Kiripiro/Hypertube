@@ -1,31 +1,30 @@
 <div class="centerDiv">
     <div class="formCard">
         <p class="title">Log in</p>
-        <form (ngSubmit)="onSubmit()" [formGroup]="loginForm">
-            <mat-form-field class="form-field" hideRequiredMarker>
-                <mat-label>Username</mat-label>
-                <input matInput id="username" formControlName="username">
-            </mat-form-field>
-            <mat-form-field class="form-field withHint" hideRequiredMarker>
-                <mat-label>Password</mat-label>
-                <input matInput type="password" id="password" formControlName="password" minlength="8">
-            </mat-form-field>
-            <div class="loginButtonDiv">
-                <button type="submit" [disabled]="loginForm.invalid" color="primary" mat-raised-button>Log in</button>
-                <a [routerLink]="['/resetpassword']" class="resetPassword">Reset password</a>
-            </div>
-        </form>
-    </div>
-    <div class="apiButtonDiv">Or
-        <button (click)="login42()">Sign In with 42</button>
-        <button (click)="loginGoogle()">Sign In with Google</button>
-        <!-- <div id="g_id_onload" data-client_id="263416825212-susfcn7ch7prvfsv6k1llfprtqtcj5ca.apps.googleusercontent.com"
-            data-context="signin" data-ux_mode="popup" data-login_uri="http://localhost:3000/user/loginGoogle"
-            data-auto_select="true" data-itp_support="false">
+        <div class="apiButtonDiv">
+            <button (click)="login42()">Sign In with 42</button>
+            <button (click)="loginGoogle()">Sign In with Google</button>
+        </div>
+        <span class="or">or</span>
+        <div class="login">
+            <form (ngSubmit)="onSubmit()" [formGroup]="loginForm">
+                <div class="loginInputDiv">
+                    <mat-form-field class="form-field" hideRequiredMarker>
+                        <mat-label>Username</mat-label>
+                        <input matInput id="username" formControlName="username">
+                    </mat-form-field>
+                    <mat-form-field class="form-field withHint" hideRequiredMarker>
+                        <mat-label>Password</mat-label>
+                        <input matInput type="password" id="password" formControlName="password" minlength="8">
+                    </mat-form-field>
+                </div>
+                <div class="loginButtonDiv">
+                    <button class="submit" type="submit" [disabled]="loginForm.invalid" mat-raised-button>Log
+                        in</button>
+                    <a [routerLink]="['/resetpassword']" class="resetPassword" mat-raised-button>Reset password</a>
+                </div>
+            </form>
         </div>
 
-        <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="outline" data-text="signin_with"
-            data-size="large" data-logo_alignment="left">
-        </div> -->
     </div>
 </div>

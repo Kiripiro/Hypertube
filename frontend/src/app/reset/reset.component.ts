@@ -41,8 +41,16 @@ export class ResetComponent implements OnInit {
       this.authService.sendPasswordResetRequest(email).subscribe({
         next: (response) => {
           this.sent = true;
-          this.title = "Reset password request sent";
-          this.textButton = "Log in";
+          const dialogData = {
+            title: 'Success',
+            text: response.message,
+            text_yes_button: "",
+            text_no_button: "Close",
+            yes_callback: () => { },
+            no_callback: () => { },
+            reload: false
+          };
+          this.dialogService.openDialog(dialogData);
         },
         error: (error) => {
           console.error('sendPasswordResetRequest failed:', error);

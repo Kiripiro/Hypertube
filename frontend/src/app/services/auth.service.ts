@@ -13,6 +13,9 @@ import { environment } from '../../environments/environment.template';
   providedIn: 'root'
 })
 export class AuthService {
+  checkCompleteRegister() {
+    throw new Error('Method not implemented.');
+  }
   url: string;
   constructor(
     private http: HttpClient,
@@ -186,11 +189,11 @@ export class AuthService {
   }
 
   sendPasswordResetRequest(email: string): Observable<PasswordResetRequestResponseData> {
-    return this.http.post<PasswordResetRequestResponseData>(this.url + '/user/resetpasswordrequest', { email }, { withCredentials: true });
+    return this.http.post<PasswordResetRequestResponseData>(this.url + '/user/resetPassword', { email }, { withCredentials: true });
   }
 
   passwordResetValidation(token: string, password: string): Observable<PasswordResetValidationResponseData> {
-    return this.http.post<PasswordResetValidationResponseData>(this.url + '/user/resetpasswordvalidation', { token, password }, { withCredentials: true });
+    return this.http.post<PasswordResetValidationResponseData>(this.url + '/user/resetPasswordValidate', { passwordResetToken: token, password }, { withCredentials: true });
   }
 
   _frontLogOut(error: string) {

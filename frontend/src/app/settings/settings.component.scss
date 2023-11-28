@@ -3,7 +3,7 @@ $primary: #FDBABA;
 $surface: #3E2266;
 $surfaceAlt: #6DB1BF;
 $surfaceAltDark: #2e7280;
-$onPrimary: #3E2266;
+$onPrimary: #f3f3f3;
 $onSurface: white;
 $onPrimaryAlt: #6DB1BF;
 $greyInfos: #9a9fa3;
@@ -14,6 +14,22 @@ mat-label {
     font-weight: 500;
     color: $onPrimary;
     margin-bottom: 0.3rem;
+}
+
+.settings-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 50vw;
+
+    p {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 2.5rem;
+        font-weight: 500;
+        color: $onPrimary;
+    }
 }
 
 .userInfos {
@@ -123,7 +139,8 @@ mat-label {
 
     .delete-button {
         margin-top: 10px;
-        background-color: red !important;
+        color: $onPrimary;
+        background-color: rgb(222, 7, 7) !important;
     }
 }
 

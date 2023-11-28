@@ -61,6 +61,14 @@ userRouter.post('/id', auth, async (req, res) => {
     }
 });
 
+userRouter.post('/username', auth, async (req, res) => {
+    try {
+        await UserController.getUserByUsername(req, res);
+    } catch (error) {
+        console.error(error);
+    }
+});
+
 userRouter.get('/id', auth, async (req, res) => {
     try {
         await UserController.getPersonalUser(req, res);
@@ -72,6 +80,31 @@ userRouter.get('/id', auth, async (req, res) => {
 userRouter.post('/settingsUpdate', auth, async (req, res) => {
     try {
         await UserController.settingsUpdateInfos(req, res);
+    } catch (error) {
+        console.log(error);
+    }
+});
+
+
+userRouter.post('/delete', auth, async (req, res) => {
+    try {
+        await UserController.deleteUser(req, res);
+    } catch (error) {
+        console.log(error);
+    }
+});
+
+userRouter.post('/resetPassword', async (req, res) => {
+    try {
+        await UserController.resetPassword(req, res);
+    } catch (error) {
+        console.log(error);
+    }
+});
+
+userRouter.post('/resetPasswordValidate', async (req, res) => {
+    try {
+        await UserController.resetPasswordValidate(req, res);
     } catch (error) {
         console.log(error);
     }

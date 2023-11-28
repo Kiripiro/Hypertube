@@ -19,6 +19,10 @@ clean:
 	# rm -rf $(FRONTEND_NODE_MODULES)
 	# rm -rf $(BACKEND_NODE_MODULES)
 	rm -rf $(MIGRATIONS_FILE)
+	@if [ -n "$(wildcard $(BACKEND_DIR)/imagesSaved/*)" ]; then \
+		echo "Removing files in $(BACKEND_DIR)/imagesSaved..."; \
+		rm -rf $(BACKEND_DIR)/imagesSaved/*; \
+	fi
 
 fclean:	clean
 	docker system prune --all --force --volumes

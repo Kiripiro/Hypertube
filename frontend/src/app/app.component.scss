@@ -3,9 +3,45 @@ $primary: #383737;
 $surface: rgb(179, 10, 10);
 $surfaceAlt: #6DB1BF;
 $surfaceAltDark: #2e7280;
-$onPrimary: #cb0d0d;
+$onPrimary: #f3f3f3;
 $onSurface: rgb(188, 18, 18);
 $onPrimaryAlt: #bf806d;
 $greyInfos: #9a9fa3;
 $greyInfosDark: #333435;
-$error: red;
+$error: rgb(212, 21, 21);
+
+app-root {
+    width: 100vw;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.centerDiv {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.formCard {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: auto;
+    width: 90vw;
+    border-radius: 20px;
+    background-color: $primary;
+    padding: 20px;
+    margin: 20px;
+
+    p {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 2.5rem;
+        font-weight: 500;
+        color: $onPrimary;
+        margin-bottom: 20px;
+    }
+}

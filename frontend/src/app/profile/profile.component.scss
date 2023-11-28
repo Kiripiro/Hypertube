@@ -1,0 +1,170 @@
+@import '../app.component.scss';
+
+.profileCard {
+    width: 50vw;
+    height: auto;
+    border-radius: 20px;
+    padding: 0.5rem;
+    box-shadow: 5px 5px 15px rgba(70, 70, 70, 0.12), -1px -1px 50px rgba(70, 70, 70, 0.12);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: $primary;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+
+    p {
+        margin-top: 1rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 2.5rem;
+        font-weight: 500;
+        color: $onPrimary;
+        margin-bottom: 20px;
+    }
+
+    .avatarDiv {
+        margin-top: 20px;
+        height: 55vh;
+        width: 40vw;
+
+        img {
+            height: 100%;
+            width: 100%;
+            border-radius: 20px;
+            object-fit: cover;
+        }
+    }
+
+    .mainDivProfil {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+        align-items: center;
+
+        #infos {
+            font-size: 1.3rem;
+            font-weight: 600;
+            padding: 1rem;
+            border-radius: 15px;
+            width: auto;
+            background-color: $surface;
+            color: $onPrimary;
+            text-align: center;
+            margin: 1rem 0;
+        }
+
+        button {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0.5rem 1rem;
+        }
+    }
+}
+
+.errorCard {
+    width: 80vw;
+    height: auto;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 5px 5px 15px rgba(70, 70, 70, 0.12), -1px -1px 50px rgba(70, 70, 70, 0.12);
+    margin-top: 2rem;
+    background-color: $primary;
+    display: flex;
+
+    p {
+        width: 100%;
+        height: 100%;
+        text-align: center;
+        line-height: 100px;
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+}
+
+.loadingCard {
+    width: 80vw;
+    height: auto;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 5px 5px 15px rgba(70, 70, 70, 0.12), -1px -1px 50px rgba(70, 70, 70, 0.12);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background-color: $primary;
+    margin-top: 2rem;
+
+    p {
+        width: 100%;
+        text-align: center;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 2rem 0;
+    }
+}
+
+@media (max-width: 1024px) {
+    .profileCard {
+        width: 60vw;
+        height: auto;
+
+        .carouselDiv {
+            height: 60vh;
+            width: 60vw;
+        }
+
+        .mainDivProfil {
+            #nameAge {
+                font-size: 1.2rem;
+                margin: 0.5rem;
+            }
+
+            button {
+                padding: 0.4rem 0.8rem;
+            }
+        }
+
+    }
+
+    .errorCard,
+    .loadingCard {
+        p {
+            font-size: 1.2rem;
+            margin: 1rem 0;
+        }
+    }
+}
+
+@media (max-width: 760px) {
+    .profileCard {
+        width: 95vw;
+        height: auto;
+
+        .avatarDiv {
+            height: 60vh;
+            width: 95vw;
+        }
+
+        .mainDivProfil {
+            #nameAge {
+                font-size: 1.2rem;
+                margin: 0.5rem;
+            }
+
+            button {
+                padding: 0.4rem 0.8rem;
+            }
+        }
+    }
+
+    .errorCard,
+    .loadingCard {
+        p {
+            font-size: 1.2rem;
+            margin: 1rem 0;
+        }
+    }
+}

@@ -14,9 +14,13 @@
         cursor: pointer;
     }
 
+    mat-icon {
+        color: $onPrimary;
+        cursor: pointer;
+    }
+
     button {
         border-radius: 8px;
-        // margin-left: 1.5rem;
         font-size: 1.3rem;
         font-weight: 600;
         padding-top: 1.5rem;
@@ -31,7 +35,7 @@
     }
 
     .secondaryButton {
-        background-color: $onPrimary;
+        background-color: $onSurface;
         color: white;
     }
 

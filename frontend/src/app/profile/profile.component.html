@@ -1,0 +1,19 @@
+<div class="centerDiv">
+    <div class="profileCard" *ngIf="!loading && !error">
+        <p class="title">Profile</p>
+        <div class="avatarDiv">
+            <img src="{{userInfos.avatar}}" alt="profilePicture" class="profilePicture">
+        </div>
+        <div class="mainDivProfil" id="mainDivPersonnal">
+            <p id="infos">{{userInfos.firstName}} {{userInfos.lastName}} - {{userInfos.username}}</p>
+        </div>
+        <!-- Ajouter films vus et likes ? -->
+    </div>
+    <div class="errorCard" *ngIf="error">
+        <p>User not found</p>
+    </div>
+    <div class="loadingCard" *ngIf="loading && !error">
+        <p>Loading</p>
+        <mat-progress-bar mode="query"></mat-progress-bar>
+    </div>
+</div>

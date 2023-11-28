@@ -1,8 +1,8 @@
 <div class="centerDiv" *ngIf="!notConnected">
     <div class="profileCard" *ngIf="!loading && !error">
-        <div class="carouselDiv">
+        <!-- <div class="carouselDiv">
             <app-carousel [images]="img" [title]="userDisplayed.username"></app-carousel>
-        </div>
+        </div> -->
         <div class="mainDivProfil">
             <p id="nameAge">{{userDisplayed.firstName}} {{userDisplayed.lastName}} - {{userDisplayed.age}} years</p>
         </div>

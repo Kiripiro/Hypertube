@@ -35,8 +35,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NavBarComponent } from './navbar/nav-bar.component';
 import { DialogComponent } from './utils/dialog/dialog.component';
 import { DialogService } from 'src/app/services/dialog.service';
-import { CarouselComponent } from './utils/carousel/carousel.component';
-// import { ProfileComponent } from './profile/profile.component';
 import { SettingsComponent } from './settings/settings.component';
 import { MatRadioModule } from '@angular/material/radio';
 import { HomeService } from 'src/app/services/home.service';
@@ -44,6 +42,7 @@ import { WaitComponent } from './wait/wait.component';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { ResetComponent } from './reset/reset.component';
 import { OAuthModule } from 'angular-oauth2-oidc';
+import { ProfileComponent } from './profile/profile.component';
 
 @NgModule({
   declarations: [
@@ -52,8 +51,7 @@ import { OAuthModule } from 'angular-oauth2-oidc';
     HomeComponent,
     NavBarComponent,
     DialogComponent,
-    CarouselComponent,
-    // ProfileComponent,
+    ProfileComponent,
     SettingsComponent,
     WaitComponent,
     ResetComponent,

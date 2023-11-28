@@ -3,7 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { NotFoundComponent } from './not-found/not-found.component';
 import { HomeComponent } from './home/home.component';
 import { AuthModule } from './auth/auth.module';
-// import { ProfileComponent } from './profile/profile.component';
+import { ProfileComponent } from './profile/profile.component';
 import { SettingsComponent } from './settings/settings.component';
 import { WaitComponent } from './wait/wait.component';
 import { ResetComponent } from './reset/reset.component';
@@ -11,7 +11,7 @@ import { ResetComponent } from './reset/reset.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
-  // { path: 'profile/:username', component: ProfileComponent },
+  { path: 'profile/:username', component: ProfileComponent },
   { path: 'auth', loadChildren: () => AuthModule },
   { path: 'settings', component: SettingsComponent },
   // { path: 'search', component: SearchComponent },

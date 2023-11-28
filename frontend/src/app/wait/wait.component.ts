@@ -35,8 +35,8 @@ export class WaitComponent implements OnInit {
 
   ngOnInit(): void {
     this.resetPasswordForm = this.fb.group({
-      password: ['qqqqqqqq', [Validators.required, Validators.minLength(8)]],
-      repeat_password: ['qqqqqqqq', [Validators.required, Validators.minLength(8)]],
+      password: ['', [Validators.required, Validators.minLength(8)]],
+      repeat_password: ['', [Validators.required, Validators.minLength(8)]],
     });
     this.activatedRoute.params.subscribe(params => {
       if (params['type'] && (params['type'] == "email" || params['type'] == "resetpassword") && params['token'] && params['token'].length > 0) {

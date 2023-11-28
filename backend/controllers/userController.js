@@ -26,7 +26,11 @@ class UserController {
 
             const existingUser = await User.findOne({ where: { email } });
             if (existingUser) {
-                return res.status(409).json({ message: 'Email is already registered.' });
+                return res.status(409).json({ error: 'Email is already registered.' });
+            }
+            const existingUsername = await User.findOne({ where: { username } });
+            if (existingUsername) {
+                return res.status(409).json({ error: 'Username is already taken.' });
             }
 
             const hashedPassword = await bcrypt.hash(password, 10);
@@ -171,6 +175,9 @@ class UserController {
         try {
             const userData = req.body.user;
             const userExists = await User.findOne({ where: { email: userData.email } });
+            if (userExists && !userExists.loginApi) {
+                return res.status(401).json({ error: 'Invalid credentials, you have signed up manually using this email.' });
+            }
             const refreshToken = uuidv4();
             if (!userExists) {
                 const newUser = await User.create({
@@ -233,6 +240,7 @@ class UserController {
     refresh = async (req, res) => {
         try {
             const refreshToken = this._parseCookie(req, 'refreshToken');
+            console.log(refreshToken);
             if (!refreshToken) {
                 return res.status(401).json({ message: 'Refresh token missing' });
             }
@@ -263,8 +271,9 @@ class UserController {
             if (!user) {
                 return res.status(404).json({ message: 'User not found' });
             } else {
+                console.log('user.avatar = ' + user.avatar);
                 let avatar = user.avatar;
-                if (!avatar.includes("http://") && !avatar.includes("https://")) {
+                if (avatar && !avatar.includes("http://") && !avatar.includes("https://")) {
                     avatar = await this._getPictureDataFromPath("/app/imagesSaved/" + avatar);
                 }
                 const userData = {
@@ -274,6 +283,32 @@ class UserController {
                     "lastName": user.lastName,
                     "avatar": avatar,
                     "loginApi": user.loginApi,
+                };
+                return res.status(200).json({ message: 'User found', user: userData });
+            }
+        } catch (error) {
+            console.error('Error getting user:', error);
+            return res.status(500).json({ message: 'Internal Server Error' });
+        }
+    };
+
+    getUserByUsername = async (req, res) => {
+        try {
+            console.log(req.body);
+            const user = await User.findOne({ where: { username: req.body.username } });
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            } else {
+                let avatar = user.avatar;
+                if (avatar && !avatar.includes("http://") && !avatar.includes("https://")) {
+                    avatar = await this._getPictureDataFromPath("/app/imagesSaved/" + avatar);
+                }
+                const userData = {
+                    "id": user.id,
+                    "username": user.username,
+                    "firstName": user.firstName,
+                    "lastName": user.lastName,
+                    "avatar": avatar,
                 };
                 return res.status(200).json({ message: 'User found', user: userData });
             }
@@ -310,6 +345,7 @@ class UserController {
         try {
             const userId = req.user.userId;
             const userData = req.body.user;
+            console.log(userData);
             const file = req.body.file;
             if (!userData) {
                 res.status(400).json({ error: 'Missing data' });
@@ -320,7 +356,7 @@ class UserController {
                 res.status(400).json({ error: 'Username already in use' });
                 return;
             }
-            if (userData.email && (await this.model.findByEmail(userData.email)) !== null) {
+            if (userData.email && (await User.findOne({ where: { email: userData.email } })) !== null) {
                 res.status(400).json({ error: 'Email already in use' });
                 return;
             }
@@ -335,10 +371,17 @@ class UserController {
                     console.error('Error saving picture:', error);
                 }
             }
-            if (userData.password) {
+            if (userData.password && userData.confirm_password && userData.password == userData.confirm_password) {
                 const hashedPassword = await bcrypt.hash(userData.password, 10);
                 userData.password = hashedPassword;
+            } else if (userData.password && userData.confirm_password && userData.password != userData.confirm_password) {
+                res.status(400).json({ error: 'Passwords do not match' });
+                return;
+            } else if (userData.password && !userData.confirm_password || !userData.password && userData.confirm_password) {
+                res.status(400).json({ error: 'Missing password or confirmation' });
+                return;
             }
+            console.log(userId);
             await User.update(userData, { where: { id: userId } });
             const user = await User.findOne({ where: { id: userId } });
             const userReturn = {
@@ -356,6 +399,85 @@ class UserController {
             res.status(500).json({ error: 'Internal Server Error' });
         }
     }
+
+    deleteUser = async (req, res) => {
+        try {
+            const userId = req.user.userId;
+            const user = await User.findOne({ where: { id: userId } });
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            } else {
+                if (user.avatar) {
+                    await this._removePicture(user.avatar);
+                }
+                await User.destroy({ where: { id: userId } });
+                res.clearCookie('accessToken');
+                res.clearCookie('refreshToken');
+                return res.status(200).json({ message: 'User deleted' });
+            }
+        } catch (error) {
+            console.error('Error deleting user:', error);
+            return res.status(500).json({ message: 'Internal Server Error' });
+        }
+    };
+
+    resetPassword = async (req, res) => {
+        try {
+            const { email } = req.body;
+            const user = await User.findOne({ where: { email } });
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            } else {
+                //send an email with a link to reset password
+                const passwordResetToken = uuidv4();
+                const dataToUpdate = {
+                    passwordReset: true,
+                    passwordResetToken: passwordResetToken,
+                };
+                await User.update(dataToUpdate, { where: { email } });
+                const mailOptions = {
+                    from: process.env.EMAIL,
+                    to: email,
+                    subject: 'Password reset',
+                    text: 'Hi ' + user.username + '\nClick on the following link to reset your password:\n' + process.env.FRONTEND_URL + '/verification/resetpassword/' + passwordResetToken
+                };
+                transporter.sendMail(mailOptions, function (error, info) {
+                    if (error) {
+                        console.log('error = ' + error);
+                    } else {
+                        console.log('Email sent: ' + info.response);
+                    }
+                });
+                return res.status(200).json({ message: 'Email sent, please check your emails.' });
+            }
+        } catch (error) {
+            console.error('Error resetting password:', error);
+            return res.status(500).json({ message: 'Internal Server Error' });
+        }
+    };
+
+    resetPasswordValidate = async (req, res) => {
+        try {
+            console.log(req.body);
+            const { password, passwordResetToken } = req.body;
+            const user = await User.findOne({ where: { passwordResetToken } });
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            } else {
+                const hashedPassword = await bcrypt.hash(password, 10);
+                const dataToUpdate = {
+                    password: hashedPassword,
+                    passwordReset: false,
+                    passwordResetToken: null,
+                };
+                await User.update(dataToUpdate, { where: { passwordResetToken } });
+                return res.status(200).json({ message: 'Password updated' });
+            }
+        } catch (error) {
+            console.error('Error resetting password:', error);
+            return res.status(500).json({ message: 'Internal Server Error' });
+        }
+    };
 
     _generateToken(userId) {
         const secretKey = process.env.JWT_SECRET;
