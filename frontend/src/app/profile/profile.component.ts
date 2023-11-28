@@ -20,7 +20,6 @@ export class ProfileComponent implements OnInit {
   loading = true;
   error = false;
   personalProfil = false;
-  img: string[] = [];
   private id: number;
 
   constructor(
@@ -49,7 +48,11 @@ export class ProfileComponent implements OnInit {
           this.userInfos = response.user;
           console.log(this.userInfos);
           this.personalProfil = this.userInfos.id == this.id;
-          this.img = this.userInfos.img;
+          if (this.userInfos.avatar && this.userInfos.avatar.includes("http") || this.userInfos.avatar.includes("https")) {
+            this.userInfos.avatar = this.userInfos.avatar;
+          } else {
+            this.userInfos.avatar = "data:image/png;base64," + this.userInfos.avatar;
+          }
           this.loading = false;
         },
         error: (error) => {
