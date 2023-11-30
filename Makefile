@@ -5,8 +5,6 @@ FRONTEND_NODE_MODULES := $(wildcard $(FRONTEND_DIR)/node_modules)
 
 BACKEND_NODE_MODULES := $(wildcard $(BACKEND_DIR)/node_modules)
 
-MIGRATIONS_FILE := $(wildcard $(BACKEND_DIR)/config/database/migrations.lock)
-
 all:	start
 
 start:	check_node_modules 
@@ -16,9 +14,8 @@ stop:	docker-compose down
 
 clean:
 	docker-compose down --rmi all
-	# rm -rf $(FRONTEND_NODE_MODULES)
-	# rm -rf $(BACKEND_NODE_MODULES)
-	rm -rf $(MIGRATIONS_FILE)
+	rm -rf $(FRONTEND_NODE_MODULES)
+	rm -rf $(BACKEND_NODE_MODULES)
 	@if [ -n "$(wildcard $(BACKEND_DIR)/imagesSaved/*)" ]; then \
 		echo "Removing files in $(BACKEND_DIR)/imagesSaved..."; \
 		rm -rf $(BACKEND_DIR)/imagesSaved/*; \

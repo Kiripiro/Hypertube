@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
     },
     title: DataTypes.STRING,
-    imbd_id: DataTypes.STRING
+    imdb_id: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'Movies',

@@ -5,8 +5,9 @@ import { EMPTY, Observable, catchError } from 'rxjs';
 import { LocalStorageService, localStorageName } from './local-storage.service';
 import { DialogService } from './dialog.service';
 import { environment } from 'src/environments/environment.template';
-import { FilmDetails } from '../models/models';
+import { FilmDetails, getMoviesParams } from '../models/models';
 import { observableToBeFn } from 'rxjs/internal/testing/TestScheduler';
+import { HttpParams } from '@angular/common/http';
 
 
 @Injectable({
@@ -52,9 +53,8 @@ export class HomeService {
               plot: response.Plot,
               awards: response.Awards,
               poster_path: response.Poster,
-              imbd_id: response.imdbID,
-              imbd_rating: response.imdbRating,
-              seeds: response.seeds,
+              imdb_id: response.imdbID,
+              imdb_rating: response.imdbRating,
             });
             if (films.length === filmsDetails.length) {
               films.sort((a, b) => {
@@ -80,7 +80,17 @@ export class HomeService {
     });
   }
 
-  getMovies(): Observable<any> {
+
+  getMovies(params: getMoviesParams | undefined): Observable<any> {
+    if (params) {
+      let httpParams = new HttpParams();
+      for (let key in params) {
+        if (params.hasOwnProperty(key) && params[key as keyof getMoviesParams] !== undefined) {
+          httpParams = httpParams.set(key, params[key as keyof getMoviesParams]);
+        }
+      }
+      return this.http.get<any>(this.url + '/movies/fetchYTSMovies', { params: httpParams, withCredentials: true });
+    }
     return this.http.get<any>(this.url + '/movies/fetchYTSMovies', { withCredentials: true });
   }
 }

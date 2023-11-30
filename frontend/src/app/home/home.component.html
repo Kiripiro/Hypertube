@@ -1,12 +1,43 @@
-<div class="centerDiv" *ngIf="!notConnected">
-    <div class="filmList">
-        <div class="film" *ngFor="let film of films">
-            <div class="filmImage">
-                <img [src]="film.poster_path" alt="film image">
-            </div>
-            <div class="filmTitle">
-                <h2>{{film.title}}</h2>
-                <span>{{film.release_date}}</span>
+<div class="home">
+    <div class="filmListFilters">
+        <div class="filmListFilter">
+            <mat-form-field>
+                <mat-label>Search</mat-label>
+                <input matInput [(ngModel)]="search" (ngModelChange)="searchFilms()" placeholder="Search">
+            </mat-form-field>
+        </div>
+        <div class="filmListFilter">
+            <mat-form-field>
+                <mat-label>Sort by</mat-label>
+                <mat-select [(value)]="sortBy" (selectionChange)="sortFilms()">
+                    <mat-option value="title">Title</mat-option>
+                    <mat-option value="release_date">Release Date</mat-option>
+                    <mat-option value="imdb_rating">IMDb Rating</mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+        <div class="filmListFilter">
+            <mat-form-field>
+                <mat-label>Order</mat-label>
+                <mat-select [(value)]="order" (selectionChange)="sortFilms()">
+                    <mat-option value="asc">Ascending</mat-option>
+                    <mat-option value="desc">Descending</mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+    </div>
+    <div class="centerDiv" *ngIf="!notConnected" infinite-scroll [infiniteScrollDistance]="scrollDistance"
+        [infiniteScrollUpDistance]="scrollUpDistance" (scrolled)="loadData()">
+        <div class="filmList">
+
+            <div class="film" *ngFor="let film of films" (click)="openFilmModal(film)">
+                <div class="filmImage">
+                    <img [src]="film.poster_path" alt="film image">
+                </div>
+                <div class="filmTitle">
+                    <h2>{{film.title}}</h2>
+                    <span>{{film.release_date}}</span>
+                </div>
             </div>
         </div>
     </div>

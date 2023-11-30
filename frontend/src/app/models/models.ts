@@ -94,9 +94,8 @@ export interface FilmDetails {
 	awards: string;
 	poster_path: string;
 	release_date: string;
-	imbd_id: string;
-	imbd_rating: string;
-	seeds: number;
+	imdb_id: string;
+	imdb_rating: string;
 }
 
 export interface CompleteRegisterResponseData {
@@ -263,36 +262,13 @@ export interface GetFameRatingResponseData {
 	fame_rating: number
 }
 
-export const sortSelectType = {
-	Location: "Location",
-	Age: "Age",
-	Tags: "Tags",
-	FameRating: "Fame rating"
-}
-
-export const filterSelectType = {
-	Location: "to less than 20km",
-	Age: "+/- 5 years",
-	Tags: "3 common tags minimum",
-	FameRating: "Fame rating"
-}
-
-/* Search */
-
-export const ageGapType = {
-	_18_25: "18-25",
-	_26_35: "26-35",
-	_36_50: "36-50",
-	_51: "+51"
-}
-
-export const fameRatingGapType = {
-	_30: "-30",
-	_31_60: "31-60",
-	_61_100: "61-100",
-	_101_150: "101-150",
-	_151_250: "151-250",
-	_251: "+251"
+export interface getMoviesParams {
+	limit: number,
+	page: number,
+	query_term: string,
+	genre: string,
+	sort_by: string,
+	order_by: string,
 }
 
 export interface GetCitiesResponseData {

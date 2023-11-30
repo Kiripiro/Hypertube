@@ -4,60 +4,86 @@ const axios = require('axios');
 
 class MoviesController {
     fetchYTSMovies = async (req, res) => {
-        let movies = [];
-        let hasMore = true;
         const params = {
-            limit: req.query.limit || 40,
+            limit: req.query.limit || 20,
             page: req.query.page || 1,
             query_term: req.query.query_term || '0',
             genre: req.query.genre || 'all',
             sort_by: req.query.sort_by || 'year',
             order_by: req.query.order_by || 'desc',
         };
+        const torrentApiUrl = process.env.TORRENT_API + 'list_movies.json';
+        const omdbApiUrl = 'http://www.omdbapi.com/';
 
         try {
-            let res = await axios.get(process.env.TORRENT_API + 'list_movies.json');
-            const moviesData = res.data.data;
-            const movieList = res.data.data.movies;
+            const { data } = await axios.get(torrentApiUrl, { params });
+            const { movie_count, movies } = data.data;
 
-            if (moviesData.movie_count === 0) {
-                throw notFoundError();
+            if (movie_count === 0) {
+                return res.status(200).json({ movies: [], hasMore: false });
             }
-            if (moviesData.movie_count <= params.limit * params.page) {
-                hasMore = false;
-            }
-            if (movieList) {
-                await Promise.all(
-                    movieList.map(async (movie) => {
-                        res = await axios.get(`http://www.omdbapi.com/?i=${movie.imdb_code}&apikey=${process.env.OMDB_API_KEY}`);
-                        movie.thumbnail = res.data.Poster;
+            const hasMore = movie_count > params.limit * params.page;
+
+            if (movies) {
+                const filteredMovies = await Promise.all(
+                    movies.map(async (movie) => {
+                        try {
+                            const omdbResponse = await axios.get(`${omdbApiUrl}?i=${movie.imdb_code}&apikey=${process.env.OMDB_API_KEY}`);
+                            const omdbData = omdbResponse.data;
+
+                            if (omdbData.Poster === 'N/A' || omdbData.Poster === undefined) {
+                                if (movie.medium_cover_image && (await this.isImageAvailable(movie.medium_cover_image))) {
+                                    movie.thumbnail = movie.medium_cover_image;
+                                } else {
+                                    return null;
+                                }
+                            } else if (omdbData.Poster) {
+                                movie.thumbnail = omdbData.Poster;
+                            } else {
+                                return null;
+                            }
+                            return this._filteredMovieData(movie, omdbData);
+                        } catch (error) {
+                            console.log(error);
+                            console.error(`Error fetching OMDB data for movie with imdb_code ${movie.imdb_code}: ${error.message}`);
+                            return null;
+                        }
                     }),
                 );
-                movies = movieList.map((movie) => this._filteredMovieData(movie));
+
+                const validMovies = filteredMovies.filter(movie => movie !== null);
+
+                return res.status(200).json({ movies: validMovies, hasMore });
             }
         } catch (e) {
             console.error(e);
             return { movies: [], hasMore: false };
         }
-        console.log(movies, hasMore);
-        return res.status(200).json({ movies, hasMore });
     };
 
-    _filteredMovieData = (movie) => {
+    isImageAvailable = async (imageUrl) => {
+        try {
+            const response = await axios.head(imageUrl);
+            return response.status === 200;
+        } catch (error) {
+            return false;
+        }
+    };
+
+    _filteredMovieData = (movie, omdbData) => {
         return {
-            title: movie.title,
-            genre: movie.genres,
-            poster_path: movie.thumbnail,
-            imbd_id: movie.imdb_code,
-            imbd_rating: movie.rating,
-            plot: movie.description_full,
-            director: movie.director,
-            writer: movie.writer,
-            actors: movie.actors,
-            language: movie.language,
-            awards: movie.awards,
-            release_date: movie.year,
-            seeds: movie.torrents.reduce((acc, torrent) => acc + torrent.seeds, 0),
+            title: movie.title || omdbData.Title,
+            genre: movie.genres || omdbData.Genre,
+            poster_path: movie.thumbnail || omdbData.Poster,
+            imdb_id: movie.imdb_code || omdbData.imdbID,
+            imdb_rating: movie.rating || omdbData.imdbRating,
+            plot: omdbData.Plot || movie.description,
+            director: omdbData.Director,
+            writer: omdbData.Writer,
+            actors: omdbData.Actors,
+            language: movie.language || omdbData.Language,
+            awards: movie.awards || omdbData.Awards,
+            release_date: movie.year || omdbData.Year,
         };
     };
 }

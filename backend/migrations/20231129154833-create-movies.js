@@ -15,7 +15,7 @@ module.exports = {
       title: {
         type: Sequelize.STRING
       },
-      imbd_id: {
+      imdb_id: {
         type: Sequelize.STRING
       },
       createdAt: {

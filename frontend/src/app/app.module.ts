@@ -43,6 +43,8 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { ResetComponent } from './reset/reset.component';
 import { OAuthModule } from 'angular-oauth2-oidc';
 import { ProfileComponent } from './profile/profile.component';
+import { InfiniteScrollModule } from 'ngx-infinite-scroll';
+import { MovieModalComponent } from './utils/movie-modal/movie-modal.component';
 
 @NgModule({
   declarations: [
@@ -51,6 +53,7 @@ import { ProfileComponent } from './profile/profile.component';
     HomeComponent,
     NavBarComponent,
     DialogComponent,
+    MovieModalComponent,
     ProfileComponent,
     SettingsComponent,
     WaitComponent,
@@ -83,6 +86,7 @@ import { ProfileComponent } from './profile/profile.component';
     MatRadioModule,
     MatCheckboxModule,
     MatBadgeModule,
+    InfiniteScrollModule,
     OAuthModule.forRoot(),
   ],
   providers: [

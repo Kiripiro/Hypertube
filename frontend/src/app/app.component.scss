@@ -1,5 +1,5 @@
 $background: #141414;
-$primary: #383737;
+$primary: hsl(0, 1%, 22%);
 $surface: #ed0f0f;
 $surfaceAlt: #6DB1BF;
 $surfaceAltDark: #2e7280;
@@ -9,6 +9,7 @@ $onPrimaryAlt: #bf806d;
 $greyInfos: #9a9fa3;
 $greyInfosDark: #333435;
 $error: rgb(212, 21, 21);
+
 
 app-root {
     width: 100vw;

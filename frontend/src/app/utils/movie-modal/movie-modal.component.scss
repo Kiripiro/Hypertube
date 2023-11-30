@@ -1,0 +1,66 @@
+@import "../../app.component.scss";
+
+.movie-modal {
+    background-color: $primary;
+    width: 80vw;
+    color: $onPrimary;
+
+    h2 {
+        color: $onPrimary;
+        font-size: 1.5rem;
+        font-weight: bolder;
+        max-width: 90%;
+    }
+
+    .movie-modal-content {
+        padding: 20px;
+
+        .movie-modal-header {
+            display: flex;
+            justify-content: space-between;
+
+            .close-button {
+                background-color: $surface;
+                color: $onPrimary;
+                border: none;
+                // border-radius: 50px;
+                cursor: pointer;
+                transition: transform 0.3s ease;
+
+                &:hover {
+                    transform: scale(1.02);
+                }
+            }
+        }
+
+        p {
+            color: $onPrimary;
+        }
+
+        a {
+            color: $surface;
+            text-decoration: none;
+            transition: transform 0.3s ease;
+
+            &:hover {
+                transform: scale(1.02);
+            }
+        }
+
+        .movie-modal-button {
+            background-color: $surface;
+            color: $onPrimary;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+
+            &:hover {
+                transform: scale(1.02);
+            }
+        }
+    }
+}
