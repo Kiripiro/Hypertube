@@ -3,7 +3,7 @@ import { LocalStorageService, localStorageName } from '../services/local-storage
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
 import { HomeService } from 'src/app/services/home.service';
-import { HomeUserData, UserSimplified, filterSelectType, sortSelectType } from 'src/app/models/models';
+import { FilmDetails, UserSimplified, filterSelectType, sortSelectType } from 'src/app/models/models';
 import { DialogService } from 'src/app/services/dialog.service';
 
 @Component({
@@ -13,33 +13,23 @@ import { DialogService } from 'src/app/services/dialog.service';
 })
 export class HomeComponent implements OnInit {
 
-  username = "";
-  interestingUsers: UserSimplified[] = [];
-  userDisplayed!: HomeUserData;
-  img: string[] = [];
-  userIndex = 0;
-
-  sortSelected = "";
-  sortType: String[] = [
-    sortSelectType.Age,
-    sortSelectType.Location,
-    sortSelectType.Tags,
-    sortSelectType.FameRating
-  ];
-
-  filterSelected = "";
-  filterType: String[] = [
-    filterSelectType.Age,
-    filterSelectType.Location,
-    filterSelectType.Tags,
-    sortSelectType.FameRating
-  ];
-
-  loading = true;
+  notConnected = false;
+  loading = false;
   error = false;
-  notConnected = true;
-
-  personalFameRating = 0;
+  filmList = [
+    "Catch Me If You Can",
+    "The Godfather",
+    "The Godfather: Part II",
+    "The Dark Knight",
+    "The Dark Knight Rises",
+    "Superman",
+    "Captain America: The First Avenger",
+    "Captain America: The Winter Soldier",
+    "The Lion King",
+    "The Jungle Book",
+  ]
+  films: FilmDetails[] = [];
+  displayInfos: boolean = false;
 
   constructor(
     private localStorageService: LocalStorageService,
@@ -55,6 +45,23 @@ export class HomeComponent implements OnInit {
   }
 
   ngOnInit(): void {
-
+    // this.homeService.getFilmsDetails(this.filmList).subscribe({
+    //   next: (response) => {
+    //     this.films = response;
+    //     console.log(this.films);
+    //   },
+    //   error: (error) => {
+    //     console.log(error);
+    //   }
+    // });
+    this.homeService.getMovies().subscribe({
+      next: (response) => {
+        console.log(response);
+        this.films = response.movies;
+      },
+      error: (error) => {
+        console.log(error);
+      }
+    });
   }
 }

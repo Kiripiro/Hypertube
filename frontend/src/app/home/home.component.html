@@ -1,22 +1,13 @@
 <div class="centerDiv" *ngIf="!notConnected">
-    <div class="profileCard" *ngIf="!loading && !error">
-        <!-- <div class="carouselDiv">
-            <app-carousel [images]="img" [title]="userDisplayed.username"></app-carousel>
-        </div> -->
-        <div class="mainDivProfil">
-            <p id="nameAge">{{userDisplayed.firstName}} {{userDisplayed.lastName}} - {{userDisplayed.age}} years</p>
-        </div>
-        <div class="errorCard" *ngIf="error">
-            <p>User not found</p>
-        </div>
-        <div class="loadingCard" *ngIf="loading && !error">
-            <p>Loading</p>
-            <mat-progress-bar mode="query"></mat-progress-bar>
-        </div>
-    </div>
-    <div class="centerDiv" *ngIf="notConnected">
-        <div class="notConnectedCard">
-            <p>Welcome to Matcha !</p>
+    <div class="filmList">
+        <div class="film" *ngFor="let film of films">
+            <div class="filmImage">
+                <img [src]="film.poster_path" alt="film image">
+            </div>
+            <div class="filmTitle">
+                <h2>{{film.title}}</h2>
+                <span>{{film.release_date}}</span>
+            </div>
         </div>
     </div>
 </div>

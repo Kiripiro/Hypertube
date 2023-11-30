@@ -82,26 +82,21 @@ export interface loginGoogleResponseData {
 	};
 }
 
-export interface HomeUserData {
-	id: number,
-	username: string,
-	firstName: string,
-	lastName: string,
-	age: number,
-	complete_register: boolean,
-	gender: string,
-	sexual_preferences: string[],
-	biography: string,
-	picture_1: string,
-	picture_2: string,
-	picture_3: string,
-	picture_4: string,
-	picture_5: string,
-	tags: string[],
-	fame_rating: number,
-	you_blocked_he: boolean,
-	he_blocked_you: boolean,
-	you_reported_he: boolean,
+export interface FilmDetails {
+	id: number | null;
+	title: string;
+	director: string;
+	writer: string;
+	actors: string;
+	genre: string;
+	language: string;
+	plot: string;
+	awards: string;
+	poster_path: string;
+	release_date: string;
+	imbd_id: string;
+	imbd_rating: string;
+	seeds: number;
 }
 
 export interface CompleteRegisterResponseData {

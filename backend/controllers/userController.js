@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid')
 const axios = require('axios');
-require('dotenv').config();
+
 const { OAuth2Client } = require('google-auth-library');
 const client = new OAuth2Client();
 const fs = require('fs');
@@ -42,6 +42,7 @@ class UserController {
                 lastName,
                 email,
                 password: hashedPassword,
+                avatar: 'baseAvatar.png',
                 token: token,
                 tokenCreationDate: this._getTimestampString(),
                 tokenExpirationDate: this._getTimestampString(1)
