@@ -11,4 +11,12 @@ moviesRouter.get('/fetchYTSMovies', auth, async (req, res) => {
     }
 });
 
+moviesRouter.get('/movieStream/:id', auth, async (req, res) => {
+    try {
+        await MoviesController.getMovieStream(req, res);
+    } catch (error) {
+        console.error(error);
+    }
+});
+
 module.exports = moviesRouter;

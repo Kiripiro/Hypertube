@@ -45,6 +45,7 @@ import { OAuthModule } from 'angular-oauth2-oidc';
 import { ProfileComponent } from './profile/profile.component';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { MovieModalComponent } from './utils/movie-modal/movie-modal.component';
+import { DetailsComponent } from './details/details.component';
 
 @NgModule({
   declarations: [
@@ -58,6 +59,7 @@ import { MovieModalComponent } from './utils/movie-modal/movie-modal.component';
     SettingsComponent,
     WaitComponent,
     ResetComponent,
+    DetailsComponent
   ],
   imports: [
     BrowserModule,
