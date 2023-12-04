@@ -9,7 +9,11 @@ module.exports = (sequelize, Sequelize) => {
     },
     username: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
+      unique: {
+        args: true,
+        msg: 'Username already exists',
+      },
     },
     firstName: {
       type: DataTypes.STRING,

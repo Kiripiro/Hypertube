@@ -7,6 +7,8 @@ const sequelize = require('./config/db');
 const mainRouter = require('./routes/mainRouter');
 
 require('./config/checkEnv');
+const _pingTorrentApi = require('./config/checkTorrentApi');
+_pingTorrentApi();
 const port = process.env.NODE_PORT;
 
 const User = UserModel(sequelize, Sequelize);

@@ -14,8 +14,8 @@ stop:	docker-compose down
 
 clean:
 	docker-compose down --rmi all
-	rm -rf $(FRONTEND_NODE_MODULES)
-	rm -rf $(BACKEND_NODE_MODULES)
+	# rm -rf $(FRONTEND_NODE_MODULES)
+	# rm -rf $(BACKEND_NODE_MODULES)
 	@if [ -n "$(wildcard $(BACKEND_DIR)/imagesSaved/*)" ]; then \
 		echo "Removing files in $(BACKEND_DIR)/imagesSaved..."; \
 		rm -rf $(BACKEND_DIR)/imagesSaved/*; \

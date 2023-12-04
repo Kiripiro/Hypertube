@@ -36,7 +36,7 @@ class MoviesController {
                                 imdb_rating: movie.rating,
                                 plot: movie.synopsis,
                                 language: movie.language,
-                                release_date: movie.release_date,
+                                release_date: movie.year,
                             }
                             return data;
                         } else {

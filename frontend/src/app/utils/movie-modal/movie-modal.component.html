@@ -1,7 +1,13 @@
 <div class="movie-modal">
     <div class="movie-modal-content">
         <div class="movie-modal-header">
-            <h2 mat-dialog-title>{{ data.title }}</h2>
+            <div class="movie-modal-header-commentsOpened" *ngIf="showComments">
+                <button mat-icon-button (click)="showCommentsToggle()" class="close-button">
+                    <mat-icon aria-label="Close dialog">arrow_back</mat-icon>
+                </button>
+                <h2 mat-dialog-title>{{ data.title }}</h2>
+            </div>
+            <h2 *ngIf="!showComments" mat-dialog-title>{{ data.title }}</h2>
             <button mat-icon-button mat-dialog-close class="close-button">
                 <mat-icon aria-label="Close dialog">close</mat-icon>
             </button>
@@ -30,7 +36,7 @@
                 <ng-container *ngFor="let comment of comments">
                     <div class="comment" *ngIf="!comment.parent_id">
                         <div class="comment-header">
-                            <p class="comment-author">{{ comment.author_id }}</p>
+                            <p class="comment-author">{{ comment.author_username }}</p>
                             <p class="comment-date">{{ comment.createdAt | date:'medium' }}</p>
                         </div>
                         <p class="comment-text">{{ comment.text }}</p>
@@ -65,4 +71,3 @@
             <button mat-raised-button class="movie-modal-button" (click)="showCommentsToggle()">Show comments</button>
         </div>
     </div>
-</div>

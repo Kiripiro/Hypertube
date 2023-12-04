@@ -101,6 +101,7 @@ export interface FilmDetails {
 export interface Comment {
 	id: number;
 	author_id: number;
+	author_username: string;
 	text: string;
 	imdb_id: number;
 	parent_id: number;

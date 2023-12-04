@@ -1,11 +1,16 @@
-const { Comments, Movies } = require("../models");
+const { Comments, Movies, User } = require("../models");
 class CommentsController {
     // Add your controller methods here
     addComment = async (req, res) => {
         const { author_id, text, imdb_id, parent_id } = req.body;
         try {
             console.log(req.body);
-            const comment = await Comments.create({ author_id, text, imdb_id, parent_id: parent_id || null });
+            const user = await User.findOne({ where: { id: author_id } });
+            if (!user) {
+                return res.status(400).json({ error: "User not found" });
+            }
+            let username = user.dataValues.username;
+            const comment = await Comments.create({ author_id, author_username: username, text, imdb_id, parent_id: parent_id || null });
             if (!comment) {
                 return res.status(400).json({ error: "Comment could not be added" });
             }

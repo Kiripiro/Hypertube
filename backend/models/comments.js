@@ -10,7 +10,6 @@ module.exports = (sequelize, DataTypes) => {
          * The `models/index` file will call this method automatically.
          */
         static associate(models) {
-            // define association here
             Comments.belongsTo(models.User, { foreignKey: 'author_id' });
             Comments.hasMany(models.Comments, { foreignKey: 'parent_id', as: 'children' });
             Comments.belongsTo(models.Movies, { foreignKey: 'movie_id' });
@@ -26,6 +25,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false,
             foreignKey: true,
+        },
+        author_username: {
+            type: DataTypes.STRING,
+            allowNull: true,
         },
         text: {
             type: DataTypes.STRING,

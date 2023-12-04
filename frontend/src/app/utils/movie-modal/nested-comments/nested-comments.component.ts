@@ -7,7 +7,7 @@ import { Comment } from 'src/app/models/models';
     <div class="comments">
       <div *ngFor="let nestedComment of nestedComments" class="comment nested-comment">
         <div class="comment-header">
-          <p class="comment-author">{{ nestedComment.author_id }}</p>
+          <p class="comment-author">{{ nestedComment.author_username }}</p>
           <p class="comment-date">{{ nestedComment.createdAt | date:'medium'}}</p>
         </div>
         <p class="comment-text">{{ nestedComment.text }}</p>
