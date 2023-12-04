@@ -6,14 +6,14 @@
                 <mat-icon aria-label="Close dialog">close</mat-icon>
             </button>
         </div>
-        <div mat-dialog-content>
+        <div *ngIf="!showComments" mat-dialog-content>
             <img [src]="data.poster_path" alt="film image" class="modal-image">
             <div class="movie-details">
                 <div class="basic-details">
                     <p><strong>Director:</strong> {{ data.director || 'N/A' }}</p>
                     <p><strong>Writer:</strong> {{ data.writer || 'N/A' }}</p>
                     <p><strong>Actors:</strong> {{ data.actors || 'N/A' }}</p>
-                    <p><strong>Genre:</strong> {{ data.genre.join(', ') }}</p>
+                    <p><strong>Genre:</strong> {{ data.genre || 'N/A' }}</p>
                     <p><strong>Language:</strong> {{ data.language }}</p>
                 </div>
 
@@ -25,8 +25,44 @@
                 <p *ngIf="data.imdb_rating"><strong>IMDb Rating:</strong> {{ data.imdb_rating }} / 10</p>
             </div>
         </div>
-        <!-- <div mat-dialog-actions align="end">
-            <button mat-raised-button class="movie-modal-button"></button>
-        </div> -->
+        <div *ngIf="showComments" mat-dialog-content>
+            <div class="comments">
+                <ng-container *ngFor="let comment of comments">
+                    <div class="comment" *ngIf="!comment.parent_id">
+                        <div class="comment-header">
+                            <p class="comment-author">{{ comment.author_id }}</p>
+                            <p class="comment-date">{{ comment.createdAt | date:'medium' }}</p>
+                        </div>
+                        <p class="comment-text">{{ comment.text }}</p>
+                        <button class="comment-reply-button" (click)="replyToComment(comment)">
+                            <mat-hint class="hint">Reply</mat-hint>
+                        </button>
+                        <app-nested-comments (replyToNestedCommentEvent)="handleReplyToNestedComment($event)"
+                            [parentComment]="comment" [allComments]="comments"></app-nested-comments>
+                    </div>
+                </ng-container>
 
+            </div>
+        </div>
+        <div *ngIf="showComments" mat-dialog-actions align="start">
+            <div class="comment-form">
+                <form [formGroup]="commentForm" (ngSubmit)="onSubmit()">
+                    <mat-form-field class="comment-input">
+                        <input matInput placeholder="Add a comment" formControlName="comment">
+                        <mat-error *ngIf="commentForm.controls['comment'].hasError('required')">
+                            Comment is required
+                        </mat-error>
+                    </mat-form-field>
+                    <button *ngIf="!replying" mat-raised-button type="submit" class="movie-modal-button"
+                        (click)="onSubmit()">Add
+                        comment</button>
+                    <button *ngIf="replying" mat-raised-button class="movie-modal-button"
+                        (click)="onSubmit()">Reply</button>
+                </form>
+            </div>
+        </div>
+        <div *ngIf="!showComments" mat-dialog-actions align="end">
+            <button mat-raised-button class="movie-modal-button" (click)="showCommentsToggle()">Show comments</button>
+        </div>
     </div>
+</div>

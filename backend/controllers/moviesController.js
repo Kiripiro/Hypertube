@@ -27,32 +27,42 @@ class MoviesController {
             if (movies) {
                 const filteredMovies = await Promise.all(
                     movies.map(async (movie) => {
-                        try {
-                            const omdbResponse = await axios.get(`${omdbApiUrl}?i=${movie.imdb_code}&apikey=${process.env.OMDB_API_KEY}`);
-                            const omdbData = omdbResponse.data;
+                        if (movie.medium_cover_image && (await this._isImageAvailable(movie.medium_cover_image))) {
+                            let data = {
+                                title: movie.title,
+                                poster_path: movie.medium_cover_image,
+                                genre: movie.genre,
+                                imdb_id: movie.imdb_code,
+                                imdb_rating: movie.rating,
+                                plot: movie.synopsis,
+                                language: movie.language,
+                                release_date: movie.release_date,
+                            }
+                            return data;
+                        } else {
+                            try {
+                                const omdbResponse = await axios.get(`${omdbApiUrl}?i=${movie.imdb_code}&apikey=${process.env.OMDB_API_KEY}`);
+                                const omdbData = omdbResponse.data;
 
-                            if (omdbData.Poster === 'N/A' || omdbData.Poster === undefined) {
-                                if (movie.medium_cover_image && (await this.isImageAvailable(movie.medium_cover_image))) {
-                                    movie.thumbnail = movie.medium_cover_image;
+                                if (omdbData.Poster === 'N/A' || omdbData.Poster === undefined) {
+                                    return null;
+                                } else if (omdbData.Poster) {
+                                    movie.thumbnail = omdbData.Poster;
                                 } else {
                                     return null;
                                 }
-                            } else if (omdbData.Poster) {
-                                movie.thumbnail = omdbData.Poster;
-                            } else {
+
+                                const filteredMovieData = this._filteredMovieData(omdbData);
+                                filteredMovieData.poster_path = movie.thumbnail;
+                                return filteredMovieData;
+                            } catch (error) {
+                                console.error(`Error fetching OMDB data for movie with imdb_code ${movie.imdb_code}: ${error.message}`);
                                 return null;
                             }
-                            return this._filteredMovieData(movie, omdbData);
-                        } catch (error) {
-                            console.log(error);
-                            console.error(`Error fetching OMDB data for movie with imdb_code ${movie.imdb_code}: ${error.message}`);
-                            return null;
                         }
                     }),
                 );
-
                 const validMovies = filteredMovies.filter(movie => movie !== null);
-
                 return res.status(200).json({ movies: validMovies, hasMore });
             }
         } catch (e) {
@@ -61,7 +71,28 @@ class MoviesController {
         }
     };
 
-    isImageAvailable = async (imageUrl) => {
+    fetchMovieDetails = async (req, res) => {
+        const { imdb_id } = req.params;
+        const omdbApiUrl = 'http://www.omdbapi.com/';
+
+        try {
+            const omdbResponse = await axios.get(`${omdbApiUrl}?i=${imdb_id}&apikey=${process.env.OMDB_API_KEY}`);
+
+            const omdbData = omdbResponse.data;
+            if (omdbData.Poster === 'N/A' || omdbData.Poster === undefined) {
+                return res.status(200).json({ movie: this._filteredMovieData(omdbData) });
+            } else if (omdbData.Poster) {
+                return res.status(200).json({ movie: this._filteredMovieData(omdbData) });
+            } else {
+                return res.status(200).json({ movie: this._filteredMovieData(omdbData) });
+            }
+        } catch (error) {
+            console.error(`Error fetching OMDB data for movie with imdb_id ${imdb_id}: ${error.message}`);
+            return res.status(200).json({ movie: {} });
+        }
+    }
+
+    _isImageAvailable = async (imageUrl) => {
         try {
             const response = await axios.head(imageUrl);
             return response.status === 200;
@@ -70,20 +101,19 @@ class MoviesController {
         }
     };
 
-    _filteredMovieData = (movie, omdbData) => {
+    _filteredMovieData = (omdbData) => {
         return {
-            title: movie.title || omdbData.Title,
-            genre: movie.genres || omdbData.Genre,
-            poster_path: movie.thumbnail || omdbData.Poster,
-            imdb_id: movie.imdb_code || omdbData.imdbID,
-            imdb_rating: movie.rating || omdbData.imdbRating,
-            plot: omdbData.Plot || movie.description,
+            title: omdbData.Title,
+            genre: omdbData.Genre,
+            imdb_id: omdbData.imdbID,
+            imdb_rating: omdbData.imdbRating,
+            plot: omdbData.Plot,
             director: omdbData.Director,
             writer: omdbData.Writer,
             actors: omdbData.Actors,
-            language: movie.language || omdbData.Language,
-            awards: movie.awards || omdbData.Awards,
-            release_date: movie.year || omdbData.Year,
+            language: omdbData.Language,
+            awards: omdbData.Awards,
+            release_date: omdbData.Year,
         };
     };
 }

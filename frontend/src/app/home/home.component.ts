@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
-import { LocalStorageService, localStorageName } from '../services/local-storage.service';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
-import { Router } from '@angular/router';
 import { HomeService } from 'src/app/services/home.service';
 import { FilmDetails } from 'src/app/models/models';
-import { DialogService } from 'src/app/services/dialog.service';
 import { MatDialog } from '@angular/material/dialog';
 import { MovieModalComponent } from '../utils/movie-modal/movie-modal.component';
+import { CommentsService } from '../services/comments.service';
 
 @Component({
   selector: 'app-home',
@@ -14,7 +14,6 @@ import { MovieModalComponent } from '../utils/movie-modal/movie-modal.component'
   styleUrls: ['./home.component.scss', '../app.component.scss']
 })
 export class HomeComponent implements OnInit {
-
   notConnected = false;
   loading = false;
   error = false;
@@ -37,9 +36,12 @@ export class HomeComponent implements OnInit {
   sortBy: string = 'title';
   order: string = 'asc';
 
+  private searchTerms$ = new Subject<string>();
+
   constructor(
     private authService: AuthService,
     private homeService: HomeService,
+    private commentsService: CommentsService,
     public dialog: MatDialog
   ) {
     if (!this.authService.checkLog()) {
@@ -50,6 +52,29 @@ export class HomeComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadMovies();
+
+    this.searchTerms$
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        switchMap((searchTerm: string) => {
+          this.params = {
+            ...this.params,
+            query_term: searchTerm,
+            page: 1,
+          };
+          return this.homeService.getMovies(this.params);
+        })
+      )
+      .subscribe({
+        next: (response) => {
+          this.films = response.movies;
+          this.hasMore = response.hasMore;
+        },
+        error: (error) => {
+          console.log(error);
+        },
+      });
   }
 
   loadMovies() {
@@ -84,12 +109,7 @@ export class HomeComponent implements OnInit {
   }
 
   searchFilms() {
-    this.params = {
-      ...this.params,
-      query_term: this.search,
-      page: 1,
-    };
-    this.loadMovies();
+    this.searchTerms$.next(this.search);
   }
 
   sortFilms() {
@@ -102,8 +122,34 @@ export class HomeComponent implements OnInit {
   }
 
   openFilmModal(film: any): void {
-    const dialogRef = this.dialog.open(MovieModalComponent, {
-      data: film,
+    this.homeService.getMovieDetails(film.imdb_id).subscribe({
+      next: (response: any) => {
+        const movie = response.movie;
+        const data = {
+          id: film.id,
+          title: film.title,
+          director: film.director || movie.director,
+          release_date: film.release_date || movie.release_date,
+          writer: film.writer || movie.writer,
+          actors: film.actors || movie.actors,
+          genre: film.genre,
+          language: film.language || movie.language,
+          plot: film.plot || movie.plot,
+          awards: film.awards || movie.awards,
+          poster_path: this.films.find((f: any) => f.imdb_id === film.imdb_id)?.poster_path || null,
+          imdb_id: film.imdb_id,
+          imdb_rating: film.imdb_rating,
+        };
+        //get the comments for the movie and add them to the data
+        this.dialog.open(MovieModalComponent, {
+          data: {
+            ...data,
+          },
+        });
+      },
+      error: (error) => {
+        console.log(error);
+      }
     });
   }
 }

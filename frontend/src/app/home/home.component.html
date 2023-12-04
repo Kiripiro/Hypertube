@@ -3,7 +3,7 @@
         <div class="filmListFilter">
             <mat-form-field>
                 <mat-label>Search</mat-label>
-                <input matInput [(ngModel)]="search" (ngModelChange)="searchFilms()" placeholder="Search">
+                <input matInput [(ngModel)]="search" (input)="searchFilms()" placeholder="Search">
             </mat-form-field>
         </div>
         <div class="filmListFilter">

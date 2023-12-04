@@ -93,4 +93,10 @@ export class HomeService {
     }
     return this.http.get<any>(this.url + '/movies/fetchYTSMovies', { withCredentials: true });
   }
+
+
+  getMovieDetails(imdb_id: string): Observable<any> {
+    return this.http.get<any>(this.url + '/movies/fetchMovieDetails/' + imdb_id, { withCredentials: true });
+  }
+
 }

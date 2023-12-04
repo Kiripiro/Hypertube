@@ -98,6 +98,15 @@ export interface FilmDetails {
 	imdb_rating: string;
 }
 
+export interface Comment {
+	id: number;
+	author_id: number;
+	text: string;
+	imdb_id: number;
+	parent_id: number;
+	createdAt: Date;
+}
+
 export interface CompleteRegisterResponseData {
 	message: string;
 	user: {

@@ -1,5 +1,6 @@
 $background: #141414;
 $primary: hsl(0, 1%, 22%);
+$primaryAlt: hsl(0, 1%, 26%);
 $surface: #ed0f0f;
 $surfaceAlt: #6DB1BF;
 $surfaceAltDark: #2e7280;
@@ -45,4 +46,49 @@ app-root {
         color: $onPrimary;
         margin-bottom: 20px;
     }
+}
+
+.comments {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+    max-width: fit-content;
+
+    mat-hint {
+        color: $onPrimary;
+        margin-bottom: 0.3rem;
+    }
+
+    .comment {
+        padding: 20px;
+        padding-bottom: 0px;
+        background-color: $primaryAlt;
+        margin-bottom: 10px;
+
+        .comment-header {
+            display: flex;
+            flex-direction: row;
+
+            .comment-author {
+                margin-right: 10px;
+            }
+        }
+
+        .comment-reply-button {
+            background-color: transparent;
+            background-repeat: no-repeat;
+            border: none;
+            cursor: pointer;
+            overflow: hidden;
+            outline: none;
+            margin-bottom: 10px;
+        }
+
+        p {
+            display: flex;
+            color: $onPrimary;
+        }
+    }
+
 }
