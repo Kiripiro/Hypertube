@@ -17,12 +17,13 @@ class Torrent {
     error;
     downloadStarted;
     ytsId = 0;
+    torrents = [];
 
     percentageDownloaded;
 
-    constructor(torrentMagnet, ytsId) {
-        this.torrentMagnet = torrentMagnet;
+    constructor(ytsId, sortedTorrents) {
         this.ytsId = ytsId;
+        this.torrents = sortedTorrents;
         this.torrentName = "";
         this.fileSize = 0;
         this.path = "";
@@ -30,7 +31,7 @@ class Torrent {
         this.error = false;
         this.downloadStarted = false;
         this.percentageDownloaded = 0;
-        const parsedTorrent = parseTorrent(torrentMagnet);
+        // const parsedTorrent = parseTorrent(torrentMagnet);
         // console.log(parsedTorrent);
     }
 
@@ -52,9 +53,23 @@ class Torrent {
         }
     }
 
+    getDownloadedSize() {
+        if (this.path.length > 0 && fs.existsSync(this.path)) {
+            const stat = fs.statSync(this.path);
+            const size = stat.size;
+            return size;
+        }
+        return 0;
+    }
+
     startDownload(callbackDownload, callbackTorrentReady, callbackWriteStreamFinish) {
         console.log("startDownload")
-        const engine = torrentStream(this.torrentMagnet);
+        if (this.torrents.length <= 0 || this.torrents[0] == undefined || this.torrents[0] == null) {
+            console.error("startDownload error")
+            return ;
+        }
+        console.log("magnet", this.torrents[0].magnet)
+        const engine = torrentStream(this.torrents[0].magnet);
         engine.on('download', data => {
             if (this.path.length > 0 && fs.existsSync(this.path)) {
                 const stat = fs.statSync(this.path);

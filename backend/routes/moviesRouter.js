@@ -19,4 +19,12 @@ moviesRouter.get('/movieStream/:id', auth, async (req, res) => {
     }
 });
 
+moviesRouter.get('/movieLoading/:id', auth, async (req, res) => {
+    try {
+        await MoviesController.getMovieLoading(req, res);
+    } catch (error) {
+        console.error(error);
+    }
+});
+
 module.exports = moviesRouter;

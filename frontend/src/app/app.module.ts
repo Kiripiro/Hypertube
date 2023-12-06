@@ -29,6 +29,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatOptionModule } from '@angular/material/core';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatBadgeModule } from '@angular/material/badge';
+import {ProgressSpinnerMode, MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
@@ -84,6 +85,7 @@ import { DetailsComponent } from './details/details.component';
     MatOptionModule,
     MatSelectModule,
     MatChipsModule,
+    MatProgressSpinnerModule,
     ReactiveFormsModule,
     MatRadioModule,
     MatCheckboxModule,

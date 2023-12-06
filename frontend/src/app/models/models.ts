@@ -327,3 +327,12 @@ export interface Notification {
 	strong?: string,
 	message: string,
 }
+
+/* Movies */
+
+export interface LoadingMovieResponse {
+	data: {
+		percentage: number,
+		size: number
+	}
+}

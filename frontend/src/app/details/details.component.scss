@@ -1,0 +1,19 @@
+.centerDiv {
+    width: 100%;
+    height: 100%;
+}
+
+.detailsWait {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 250px;
+    width: 250px;
+    background-color: white;
+
+    p {
+        color: black;
+        font-size: 2rem;
+    }
+}
