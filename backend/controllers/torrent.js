@@ -18,6 +18,7 @@ class Torrent {
     downloadStarted;
     ytsId = 0;
     torrents = [];
+    engine;
 
     percentageDownloaded;
 
@@ -31,18 +32,19 @@ class Torrent {
         this.error = false;
         this.downloadStarted = false;
         this.percentageDownloaded = 0;
+        this.engine = null;
         // const parsedTorrent = parseTorrent(torrentMagnet);
         // console.log(parsedTorrent);
     }
 
     checkCanStream() {
-        console.log("checkCanStream percentageDownloaded", this.percentageDownloaded)
+        // console.log("checkCanStream percentageDownloaded", this.percentageDownloaded)
         if (this.path.length > 0 && fs.existsSync(this.path)) {
             const stat = fs.statSync(this.path);
             const size = stat.size;
-            console.log("checkCanStream size", size);
+            // console.log("checkCanStream size", size);
             const estimatedTime = size / 25;
-            console.log("checkCanStream estimatedTime", estimatedTime);
+            // console.log("checkCanStream estimatedTime", estimatedTime);
             if (this.percentageDownloaded > 3) {
                 return true;
             } else {
@@ -69,8 +71,9 @@ class Torrent {
             return ;
         }
         console.log("magnet", this.torrents[0].magnet)
-        const engine = torrentStream(this.torrents[0].magnet);
-        engine.on('download', data => {
+        this.engine = torrentStream(this.torrents[0].magnet);
+
+        this.engine.on('download', data => {
             if (this.path.length > 0 && fs.existsSync(this.path)) {
                 const stat = fs.statSync(this.path);
                 const size = stat.size;
@@ -85,9 +88,9 @@ class Torrent {
             callbackDownload();
         });
 
-        engine.on('ready', () => {
+        this.engine.on('ready', () => {
             console.log('ready');
-            engine.files.forEach(async (file) => {
+            this.engine.files.forEach(async (file) => {
                 if (ACCEPTED_FILES.includes(path.extname(file.name))) {
                     // console.log("file.name", file.name)
                     // console.log("file.path", file.path)
@@ -113,17 +116,24 @@ class Torrent {
             });
         });
 
-        engine.on('idle', function () {
+        this.engine.on('idle', function () {
             console.log('idle');
         });
 
-        engine.on('torrent', function () {
+        this.engine.on('torrent', function () {
             console.log('torrent');
         });
 
-        engine.on('error', function () {
+        this.engine.on('error', function () {
             console.log('error');
         });
+    }
+
+    stopDownload() {
+        console.log("stopDownload")
+        if (this.engine != null) {
+            this.engine.destroy();
+        }
     }
 }
 

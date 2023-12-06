@@ -17,3 +17,107 @@
         font-size: 2rem;
     }
 }
+
+.videoPlayer {
+    width: 600px;
+}
+
+.video-container {
+    position: relative;
+}
+
+.controls {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 5px;
+    margin-bottom: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    // justify-content: start;
+    // align-items: center;
+    height: 3rem;
+}
+
+.topControl {
+    #progressRange {
+        width: calc(100% - 30px);
+        height: 8px;
+        background-color: rgba(202, 202, 202, 0.5);
+        margin: auto;
+        border-radius: 10px;
+        cursor: pointer;
+    }
+    
+    #progressBar {
+        background-color: blue;
+        width: 0%;
+        height: 100%;
+        border-radius: 10px;
+        transition: all 0.5s ease;
+    }
+}
+
+.bottomControl {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .bottonControlLeft {
+        display: flex;
+        align-items: center;
+        margin-left: 0.5rem;
+
+        #videoPlayButton {
+            font-size: 3rem;
+            height: fit-content;
+            width: fit-content;
+            color: white;
+        }
+    }
+
+    .bottonControlRight {
+        display: flex;
+        align-items: center;
+        margin-right: 0.5rem;
+
+        #fullscreenButton {
+            font-size: 2rem;
+            height: fit-content;
+            width: fit-content;
+            color: white;
+        }
+    
+        .volume-control {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            overflow: hidden;
+
+            .hidden {
+                width: 0px;
+            }
+            
+            .visible {
+                width: 150px;
+            }
+
+            #volumeBar {
+                transition: width 0.5s ease;
+
+                #volumeSlider {
+                    width: 100px;
+                }
+            }
+    
+            #volumeButton {
+                font-size: 2rem;
+                height: fit-content;
+                width: fit-content;
+                color: white;
+                margin-right: 0.5rem;
+            }
+        }
+    }
+}

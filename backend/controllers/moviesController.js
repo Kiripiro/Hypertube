@@ -49,7 +49,6 @@ class MoviesController {
                                 release_date: movie.year,
                                 yts_id: movie.id
                             }
-                            console.log("data", data)
                             return data;
                         } else {
                             try {
@@ -138,22 +137,22 @@ class MoviesController {
             }, 5000);
         } else {
             const file = this.fileTab.find(it => it.fileName == torrent.torrentName);
-            console.log("file", file);
+            // console.log("file", file);
             if (!file) {
                 console.log("error file not found")
                 return ;
             }
             const filePath = file.filePath;
-            console.log("path", filePath)
+            // console.log("path", filePath)
             const stat = fs.statSync(filePath)
             const fileSize = stat.size
-            console.log("fileSize", fileSize)
+            // console.log("fileSize", fileSize)
             const expectedFileSize = file.expectedFileSize;
-            console.log("expectedFileSize", expectedFileSize)
+            // console.log("expectedFileSize", expectedFileSize)
             
             if (range) {
-                console.log("range yes")
-                console.log(range)
+                // console.log("range yes")
+                // console.log(range)
                 const parts = range.replace(/bytes=/, "").split("-")
                 const chunkSizeToSend = 100000;
                 var start = parseInt(parts[0], 10)
@@ -170,7 +169,7 @@ class MoviesController {
                         'Content-Length': chunksize,
                         'Content-Type': 'video/mp4',
                     }
-                    console.log("head", head)
+                    // console.log("head", head)
                     res.writeHead(206, head)
                     readStream.pipe(res)
 
@@ -188,15 +187,15 @@ class MoviesController {
                     if (end > fileSize) {
                         end = fileSize - 1;
                     }
-                    console.log("start", start)
-                    console.log("end", end)
+                    // console.log("start", start)
+                    // console.log("end", end)
                     if (start > end) {
                         console.log("AIE")
                         start = end - 1;
                     }
                     this.lastByteSent = end;
                     const chunksize = ((end - start) > 0 ? (end - start) : -1) + 1
-                    console.log("chunksize", chunksize)
+                    // console.log("chunksize", chunksize)
                     
                     const readStream = fs.createReadStream(filePath, { start, end })
 
@@ -206,7 +205,7 @@ class MoviesController {
                         'Content-Length': chunksize,
                         'Content-Type': 'video/mp4',
                     }
-                    console.log("head", head)
+                    // console.log("head", head)
                     res.writeHead(206, head)
                     readStream.pipe(res)
                 }         
@@ -236,7 +235,7 @@ class MoviesController {
             const range = req.headers.range;
             const file = this.fileTab.find(it => it.fileName == (torrent.torrentName ? torrent.torrentName : ""));
             if (torrent && file && file.checkExist()) {
-                console.log("torrent and file exist");
+                // console.log("torrent and file exist");
                 this.sendRange(range, torrent, res);
             } else {
                 console.error("Torrent or file not exist");
@@ -283,12 +282,15 @@ class MoviesController {
     getMovieLoading = async (req, res) => {
         try {
             const ytsId = req.params.id;
+            console.log("torrentTab", this.torrentTab);
             var torrent = this.torrentTab.find(it => it.ytsId == ytsId);
             const file = this.fileTab.find(it => it.fileName == (torrent ? (torrent.torrentName ? torrent.torrentName : "") : ""));
             if (torrent && file && file.checkExist()) {
                 console.log("getMovieLoading torrent and file exist");
-                const size = torrent.size;
+                console.log("getMovieLoading torrent", torrent);
+                const size = torrent.getDownloadedSize();
                 const percentageDownloaded = torrent.percentageDownloaded;
+                console.log("torrent.fileSize", torrent.fileSize);
                 console.log("getMovieLoading size", size);
                 console.log("getMovieLoading percentageDownloaded", percentageDownloaded);
                 return res.status(200).json({ data: { size: size, percentage: percentageDownloaded} });
@@ -327,6 +329,24 @@ class MoviesController {
                 const size = torrent.getDownloadedSize();
                 const percentageDownloaded = torrent.percentageDownloaded;
                 return res.status(200).json({ data: { size: size, percentage: percentageDownloaded} });
+            }
+        } catch (error) {
+            console.error('Error getMovieLoading:', error);
+            return res.status(500).json({ message: 'Internal Server Error' });
+        }
+    };
+
+    stopMovieLoading = async (req, res) => {
+        try {
+            const ytsId = req.params.id;
+            var torrent = this.torrentTab.find(it => it.ytsId == ytsId);
+            if (torrent) {
+                console.log("stopMovieLoading torrent exist");
+                torrent.stopDownload();
+                return res.status(200).json({ message: 'Torrent stopped' });
+            } else {
+                console.log("getMovieLoading Torrent not exist");
+                return res.status(200).json({ message: 'Torrent don\'t exist' });
             }
         } catch (error) {
             console.error('Error getMovieLoading:', error);

@@ -346,3 +346,7 @@ export interface LoadingMovieResponse {
 		size: number
 	}
 }
+
+export interface StopLoadingMovieResponse {
+	message: string
+}
