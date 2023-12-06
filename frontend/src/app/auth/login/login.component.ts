@@ -25,7 +25,6 @@ export class LoginComponent implements OnInit {
       this.authService.login42(this.route.snapshot.queryParams['code']);
     }
     else if (this.authService.checkLog()) {
-      console.log('redirect home');
       this.router.navigate(['']);
     }
     this.loginForm = this.fb.group({

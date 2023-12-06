@@ -12,7 +12,6 @@ module.exports = (sequelize, DataTypes) => {
         static associate(models) {
             Comments.belongsTo(models.User, { foreignKey: 'author_id' });
             Comments.hasMany(models.Comments, { foreignKey: 'parent_id', as: 'children' });
-            Comments.belongsTo(models.Movies, { foreignKey: 'movie_id' });
         }
     }
     Comments.init({

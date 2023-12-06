@@ -29,7 +29,7 @@
                 <p><strong>IMDb ID:</strong> <a [href]="'https://www.imdb.com/title/' + data.imdb_id" target="_blank">
                         {{ data.imdb_id }}</a></p>
                 <p *ngIf="data.imdb_rating"><strong>IMDb Rating:</strong> {{ data.imdb_rating }} / 10</p>
-                <button mat-button (click)="close()" [routerLink]="['stream/' + id]">Watch</button>
+                <button mat-button (click)="close()" [routerLink]="['stream/' + ytsId]">Watch</button>
             </div>
         </div>
         <div *ngIf="showComments" mat-dialog-content>
@@ -37,15 +37,22 @@
                 <ng-container *ngFor="let comment of comments">
                     <div class="comment" *ngIf="!comment.parent_id">
                         <div class="comment-header">
-                            <p class="comment-author">{{ comment.author_username }}</p>
-                            <p class="comment-date">{{ comment.createdAt | date:'medium' }}</p>
+                            <p class="comment-author">{{ comment.author_username}}</p>
+                            <p class="comment-date">{{ comment.createdAt === comment.updatedAt ? (comment.createdAt |
+                                date:'short') : (comment.updatedAt | date:'short') }} {{ comment.createdAt ===
+                                comment.updatedAt ? '' : '🖋️' }}</p>
                         </div>
                         <p class="comment-text">{{ comment.text }}</p>
                         <button class="comment-reply-button" (click)="replyToComment(comment)">
                             <mat-hint class="hint">Reply</mat-hint>
                         </button>
+                        <button *ngIf="comment.author_id === id" class="comment-reply-button"
+                            (click)="editComment(comment)">
+                            <mat-hint class="hint">Edit</mat-hint>
+                        </button>
                         <app-nested-comments (replyToNestedCommentEvent)="handleReplyToNestedComment($event)"
-                            [parentComment]="comment" [allComments]="comments"></app-nested-comments>
+                            (editNestedCommentEvent)="handleEditNestedComment($event)" [parentComment]="comment"
+                            [allComments]="comments" [replying]="replying"></app-nested-comments>
                     </div>
                 </ng-container>
 
@@ -60,11 +67,15 @@
                             Comment is required
                         </mat-error>
                     </mat-form-field>
-                    <button *ngIf="!replying" mat-raised-button type="submit" class="movie-modal-button"
+                    <button *ngIf="!replying && !editing" mat-raised-button type="submit" class="movie-modal-button"
                         (click)="onSubmit()">Add
                         comment</button>
                     <button *ngIf="replying" mat-raised-button class="movie-modal-button"
                         (click)="onSubmit()">Reply</button>
+                    <button *ngIf="editing" mat-raised-button class="movie-modal-button"
+                        (click)="onSubmit()">Edit</button>
+                    <button *ngIf="replying || editing" mat-raised-button class="movie-modal-button"
+                        (click)="cancelReplyOrEdit()">Cancel</button>
                 </form>
             </div>
         </div>

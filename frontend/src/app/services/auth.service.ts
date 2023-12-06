@@ -157,6 +157,7 @@ export class AuthService {
         this.logEmitChange(true);
       },
       error: (error) => {
+        console.log(error);
         const dialogData = {
           title: 'Login failed',
           text: error.message,
@@ -200,7 +201,6 @@ export class AuthService {
     this.logEmitChange(false);
     this.localStorageService.removeAllUserItem();
     this.router.navigate(['auth/login']);
-    window.location.reload();
     if (error.length > 0) {
       const dialogData = {
         title: 'Server error',

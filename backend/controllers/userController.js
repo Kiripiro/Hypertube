@@ -1,4 +1,4 @@
-const { User, InvalidTokens } = require('../models');
+const { User, InvalidTokens, Comments } = require('../models');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid')
@@ -9,7 +9,6 @@ const client = new OAuth2Client();
 const fs = require('fs');
 
 var nodemailer = require('nodemailer');
-const { query } = require('express');
 var transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -405,22 +404,29 @@ class UserController {
         try {
             const userId = req.user.userId;
             const user = await User.findOne({ where: { id: userId } });
+
             if (!user) {
                 return res.status(404).json({ message: 'User not found' });
-            } else {
-                if (user.avatar) {
-                    await this._removePicture(user.avatar);
-                }
-                await User.destroy({ where: { id: userId } });
-                res.clearCookie('accessToken');
-                res.clearCookie('refreshToken');
-                return res.status(200).json({ message: 'User deleted' });
             }
+
+            const userComments = await Comments.findAll({ where: { author_id: userId } });
+
+            await Promise.all(userComments.map(comment => comment.destroy()));
+            await user.destroy();
+
+            if (user.avatar) {
+                await this._removePicture(user.avatar);
+            }
+
+            res.clearCookie('accessToken');
+            res.clearCookie('refreshToken');
+            return res.status(200).json({ message: 'User deleted' });
         } catch (error) {
             console.error('Error deleting user:', error);
             return res.status(500).json({ message: 'Internal Server Error' });
         }
     };
+
 
     resetPassword = async (req, res) => {
         try {

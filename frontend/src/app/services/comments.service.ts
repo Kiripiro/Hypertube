@@ -1,4 +1,3 @@
-
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -27,12 +26,7 @@ export class CommentsService {
     }
 
     updateComment(comment: Comment): Observable<Comment> {
-        const url = `${this.apiUrl}/${comment.id}`;
-        return this.http.put<Comment>(url, comment);
-    }
-
-    deleteComment(commentId: number): Observable<void> {
-        const url = `${this.apiUrl}/${commentId}`;
-        return this.http.delete<void>(url);
+        console.log(comment);
+        return this.http.put<Comment>(this.apiUrl + '/updateComment/', { comment: comment }, { withCredentials: true });
     }
 }

@@ -6,7 +6,7 @@ import { HomeService } from 'src/app/services/home.service';
 import { FilmDetails } from 'src/app/models/models';
 import { MatDialog } from '@angular/material/dialog';
 import { MovieModalComponent } from '../utils/movie-modal/movie-modal.component';
-import { CommentsService } from '../services/comments.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-home',
@@ -41,40 +41,40 @@ export class HomeComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private homeService: HomeService,
-    private commentsService: CommentsService,
     public dialog: MatDialog
   ) {
     if (!this.authService.checkLog()) {
       this.notConnected = true;
-      return;
     }
   }
 
   ngOnInit(): void {
-    this.loadMovies();
+    if (this.authService.checkLog()) {
+      this.loadMovies();
 
-    this.searchTerms$
-      .pipe(
-        debounceTime(300),
-        distinctUntilChanged(),
-        switchMap((searchTerm: string) => {
-          this.params = {
-            ...this.params,
-            query_term: searchTerm,
-            page: 1,
-          };
-          return this.homeService.getMovies(this.params);
-        })
-      )
-      .subscribe({
-        next: (response) => {
-          this.films = response.movies;
-          this.hasMore = response.hasMore;
-        },
-        error: (error) => {
-          console.log(error);
-        },
-      });
+      this.searchTerms$
+        .pipe(
+          debounceTime(300),
+          distinctUntilChanged(),
+          switchMap((searchTerm: string) => {
+            this.params = {
+              ...this.params,
+              query_term: searchTerm,
+              page: 1,
+            };
+            return this.homeService.getMovies(this.params);
+          })
+        )
+        .subscribe({
+          next: (response) => {
+            this.films = response.movies;
+            this.hasMore = response.hasMore;
+          },
+          error: (error) => {
+            console.log(error);
+          },
+        });
+    }
   }
 
   loadMovies() {

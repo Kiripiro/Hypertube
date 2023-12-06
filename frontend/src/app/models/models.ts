@@ -106,6 +106,7 @@ export interface Comment {
 	imdb_id: number;
 	parent_id: number;
 	createdAt: Date;
+	updatedAt: Date;
 }
 
 export interface CompleteRegisterResponseData {

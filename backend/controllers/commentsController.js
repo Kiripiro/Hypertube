@@ -45,6 +45,24 @@ class CommentsController {
         }
     }
 
+    updateComment = async (req, res) => {
+        const { comment } = req.body;
+        console.log(req.body, comment);
+        try {
+            const commentExists = await Comments.findOne({ where: { id: comment.id } });
+            if (!commentExists) {
+                return res.status(400).json({ error: "Comment not found" });
+            }
+            const updatedComment = await Comments.update({ text: comment.text, updated_at: new Date() }, { where: { id: comment.id } });
+            console.log(updatedComment);
+            if (!updatedComment) {
+                return res.status(400).json({ error: "Comment could not be updated" });
+            }
+            return res.status(200).json({ message: "Comment updated", comment: comment });
+        } catch (error) {
+            return res.status(500).json({ error: error.message });
+        }
+    }
 }
 
 module.exports = new CommentsController();

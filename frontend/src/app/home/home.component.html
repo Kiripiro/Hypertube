@@ -1,5 +1,5 @@
 <div class="home">
-    <div class="filmListFilters">
+    <div *ngIf="!notConnected" class=" filmListFilters">
         <div class="filmListFilter">
             <mat-form-field>
                 <mat-label>Search</mat-label>
@@ -39,6 +39,14 @@
                     <span>{{film.release_date}}</span>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div class="centerDiv" *ngIf="notConnected">
+        <div class="notConnectedCard">
+            <h1>Welcome to <strong>Hypertube</strong>!</h1>
+            <p>Log in to start watching movies!</p>
+            <button mat-raised-button routerLink="/auth/login">Log in</button>
         </div>
     </div>
 </div>

@@ -19,4 +19,12 @@ commentsRouter.get('/getComments/:imdb_id', auth, async (req, res) => {
     }
 });
 
+commentsRouter.put('/updateComment/', auth, async (req, res) => {
+    try {
+        await CommentsController.updateComment(req, res);
+    } catch (error) {
+        console.error(error);
+    }
+});
+
 module.exports = commentsRouter;

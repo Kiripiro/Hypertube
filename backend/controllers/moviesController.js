@@ -49,7 +49,6 @@ class MoviesController {
                                 release_date: movie.year,
                                 yts_id: movie.id
                             }
-                            console.log("data", data)
                             return data;
                         } else {
                             try {
@@ -141,7 +140,7 @@ class MoviesController {
             console.log("file", file);
             if (!file) {
                 console.log("error file not found")
-                return ;
+                return;
             }
             const filePath = file.filePath;
             console.log("path", filePath)
@@ -150,7 +149,7 @@ class MoviesController {
             console.log("fileSize", fileSize)
             const expectedFileSize = file.expectedFileSize;
             console.log("expectedFileSize", expectedFileSize)
-            
+
             if (range) {
                 console.log("range yes")
                 console.log(range)
@@ -197,7 +196,7 @@ class MoviesController {
                     this.lastByteSent = end;
                     const chunksize = ((end - start) > 0 ? (end - start) : -1) + 1
                     console.log("chunksize", chunksize)
-                    
+
                     const readStream = fs.createReadStream(filePath, { start, end })
 
                     const head = {
@@ -209,7 +208,7 @@ class MoviesController {
                     console.log("head", head)
                     res.writeHead(206, head)
                     readStream.pipe(res)
-                }         
+                }
             } else {
                 console.log("range no")
                 const head = {
@@ -259,22 +258,22 @@ class MoviesController {
             if (torrents[i].quality != undefined && torrents[i].quality == "720p") {
                 const magnet = `magnet:?xt=urn:btih:${torrents[i].hash}&dn=${encodedUrl}`;
                 retTab.push(
-                {
-                    magnet: magnet,
-                    hash: torrents[i].hash,
-                    quality: torrents[i].quality,
-                    size_bytes: torrents[i].size_bytes
-                });
+                    {
+                        magnet: magnet,
+                        hash: torrents[i].hash,
+                        quality: torrents[i].quality,
+                        size_bytes: torrents[i].size_bytes
+                    });
             }
             else {
                 const magnet = `magnet:?xt=urn:btih:${torrents[i].hash}&dn=${encodedUrl}`;
                 retTab2.push(
-                {
-                    magnet: magnet,
-                    hash: torrents[i].hash,
-                    quality: torrents[i].quality,
-                    size_bytes: torrents[i].size_bytes
-                });
+                    {
+                        magnet: magnet,
+                        hash: torrents[i].hash,
+                        quality: torrents[i].quality,
+                        size_bytes: torrents[i].size_bytes
+                    });
             }
         }
         return retTab.concat(retTab2);
@@ -291,7 +290,7 @@ class MoviesController {
                 const percentageDownloaded = torrent.percentageDownloaded;
                 console.log("getMovieLoading size", size);
                 console.log("getMovieLoading percentageDownloaded", percentageDownloaded);
-                return res.status(200).json({ data: { size: size, percentage: percentageDownloaded} });
+                return res.status(200).json({ data: { size: size, percentage: percentageDownloaded } });
             } else {
                 console.log("getMovieLoading Torrent or file not exist");
                 if (!torrent) {
@@ -312,7 +311,7 @@ class MoviesController {
                     this.torrentTab.push(torrent);
                     torrent.startDownload(
                         () => {
-    
+
                         },
                         () => {
                             console.log('callbackTorrentReady');
@@ -326,7 +325,7 @@ class MoviesController {
                 }
                 const size = torrent.getDownloadedSize();
                 const percentageDownloaded = torrent.percentageDownloaded;
-                return res.status(200).json({ data: { size: size, percentage: percentageDownloaded} });
+                return res.status(200).json({ data: { size: size, percentage: percentageDownloaded } });
             }
         } catch (error) {
             console.error('Error getMovieLoading:', error);
@@ -367,7 +366,7 @@ class MoviesController {
                     return;
                     torrent = new Torrent(magnet, ytsId);
                     this.torrentTab.push(torrent);
-                }    
+                }
                 torrent.startDownload(
                     () => {
 
