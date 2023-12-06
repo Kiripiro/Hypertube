@@ -16,12 +16,16 @@ export class MovieModalComponent {
   replying: boolean = false;
   selectedComment: Comment | null = null;
 
+
+  id = 0;
+
   constructor(
     public dialogRef: MatDialogRef<MovieModalComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private formBuilder: FormBuilder,
     private commentsService: CommentsService
   ) {
+    this.id = data.yts_id;
     this.commentsService.getComments(this.data.imdb_id).subscribe({
       next: (response: any) => {
         if (response && response.comments && Array.isArray(response.comments)) {

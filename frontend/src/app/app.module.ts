@@ -29,6 +29,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatOptionModule } from '@angular/material/core';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatBadgeModule } from '@angular/material/badge';
+import {ProgressSpinnerMode, MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
@@ -46,6 +47,7 @@ import { ProfileComponent } from './profile/profile.component';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { MovieModalComponent } from './utils/movie-modal/movie-modal.component';
 import { NestedCommentsComponent } from './utils/movie-modal/nested-comments/nested-comments.component';
+import { DetailsComponent } from './details/details.component';
 
 @NgModule({
   declarations: [
@@ -60,6 +62,7 @@ import { NestedCommentsComponent } from './utils/movie-modal/nested-comments/nes
     WaitComponent,
     ResetComponent,
     NestedCommentsComponent
+    DetailsComponent
   ],
   imports: [
     BrowserModule,
@@ -84,6 +87,7 @@ import { NestedCommentsComponent } from './utils/movie-modal/nested-comments/nes
     MatOptionModule,
     MatSelectModule,
     MatChipsModule,
+    MatProgressSpinnerModule,
     ReactiveFormsModule,
     MatRadioModule,
     MatCheckboxModule,

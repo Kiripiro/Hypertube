@@ -7,11 +7,13 @@ import { ProfileComponent } from './profile/profile.component';
 import { SettingsComponent } from './settings/settings.component';
 import { WaitComponent } from './wait/wait.component';
 import { ResetComponent } from './reset/reset.component';
+import { DetailsComponent } from './details/details.component';
 // import { SearchComponent } from './search/search.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'profile/:username', component: ProfileComponent },
+  { path: 'stream/:movieId', component: DetailsComponent },
   { path: 'auth', loadChildren: () => AuthModule },
   { path: 'settings', component: SettingsComponent },
   // { path: 'search', component: SearchComponent },
