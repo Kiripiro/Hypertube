@@ -47,7 +47,9 @@ class MoviesController {
                                 plot: movie.synopsis,
                                 language: movie.language,
                                 release_date: movie.year,
+                                yts_id: movie.id
                             }
+                            console.log("data", data)
                             return data;
                         } else {
                             try {

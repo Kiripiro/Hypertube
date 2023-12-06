@@ -61,7 +61,7 @@ import { DetailsComponent } from './details/details.component';
     SettingsComponent,
     WaitComponent,
     ResetComponent,
-    NestedCommentsComponent
+    NestedCommentsComponent,
     DetailsComponent
   ],
   imports: [

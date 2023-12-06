@@ -139,6 +139,7 @@ export class HomeComponent implements OnInit {
           poster_path: this.films.find((f: any) => f.imdb_id === film.imdb_id)?.poster_path || null,
           imdb_id: film.imdb_id,
           imdb_rating: film.imdb_rating,
+          yts_id: film.yts_id
         };
         //get the comments for the movie and add them to the data
         this.dialog.open(MovieModalComponent, {

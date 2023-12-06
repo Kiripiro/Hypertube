@@ -21,6 +21,7 @@
     "@angular/platform-browser-dynamic": "^17.0.5",
     "@angular/router": "^17.0.5",
     "@types/gapi.auth2": "^0.0.60",
+    "@videogular/ngx-videogular": "^8.0.0",
     "angular-oauth2-oidc": "^15.0.1",
     "ngx-infinite-scroll": "^17.0.0",
     "rxjs": "~7.8.0",

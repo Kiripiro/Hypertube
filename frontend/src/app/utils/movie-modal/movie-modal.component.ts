@@ -16,7 +16,6 @@ export class MovieModalComponent {
   replying: boolean = false;
   selectedComment: Comment | null = null;
 
-
   id = 0;
 
   constructor(
