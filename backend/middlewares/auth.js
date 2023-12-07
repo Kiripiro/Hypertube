@@ -25,10 +25,9 @@ module.exports = (req, res, next) => {
         }
         const decoded = jwt.verify(accessToken, process.env.JWT_SECRET);
         req.user = decoded;
-        console.log(req.user.id);
         next();
     } catch (error) {
-        console.log("error = " + error);
+        console.error("error = " + error);
         if (error.name === "TokenExpiredError")
             return res.status(401).send({ error: "Token expired" });
         res.status(400).send({ error: "Invalid token" });

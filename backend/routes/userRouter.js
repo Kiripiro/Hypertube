@@ -80,7 +80,7 @@ userRouter.post('/settingsUpdate', auth, async (req, res) => {
     try {
         await UserController.settingsUpdateInfos(req, res);
     } catch (error) {
-        console.log(error);
+        console.error(error);
     }
 });
 
@@ -89,7 +89,7 @@ userRouter.post('/delete', auth, async (req, res) => {
     try {
         await UserController.deleteUser(req, res);
     } catch (error) {
-        console.log(error);
+        console.error(error);
     }
 });
 
@@ -97,7 +97,7 @@ userRouter.post('/resetPassword', async (req, res) => {
     try {
         await UserController.resetPassword(req, res);
     } catch (error) {
-        console.log(error);
+        console.error(error);
     }
 });
 
@@ -105,7 +105,7 @@ userRouter.post('/resetPasswordValidate', async (req, res) => {
     try {
         await UserController.resetPasswordValidate(req, res);
     } catch (error) {
-        console.log(error);
+        console.error(error);
     }
 });
 

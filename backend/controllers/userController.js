@@ -17,6 +17,9 @@ var transporter = nodemailer.createTransport({
     }
 });
 
+const maxAgeAccessToken = 900000;
+const maxAgeRefreshToken = 86400000;
+
 class UserController {
 
     register = async (req, res) => {
@@ -57,8 +60,8 @@ class UserController {
             //     }
             // });
 
-            res.cookie('accessToken', this._generateToken(newUser.id), { httpOnly: true, maxAge: 900000 });
-            res.cookie('refreshToken', token, { httpOnly: true, maxAge: 86400000 });
+            res.cookie('accessToken', this._generateToken(newUser.id), { httpOnly: true, maxAge: maxAgeAccessToken });
+            res.cookie('refreshToken', token, { httpOnly: true, maxAge: maxAgeRefreshToken });
             return res.status(201).json({ message: 'User registered successfully', user: newUser });
         } catch (error) {
             console.error('Error registering user:', error);
@@ -111,8 +114,9 @@ class UserController {
                 "lastName": userExists.lastName,
                 "avatar": userExists.avatar,
             };
-            res.cookie('accessToken', accessToken, { httpOnly: true, maxAge: 900000 });
-            res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: 86400000 });
+            console.log(Date.now());
+            res.cookie('accessToken', accessToken, { httpOnly: true, maxAge: maxAgeAccessToken });
+            res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: maxAgeRefreshToken });
             return res.status(200).json({ message: 'User logged in successfully', user: user });
         } catch (error) {
             console.error('Error logging in user:', error);
@@ -130,9 +134,7 @@ class UserController {
                 code: code,
                 redirect_uri: 'http://localhost:4200/auth/login'
             });
-            console.log('response = ' + response);
             const accessToken = response.data.access_token;
-            console.log('accessToken = ' + accessToken);
             const headers = { Authorization: 'Bearer ' + accessToken };
             const user = await axios.get('https://api.intra.42.fr/v2/me', {
                 headers: headers
@@ -152,8 +154,8 @@ class UserController {
                     tokenExpirationDate: this._getTimestampString(1),
                     loginApi: true,
                 });
-                res.cookie('accessToken', this._generateToken(newUser.id), { httpOnly: true, maxAge: 900000 });
-                res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: 86400000 });
+                res.cookie('accessToken', this._generateToken(newUser.id), { httpOnly: true, maxAge: maxAgeAccessToken });
+                res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: maxAgeRefreshToken });
                 return res.status(201).json({ message: 'User registered successfully', user: newUser });
             }
             const dataToUpdate = {
@@ -162,8 +164,8 @@ class UserController {
                 tokenExpirationDate: this._getTimestampString(1)
             };
             await User.update(dataToUpdate, { where: { email: user.data.email } });
-            res.cookie('accessToken', this._generateToken(userExists.id), { httpOnly: true, maxAge: 900000 });
-            res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: 86400000 });
+            res.cookie('accessToken', this._generateToken(userExists.id), { httpOnly: true, maxAge: maxAgeAccessToken });
+            res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: maxAgeRefreshToken });
             return res.status(200).json({ message: 'User logged in successfully', user: userExists });
         } catch (error) {
             console.error('Error logging in user:', error);
@@ -192,8 +194,8 @@ class UserController {
                     tokenExpirationDate: this._getTimestampString(1),
                     loginApi: true,
                 });
-                res.cookie('accessToken', this._generateToken(newUser.id), { httpOnly: true, maxAge: 900000 });
-                res.cookie('refreshToken', userData.sub, { httpOnly: true, maxAge: 86400000 });
+                res.cookie('accessToken', this._generateToken(newUser.id), { httpOnly: true, maxAge: maxAgeAccessToken });
+                res.cookie('refreshToken', userData.sub, { httpOnly: true, maxAge: maxAgeRefreshToken });
                 return res.status(201).json({ message: 'User registered successfully', user: newUser });
             } else {
                 const dataToUpdate = {
@@ -202,8 +204,8 @@ class UserController {
                     tokenExpirationDate: this._getTimestampString(1)
                 };
                 await User.update(dataToUpdate, { where: { email: userData.email } });
-                res.cookie('accessToken', this._generateToken(userExists.id), { httpOnly: true, maxAge: 900000 });
-                res.cookie('refreshToken', userData.sub, { httpOnly: true, maxAge: 86400000 });
+                res.cookie('accessToken', this._generateToken(userExists.id), { httpOnly: true, maxAge: maxAgeAccessToken });
+                res.cookie('refreshToken', userData.sub, { httpOnly: true, maxAge: maxAgeRefreshToken });
                 return res.status(200).json({ message: 'User logged in successfully', user: userExists });
             }
         } catch (error) {
@@ -244,10 +246,10 @@ class UserController {
             if (!refreshToken) {
                 return res.status(401).json({ message: 'Refresh token missing' });
             }
-            if (await InvalidTokens.findOne({ where: { refreshToken } })) {
+            if (await InvalidTokens.findOne({ where: { refreshToken: refreshToken } })) {
                 return res.status(401).json({ message: 'Invalid token' });
             }
-            const user = User.findOne({ where: { token: refreshToken } });
+            const user = await User.findOne({ where: { token: refreshToken } });
             if (!user) {
                 return res.status(403).json({ message: 'Invalid token' });
             }
@@ -257,7 +259,7 @@ class UserController {
                 return res.status(401).json({ message: 'Token expired' });
             }
             const accessToken = this._generateToken(user.id);
-            res.cookie('accessToken', accessToken, { httpOnly: true, maxAge: 900000 });
+            res.cookie('accessToken', accessToken, { httpOnly: true, maxAge: maxAgeAccessToken });
             res.status(200).json({ message: 'Token refreshed successfully' });
         } catch (error) {
             console.error('Error refreshing token:', error);
@@ -271,7 +273,6 @@ class UserController {
             if (!user) {
                 return res.status(404).json({ message: 'User not found' });
             } else {
-                console.log('user.avatar = ' + user.avatar);
                 let avatar = user.avatar;
                 if (avatar && !avatar.includes("http://") && !avatar.includes("https://")) {
                     avatar = await this._getPictureDataFromPath("/app/imagesSaved/" + avatar);
@@ -294,7 +295,6 @@ class UserController {
 
     getUserByUsername = async (req, res) => {
         try {
-            console.log(req.body);
             const user = await User.findOne({ where: { username: req.body.username } });
             if (!user) {
                 return res.status(404).json({ message: 'User not found' });
@@ -345,7 +345,6 @@ class UserController {
         try {
             const userId = req.user.userId;
             const userData = req.body.user;
-            console.log(userData);
             const file = req.body.file;
             if (!userData) {
                 res.status(400).json({ error: 'Missing data' });
@@ -381,7 +380,6 @@ class UserController {
                 res.status(400).json({ error: 'Missing password or confirmation' });
                 return;
             }
-            console.log(userId);
             await User.update(userData, { where: { id: userId } });
             const user = await User.findOne({ where: { id: userId } });
             const userReturn = {
@@ -510,9 +508,11 @@ class UserController {
     _getTimestampString(nextDays = 0) {
         const date = new Date();
 
+        const options = { timeZone: 'Europe/Paris' };
+        const formatter = new Intl.DateTimeFormat('en-US', options);
+
         date.setDate(date.getDate() + nextDays);
-        const time = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
-        const dateString = date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate() + " " + time;
+        const dateString = formatter.format(date);
 
         return dateString;
     }

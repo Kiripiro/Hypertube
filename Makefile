@@ -18,7 +18,7 @@ clean:
 	# rm -rf $(BACKEND_NODE_MODULES)
 	@if [ -n "$(wildcard $(BACKEND_DIR)/imagesSaved/*)" ]; then \
 		echo "Removing files in $(BACKEND_DIR)/imagesSaved..."; \
-		rm -rf $(BACKEND_DIR)/imagesSaved/*; \
+		find $(BACKEND_DIR)/imagesSaved -type f ! -name 'baseAvatar.png' -delete; \
 	fi
 
 fclean:	clean
