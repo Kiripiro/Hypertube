@@ -3,6 +3,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { CommentsService } from 'src/app/services/comments.service';
 import { Comment } from 'src/app/models/models';
+import { MoviesService } from 'src/app/services/movie.service';
 
 @Component({
   selector: 'app-film-modal',
@@ -22,7 +23,8 @@ export class MovieModalComponent {
     public dialogRef: MatDialogRef<MovieModalComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private formBuilder: FormBuilder,
-    private commentsService: CommentsService
+    private commentsService: CommentsService,
+    private movieService: MoviesService
   ) {
     this.id = data.yts_id;
     this.commentsService.getComments(this.data.imdb_id).subscribe({
@@ -38,6 +40,13 @@ export class MovieModalComponent {
     });
     this.commentForm = this.formBuilder.group({
       comment: ['', Validators.required]
+    });
+    this.movieService.getTorrentInfos(data.yts_id).subscribe({
+      next: (response: any) => {
+        console.log("getTorrentInfos", response);
+      }, error: (error) => {
+        console.log(error);
+      }
     });
   }
 

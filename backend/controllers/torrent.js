@@ -2,7 +2,6 @@ const fs = require('fs');
 const path = require('path');
 var torrentStream = require('torrent-stream');
 var parseTorrent = require('parse-torrent');
-var parseTorrentRemote = require('parse-torrent');
 
 ACCEPTED_FILES = [".mp4"]
 PATH_DOWNLOAD_DIR = "/app/download"
@@ -44,8 +43,9 @@ class Torrent {
             const size = stat.size;
             // console.log("checkCanStream size", size);
             const estimatedTime = size / 25;
+            const percentage = size / this.fileSize * 100;
             // console.log("checkCanStream estimatedTime", estimatedTime);
-            if (this.percentageDownloaded > 3) {
+            if (percentage > 1) {
                 return true;
             } else {
                 return false;
@@ -66,12 +66,18 @@ class Torrent {
 
     startDownload(callbackDownload, callbackTorrentReady, callbackWriteStreamFinish) {
         console.log("startDownload")
+        this.downloadStarted = true;
         if (this.torrents.length <= 0 || this.torrents[0] == undefined || this.torrents[0] == null) {
             console.error("startDownload error")
             return ;
         }
         console.log("magnet", this.torrents[0].magnet)
-        this.engine = torrentStream(this.torrents[0].magnet);
+        // const magnet = "magnet:?xt=urn:btih:0719223EC1C863C85454DAD4F297F2D35F22B15E&amp;dn=Kla%20Fun%20(2024)&amp;tr=udp%3A%2F%2Fglotorrents.pw%3A6969%2Fannounce&amp;tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&amp;tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&amp;tr=udp%3A%2F%2Fp4p.arenabg.ch%3A1337&amp;tr=udp%3A%2F%2Ftracker.internetwarriors.net%3A1337"
+        // const magnet = "magnet:?xt=urn:btih:5FD6A1CD57F7EC6E1BEBC205AEF1B40A6250C333&amp;dn=Killers%20of%20the%20Flower%20Moon%20(2023)&amp;tr=udp%3A%2F%2Fglotorrents.pw%3A6969%2Fannounce&amp;tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&amp;tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&amp;tr=udp%3A%2F%2Fp4p.arenabg.ch%3A1337&amp;tr=udp%3A%2F%2Ftracker.internetwarriors.net%3A1337"
+        // const a = parseTorrent(magnet);
+        // console.log("a", a);
+        const magnet = this.torrents[0].magnet;
+        this.engine = torrentStream(magnet);
 
         this.engine.on('download', data => {
             if (this.path.length > 0 && fs.existsSync(this.path)) {
@@ -92,11 +98,10 @@ class Torrent {
             console.log('ready');
             this.engine.files.forEach(async (file) => {
                 if (ACCEPTED_FILES.includes(path.extname(file.name))) {
-                    // console.log("file.name", file.name)
-                    // console.log("file.path", file.path)
+                    console.log("file.name", file.name)
+                    console.log("file.path", file.path)
                     this.torrentName = file.name;
                     this.fileSize = file.length;
-                    this.downloadStarted = true;
                     var stream = file.createReadStream();
                     var destinationPath = path.join(PATH_DOWNLOAD_DIR, file.name);
                     this.path = destinationPath;
@@ -131,6 +136,7 @@ class Torrent {
 
     stopDownload() {
         console.log("stopDownload")
+        this.downloadStarted = false;
         if (this.engine != null) {
             this.engine.destroy();
         }

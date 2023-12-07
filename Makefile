@@ -5,6 +5,8 @@ FRONTEND_NODE_MODULES := $(wildcard $(FRONTEND_DIR)/node_modules)
 
 BACKEND_NODE_MODULES := $(wildcard $(BACKEND_DIR)/node_modules)
 
+BACKEND_NODE_DOWNLOAD := $(wildcard $(BACKEND_DIR)/download/*.*)
+
 all:	start
 
 start:	check_node_modules 
@@ -16,6 +18,7 @@ clean:
 	docker-compose down --rmi all
 	# rm -rf $(FRONTEND_NODE_MODULES)
 	# rm -rf $(BACKEND_NODE_MODULES)
+	rm -rf $(BACKEND_NODE_DOWNLOAD)
 	@if [ -n "$(wildcard $(BACKEND_DIR)/imagesSaved/*)" ]; then \
 		echo "Removing files in $(BACKEND_DIR)/imagesSaved..."; \
 		rm -rf $(BACKEND_DIR)/imagesSaved/*; \

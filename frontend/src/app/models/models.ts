@@ -343,10 +343,21 @@ export interface Notification {
 export interface LoadingMovieResponse {
 	data: {
 		percentage: number,
-		size: number
+		size: number,
+		totalSize: number
 	}
 }
 
 export interface StopLoadingMovieResponse {
 	message: string
+}
+
+export interface MovieFileSizeResponse {
+	data: {
+		size: number
+	}
+}
+
+export interface TorrentInfosResponse {
+	
 }

@@ -23,7 +23,7 @@ const validateUserRegistration = [
         .isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
 
     (req, res, next) => {
-        console.log("validateUserRegistration", req.body);
+        // console.log("validateUserRegistration", req.body);
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
