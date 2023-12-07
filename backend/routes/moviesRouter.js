@@ -35,4 +35,29 @@ moviesRouter.get('/movieLoading/:id', auth, async (req, res) => {
     }
 });
 
+moviesRouter.get('/stopMovieLoading/:id', auth, async (req, res) => {
+    try {
+        await MoviesController.stopMovieLoading(req, res);
+    } catch (error) {
+        console.error(error);
+    }
+});
+
+moviesRouter.get('/fileSize/:id', auth, async (req, res) => {
+    try {
+        await MoviesController.getMovieFileSize(req, res);
+    } catch (error) {
+        console.error(error);
+    }
+});
+
+moviesRouter.get('/torrentInfos/:id', auth, async (req, res) => {
+    try {
+        await MoviesController.getTorrentInfos(req, res);
+    } catch (error) {
+        console.error(error);
+    }
+});
+
+
 module.exports = moviesRouter;

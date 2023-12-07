@@ -242,7 +242,7 @@ class UserController {
     refresh = async (req, res) => {
         try {
             const refreshToken = this._parseCookie(req, 'refreshToken');
-            console.log(refreshToken);
+            // console.log(refreshToken);
             if (!refreshToken) {
                 return res.status(401).json({ message: 'Refresh token missing' });
             }

@@ -4,6 +4,7 @@ import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { CommentsService } from 'src/app/services/comments.service';
 import { Comment } from 'src/app/models/models';
 import { LocalStorageService } from 'src/app/services/local-storage.service';
+import { MoviesService } from 'src/app/services/movie.service';
 
 @Component({
   selector: 'app-film-modal',
@@ -25,6 +26,7 @@ export class MovieModalComponent {
     @Inject(MAT_DIALOG_DATA) public data: any,
     private formBuilder: FormBuilder,
     private commentsService: CommentsService,
+    private movieService: MoviesService,
     private localStorageService: LocalStorageService
   ) {
     this.ytsId = data.yts_id;
@@ -41,6 +43,13 @@ export class MovieModalComponent {
     });
     this.commentForm = this.formBuilder.group({
       comment: ['', Validators.required]
+    });
+    this.movieService.getTorrentInfos(data.yts_id).subscribe({
+      next: (response: any) => {
+        console.log("getTorrentInfos", response);
+      }, error: (error) => {
+        console.log(error);
+      }
     });
   }
 

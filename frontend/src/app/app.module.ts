@@ -30,6 +30,12 @@ import { MatOptionModule } from '@angular/material/core';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatBadgeModule } from '@angular/material/badge';
 import {ProgressSpinnerMode, MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import {MatSliderModule} from '@angular/material/slider';
+
+import {VgCoreModule} from '@videogular/ngx-videogular/core';
+import {VgControlsModule} from '@videogular/ngx-videogular/controls';
+import {VgOverlayPlayModule} from '@videogular/ngx-videogular/overlay-play';
+import {VgBufferingModule} from '@videogular/ngx-videogular/buffering';
 
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
@@ -48,6 +54,7 @@ import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { MovieModalComponent } from './utils/movie-modal/movie-modal.component';
 import { NestedCommentsComponent } from './utils/movie-modal/nested-comments/nested-comments.component';
 import { DetailsComponent } from './details/details.component';
+import { VideoPlayerComponent } from './utils/video-player/video-player.component';
 
 @NgModule({
   declarations: [
@@ -62,7 +69,8 @@ import { DetailsComponent } from './details/details.component';
     WaitComponent,
     ResetComponent,
     NestedCommentsComponent,
-    DetailsComponent
+    DetailsComponent,
+    VideoPlayerComponent
   ],
   imports: [
     BrowserModule,
@@ -94,6 +102,11 @@ import { DetailsComponent } from './details/details.component';
     MatBadgeModule,
     InfiniteScrollModule,
     OAuthModule.forRoot(),
+    VgCoreModule,
+    VgControlsModule,
+    VgOverlayPlayModule,
+    VgBufferingModule,
+    MatSliderModule
   ],
   providers: [
     {

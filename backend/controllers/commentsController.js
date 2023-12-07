@@ -4,7 +4,7 @@ class CommentsController {
     addComment = async (req, res) => {
         const { author_id, text, imdb_id, parent_id } = req.body;
         try {
-            console.log(req.body);
+            // console.log(req.body);
             const user = await User.findOne({ where: { id: author_id } });
             if (!user) {
                 return res.status(400).json({ error: "User not found" });

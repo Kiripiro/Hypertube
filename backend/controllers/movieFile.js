@@ -17,8 +17,8 @@ class MovieFile {
     }
 
     checkExist() {
-        console.log("this.filePath", this.filePath)
-        console.log("fs.existsSync(this.filePath)", fs.existsSync(this.filePath))
+        // console.log("this.filePath", this.filePath)
+        // console.log("fs.existsSync(this.filePath)", fs.existsSync(this.filePath))
         return fs.existsSync(this.filePath);
     }
 
@@ -29,8 +29,8 @@ class MovieFile {
         }
         const stat = fs.statSync(filePath);
         const size = stat.size;
-        console.log("size", size)
-        console.log("this.expectedFileSize", this.expectedFileSize)
+        // console.log("size", size)
+        // console.log("this.expectedFileSize", this.expectedFileSize)
 
         return size / this.expectedFileSize * 100;
     }
@@ -42,8 +42,8 @@ class MovieFile {
             const parts = range.replace(/bytes=/, "").split("-")
             const start = parseInt(parts[0], 10)
             const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1
-            console.log("start", start)
-            console.log("end", end)
+            // console.log("start", start)
+            // console.log("end", end)
             const chunksize = (end - start) + 1
 
             const file = fs.createReadStream(path, { start, end })
