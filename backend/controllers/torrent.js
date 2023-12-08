@@ -67,6 +67,9 @@ class Torrent {
             console.error("TORRENT torrents empty or null")
             throw Error("TORRENT torrents empty or null");
         }
+        if (this.torrents[0].seeds < 5) { //TODO
+            console.log(red + 'TORRENT torrent.seeds = ' + this.torrents[0].seeds);
+        }
         const magnet = this.torrents[0].magnet;
         this.engine = torrentStream(magnet);
 
@@ -87,8 +90,10 @@ class Torrent {
 
         this.engine.on('ready', () => {
             console.log(green + 'TORRENT ready' + reset);
+            var checkAcceptedFiles = false;
             this.engine.files.forEach(async (file) => {
                 if (ACCEPTED_FILES.includes(path.extname(file.name))) {
+                    checkAcceptedFiles = true;
                     console.log(green + 'TORRENT ready file accepted ' + file.name + ', path: ' + file.path + reset);
                     this.torrentName = file.name;
                     this.fileSize = file.length;
@@ -105,6 +110,12 @@ class Torrent {
                     callbackTorrentReady();
                 }
             });
+            if (!checkAcceptedFiles) { //TODO
+                console.log(red + "TORRENT no accepted files found" + reset);
+                this.engine.files.forEach(async (file) => {
+                    console.log(green + 'TORRENT file ' + file.name + reset);
+                });
+            }
         });
 
         this.engine.on('idle', function () {
