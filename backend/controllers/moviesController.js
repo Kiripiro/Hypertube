@@ -4,6 +4,8 @@ const fs = require('fs');
 const Torrent = require('./torrent');
 const MovieFile = require('./movieFile');
 var parseTorrent = require('parse-torrent');
+const torrentInfos = require('./torrentInfos');
+const TorrentHelper = require('../helpers/torrent.helper');
 
 class MoviesController {
 
@@ -126,6 +128,85 @@ class MoviesController {
         };
     };
 
+    //streamPart
+
+    getMovieLoading = async (req, res) => {
+        try {
+            const ytsId = req.params.id;
+            var torrent = this.torrentTab.find(it => it.ytsId == ytsId);
+            if (torrent && torrent.downloadStarted) {
+                console.log("getMovieLoading torrent and started");
+                const size = torrent.getDownloadedSize();
+                const percentageDownloaded = torrent.percentageDownloaded;
+                const totalSize = torrent.fileSize;
+                console.log("getMovieLoading size", size);
+                console.log("getMovieLoading percentageDownloaded", percentageDownloaded);
+                return res.status(200).json({ data: { size: size, percentage: percentageDownloaded, totalSize: totalSize} });
+            } else {
+                console.log("getMovieLoading Torrent not exist or not started");
+                if (!torrent) {
+                    console.log("getMovieLoading Torrent not exist");
+                    const moveDetailsUrl = 'movie_details.json?movie_id=';
+                    const ytsApiResponse = await axios.get(`${process.env.TORRENT_API}${moveDetailsUrl}${ytsId}`);
+                    if (!ytsApiResponse || !ytsApiResponse.data || !ytsApiResponse.data.data || !ytsApiResponse.data.data.movie) {
+                        return res.status(400).json({ error: 'Error with YTS API response' });
+                    }
+                    const ytsApiTorrents = ytsApiResponse.data.data.movie.torrents;
+                    const slug = ytsApiResponse.data.data.movie.slug;
+                    const titleLong = ytsApiResponse.data.data.movie.title_long;
+                    // console.log("movie", ytsApiResponse.data.data.movie)
+                    // const sortedTorrents = this.sortTorrents(ytsApiTorrents, titleLong);
+                    const sortedTorrents = TorrentHelper.sortTorrents(ytsApiTorrents, titleLong);
+                    if (sortedTorrents == null) {
+                        return res.status(400).json({ error: 'Error with YTS API torrent response' });
+                    }
+                    torrent = new Torrent(ytsId, sortedTorrents);
+                    this.torrentTab.push(torrent);
+                    torrent.startDownload(
+                        () => {
+
+                        },
+                        () => {
+                            console.log('callbackTorrentReady');
+                            const file = this.fileTab.find(it => it.fileName == (torrent ? (torrent.torrentName ? torrent.torrentName : "") : ""));
+                            if (!file) {
+                                const newFile = new MovieFile(torrent.torrentName, torrent.path, torrent.fileSize);
+                                this.fileTab.push(newFile);
+                            }
+                        },
+                        () => {
+                            console.log('callbackWriteStreamFinish');
+                        }
+                    );
+                } else if (!torrent.downloadStarted) {
+                    torrent.startDownload(
+                        () => {
+    
+                        },
+                        () => {
+                            console.log('callbackTorrentReady');
+                            const file = this.fileTab.find(it => it.fileName == (torrent ? (torrent.torrentName ? torrent.torrentName : "") : ""));
+                            if (!file) {
+                                const newFile = new MovieFile(torrent.torrentName, torrent.path, torrent.fileSize);
+                                this.fileTab.push(newFile);
+                            }
+                        },
+                        () => {
+                            console.log('callbackWriteStreamFinish');
+                        }
+                    );
+                }
+                const size = torrent.getDownloadedSize();
+                const percentageDownloaded = torrent.percentageDownloaded;
+                const totalSize = torrent.fileSize;
+                return res.status(200).json({ data: { size: size, percentage: percentageDownloaded, totalSize: totalSize} });
+            }
+        } catch (error) {
+            console.error('Error getMovieLoading:', error);
+            return res.status(500).json({ message: 'Internal Server Error' });
+        }
+    };
+
     sendRange(range, torrent, res) {
         if (!torrent.checkCanStream()) {
             console.log("can't stream !")
@@ -218,114 +299,6 @@ class MoviesController {
         }
     };
 
-    sortTorrents(torrents, titleLong) {
-        if (torrents == null || torrents == undefined || torrents.length <= 0) {
-            return null;
-        }
-        let retTab = [];
-        let retTab2 = [];
-        console.log("titleLong", titleLong)
-        const encodedUrl = titleLong.replaceAll(" ", "%20");
-        for (let i = 0; i < torrents.length; i++) {
-            // console.log("torrents[i]", torrents[i])
-            const magnet = `magnet:?xt=urn:btih:${torrents[i].hash}&dn=${encodedUrl}`;
-            // const magnet = `magnet:?xt=urn:btih:0719223EC1C863C85454DAD4F297F2D35F22B15E&amp;dn=Kla%20Fun%20(2024)&amp;tr=udp%3A%2F%2Fglotorrents.pw%3A6969%2Fannounce&amp;tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&amp;tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&amp;tr=udp%3A%2F%2Fp4p.arenabg.ch%3A1337&amp;tr=udp%3A%2F%2Ftracker.internetwarriors.net%3A1337`
-            if (torrents[i].quality != undefined && torrents[i].quality == "720p") {
-                retTab.push(
-                    {
-                        magnet: magnet,
-                        hash: torrents[i].hash,
-                        quality: torrents[i].quality,
-                        size_bytes: torrents[i].size_bytes
-                    });
-            }
-            else {
-                retTab2.push(
-                    {
-                        magnet: magnet,
-                        hash: torrents[i].hash,
-                        quality: torrents[i].quality,
-                        size_bytes: torrents[i].size_bytes
-                    });
-            }
-        }
-        return retTab.concat(retTab2);
-    }
-
-    getMovieLoading = async (req, res) => {
-        try {
-            const ytsId = req.params.id;
-            var torrent = this.torrentTab.find(it => it.ytsId == ytsId);
-            if (torrent && torrent.downloadStarted) {
-                console.log("getMovieLoading torrent and started");
-                const size = torrent.getDownloadedSize();
-                const percentageDownloaded = torrent.percentageDownloaded;
-                console.log("getMovieLoading size", size);
-                console.log("getMovieLoading percentageDownloaded", percentageDownloaded);
-                return res.status(200).json({ data: { size: size, percentage: percentageDownloaded} });
-            } else {
-                console.log("getMovieLoading Torrent not exist or not started");
-                if (!torrent) {
-                    console.log("getMovieLoading Torrent not exist");
-                    const moveDetailsUrl = 'movie_details.json?movie_id=';
-                    const ytsApiResponse = await axios.get(`${process.env.TORRENT_API}${moveDetailsUrl}${ytsId}`);
-                    if (!ytsApiResponse || !ytsApiResponse.data || !ytsApiResponse.data.data || !ytsApiResponse.data.data.movie) {
-                        return res.status(400).json({ error: 'Error with YTS API response' });
-                    }
-                    const ytsApiTorrents = ytsApiResponse.data.data.movie.torrents;
-                    const slug = ytsApiResponse.data.data.movie.slug;
-                    const titleLong = ytsApiResponse.data.data.movie.title_long;
-                    // console.log("movie", ytsApiResponse.data.data.movie)
-                    const sortedTorrents = this.sortTorrents(ytsApiTorrents, titleLong);
-                    if (sortedTorrents == null) {
-                        return res.status(400).json({ error: 'Error with YTS API torrent response' });
-                    }
-                    torrent = new Torrent(ytsId, sortedTorrents);
-                    this.torrentTab.push(torrent);
-                    torrent.startDownload(
-                        () => {
-
-                        },
-                        () => {
-                            console.log('callbackTorrentReady');
-                            const file = this.fileTab.find(it => it.fileName == (torrent ? (torrent.torrentName ? torrent.torrentName : "") : ""));
-                            if (!file) {
-                                const newFile = new MovieFile(torrent.torrentName, torrent.path, torrent.fileSize);
-                                this.fileTab.push(newFile);
-                            }
-                        },
-                        () => {
-                            console.log('callbackWriteStreamFinish');
-                        }
-                    );
-                } else if (!torrent.downloadStarted) {
-                    torrent.startDownload(
-                        () => {
-    
-                        },
-                        () => {
-                            console.log('callbackTorrentReady');
-                            const file = this.fileTab.find(it => it.fileName == (torrent ? (torrent.torrentName ? torrent.torrentName : "") : ""));
-                            if (!file) {
-                                const newFile = new MovieFile(torrent.torrentName, torrent.path, torrent.fileSize);
-                                this.fileTab.push(newFile);
-                            }
-                        },
-                        () => {
-                            console.log('callbackWriteStreamFinish');
-                        }
-                    );
-                }
-                const size = torrent.getDownloadedSize();
-                const percentageDownloaded = torrent.percentageDownloaded;
-                return res.status(200).json({ data: { size: size, percentage: percentageDownloaded} });
-            }
-        } catch (error) {
-            console.error('Error getMovieLoading:', error);
-            return res.status(500).json({ message: 'Internal Server Error' });
-        }
-    };
-
     getMovieFileSize = async (req, res) => {
         try {
             const ytsId = req.params.id;
@@ -375,6 +348,9 @@ class MoviesController {
                 return res.status(400).json({ error: 'Error with YTS API response, torrents null' });
             }
             ytsApiTorrents.forEach(torrent => {
+                console.log("torrent", torrent);
+                // torrentInfos.addTorrent(torrent.url);
+
                 const encodedUrl = titleLong.replaceAll(" ", "%20");
                 // const magnet = `magnet:?xt=urn:btih:${torrent.hash}`;
                 const magnet = `magnet:?xt=urn:btih:${torrent.hash}&dn=${encodedUrl}`;
@@ -453,3 +429,45 @@ class MoviesController {
 }
 
 module.exports = new MoviesController();
+
+// sortTorrents(torrents, titleLong) {
+//     if (torrents == null || torrents == undefined || torrents.length <= 0) {
+//         return null;
+//     }
+//     let retTab = [];
+//     let retTab2 = [];
+//     console.log("titleLong", titleLong)
+//     const encodedUrl = titleLong.replaceAll(" ", "%20");
+//     for (let i = 0; i < torrents.length; i++) {
+//         // console.log("torrents[i]", torrents[i])
+//         const magnet = `magnet:?xt=urn:btih:${torrents[i].hash}&dn=${encodedUrl}`;
+//         // const magnet = `magnet:?xt=urn:btih:0719223EC1C863C85454DAD4F297F2D35F22B15E&amp;dn=Kla%20Fun%20(2024)&amp;tr=udp%3A%2F%2Fglotorrents.pw%3A6969%2Fannounce&amp;tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&amp;tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&amp;tr=udp%3A%2F%2Fp4p.arenabg.ch%3A1337&amp;tr=udp%3A%2F%2Ftracker.internetwarriors.net%3A1337`
+//         if (torrents[i].quality != undefined && torrents[i].quality == "720p") {
+//             retTab.push(
+//                 {
+//                     magnet: magnet,
+//                     hash: torrents[i].hash,
+//                     quality: torrents[i].quality,
+//                     size_bytes: torrents[i].size_bytes,
+//                     seeds: torrents[i].seeds
+//                 });
+//         }
+//         else {
+//             retTab2.push(
+//                 {
+//                     magnet: magnet,
+//                     hash: torrents[i].hash,
+//                     quality: torrents[i].quality,
+//                     size_bytes: torrents[i].size_bytes,
+//                     seeds: torrents[i].seeds
+//                 });
+//         }
+//     }
+//     retTab = retTab.concat(retTab2);
+//     console.log("retTab 1 ", retTab)
+//     retTab.sort((a, b) => {
+//         return b.seeds - a.seeds
+//     });
+//     console.log("retTab 2 ", retTab)
+//     return retTab;
+// }

@@ -1,25 +1,29 @@
 const fs = require('fs');
 const path = require('path');
 var torrentStream = require('torrent-stream');
-var parseTorrent = require('parse-torrent');
 
 ACCEPTED_FILES = [".mp4"]
 PATH_DOWNLOAD_DIR = "/app/download"
 
+MIN_BYTES = 30000000;
+
+const green = "\x1b[32m";
+const reset = "\x1b[0m";
+
 class Torrent {
     
-    torrentMagnet;
+    ytsId = 0;
+    torrents = [];
+
     torrentName;
     fileSize;
     path;
-    downloaded;
-    error;
-    downloadStarted;
-    ytsId = 0;
-    torrents = [];
-    engine;
 
-    percentageDownloaded;
+    downloaded;
+    downloadStarted;
+
+    _percentageDownloaded;
+    engine;
 
     constructor(ytsId, sortedTorrents) {
         this.ytsId = ytsId;
@@ -28,24 +32,16 @@ class Torrent {
         this.fileSize = 0;
         this.path = "";
         this.downloaded = false;
-        this.error = false;
         this.downloadStarted = false;
-        this.percentageDownloaded = 0;
+        this._percentageDownloaded = 0;
         this.engine = null;
-        // const parsedTorrent = parseTorrent(torrentMagnet);
-        // console.log(parsedTorrent);
     }
 
     checkCanStream() {
-        // console.log("checkCanStream percentageDownloaded", this.percentageDownloaded)
         if (this.path.length > 0 && fs.existsSync(this.path)) {
             const stat = fs.statSync(this.path);
             const size = stat.size;
-            // console.log("checkCanStream size", size);
-            const estimatedTime = size / 25;
-            const percentage = size / this.fileSize * 100;
-            // console.log("checkCanStream estimatedTime", estimatedTime);
-            if (percentage > 1) {
+            if (size >= MIN_BYTES) {
                 return true;
             } else {
                 return false;
@@ -65,17 +61,12 @@ class Torrent {
     }
 
     startDownload(callbackDownload, callbackTorrentReady, callbackWriteStreamFinish) {
-        console.log("startDownload")
+        console.log(green + 'TORRENT startDownload' + reset);
         this.downloadStarted = true;
         if (this.torrents.length <= 0 || this.torrents[0] == undefined || this.torrents[0] == null) {
-            console.error("startDownload error")
-            return ;
+            console.error("TORRENT torrents empty or null")
+            throw Error("TORRENT torrents empty or null");
         }
-        console.log("magnet", this.torrents[0].magnet)
-        // const magnet = "magnet:?xt=urn:btih:0719223EC1C863C85454DAD4F297F2D35F22B15E&amp;dn=Kla%20Fun%20(2024)&amp;tr=udp%3A%2F%2Fglotorrents.pw%3A6969%2Fannounce&amp;tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&amp;tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&amp;tr=udp%3A%2F%2Fp4p.arenabg.ch%3A1337&amp;tr=udp%3A%2F%2Ftracker.internetwarriors.net%3A1337"
-        // const magnet = "magnet:?xt=urn:btih:5FD6A1CD57F7EC6E1BEBC205AEF1B40A6250C333&amp;dn=Killers%20of%20the%20Flower%20Moon%20(2023)&amp;tr=udp%3A%2F%2Fglotorrents.pw%3A6969%2Fannounce&amp;tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&amp;tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&amp;tr=udp%3A%2F%2Fp4p.arenabg.ch%3A1337&amp;tr=udp%3A%2F%2Ftracker.internetwarriors.net%3A1337"
-        // const a = parseTorrent(magnet);
-        // console.log("a", a);
         const magnet = this.torrents[0].magnet;
         this.engine = torrentStream(magnet);
 
@@ -84,22 +75,21 @@ class Torrent {
                 const stat = fs.statSync(this.path);
                 const size = stat.size;
                 const percentage = size / this.fileSize * 100;
-                if (this.percentageDownloaded != Math.floor(percentage)) {
-                    this.percentageDownloaded = Math.floor(percentage);
-                    console.log("download " + this.percentageDownloaded + "%, file size = " + size + ", expected size = " + this.fileSize);
+                if (this._percentageDownloaded != Math.floor(percentage)) {
+                    this._percentageDownloaded = Math.floor(percentage);
+                    console.log(green + "TORRENT download " + this._percentageDownloaded + "%, file size = " + size + ", expected size = " + this.fileSize + ", torrentName = " + this.torrentName + reset);
                 }
             } else {
-                console.log("download torrent but file don't exist");
+                console.error("TORRENT download torrent but file don't exist")
             }
             callbackDownload();
         });
 
         this.engine.on('ready', () => {
-            console.log('ready');
+            console.log(green + 'TORRENT ready' + reset);
             this.engine.files.forEach(async (file) => {
                 if (ACCEPTED_FILES.includes(path.extname(file.name))) {
-                    console.log("file.name", file.name)
-                    console.log("file.path", file.path)
+                    console.log(green + 'TORRENT ready file accepted ' + file.name + ', path: ' + file.path + reset);
                     this.torrentName = file.name;
                     this.fileSize = file.length;
                     var stream = file.createReadStream();
@@ -108,11 +98,7 @@ class Torrent {
                     var writeStream = fs.createWriteStream(destinationPath);
                     stream.pipe(writeStream);
                     writeStream.on('finish', function () {
-                        // console.log('writeStream finish');
-                        // console.log('this.fileSize', this.fileSize);
-                        const stat = fs.statSync(destinationPath);
-                        const size = stat.size;
-                        // console.log('real size', size);
+                        console.log(green + 'TORRENT writeStream finish' + reset);
                         this.downloaded = true;
                         callbackWriteStreamFinish();
                     });
@@ -122,20 +108,20 @@ class Torrent {
         });
 
         this.engine.on('idle', function () {
-            console.log('idle');
+            console.log(green + 'TORRENT idle' + reset);
         });
 
         this.engine.on('torrent', function () {
-            console.log('torrent');
+            console.log(green + 'TORRENT torrent' + reset);
         });
 
         this.engine.on('error', function () {
-            console.log('error');
+            console.error('TORRENT engine error');
         });
     }
 
     stopDownload() {
-        console.log("stopDownload")
+        console.log(green + 'TORRENT stopDownload' + reset);
         this.downloadStarted = false;
         if (this.engine != null) {
             this.engine.destroy();
