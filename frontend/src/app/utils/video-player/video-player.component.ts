@@ -173,9 +173,11 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
         const value = (response.data.size >= this.totalSize) ? 100 : (sizeNormalized * 100)
         this.downloadedValue = value;
         this.maxProgressBar = value;
+        console.log("getMovieFileSize this.maxProgressBar", this.maxProgressBar)
         if (this.loadingBar) {
           this.loadingBar.style.width = this.downloadedValue + "%";
         }
+        console.log("getMovieFileSize this.totalSize", this.totalSize)
         if (this.totalSize > 0 && response.data.size < this.totalSize && this.router.url == ("/stream/" + this.movieId)) {
           setTimeout(() => {
             this.getMovieFileSize();

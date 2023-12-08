@@ -4,6 +4,7 @@ const fs = require('fs');
 const Torrent = require('./torrent');
 const MovieFile = require('./movieFile');
 var parseTorrent = require('parse-torrent');
+const torrentInfos = require('./torrentInfos');
 
 class MoviesController {
 
@@ -236,7 +237,8 @@ class MoviesController {
                         magnet: magnet,
                         hash: torrents[i].hash,
                         quality: torrents[i].quality,
-                        size_bytes: torrents[i].size_bytes
+                        size_bytes: torrents[i].size_bytes,
+                        seeds: torrents[i].seeds
                     });
             }
             else {
@@ -245,11 +247,18 @@ class MoviesController {
                         magnet: magnet,
                         hash: torrents[i].hash,
                         quality: torrents[i].quality,
-                        size_bytes: torrents[i].size_bytes
+                        size_bytes: torrents[i].size_bytes,
+                        seeds: torrents[i].seeds
                     });
             }
         }
-        return retTab.concat(retTab2);
+        retTab = retTab.concat(retTab2);
+        console.log("retTab 1 ", retTab)
+        retTab.sort((a, b) => {
+            return b.seeds - a.seeds
+        });
+        console.log("retTab 2 ", retTab)
+        return retTab;
     }
 
     getMovieLoading = async (req, res) => {
@@ -260,9 +269,10 @@ class MoviesController {
                 console.log("getMovieLoading torrent and started");
                 const size = torrent.getDownloadedSize();
                 const percentageDownloaded = torrent.percentageDownloaded;
+                const totalSize = torrent.fileSize;
                 console.log("getMovieLoading size", size);
                 console.log("getMovieLoading percentageDownloaded", percentageDownloaded);
-                return res.status(200).json({ data: { size: size, percentage: percentageDownloaded} });
+                return res.status(200).json({ data: { size: size, percentage: percentageDownloaded, totalSize: totalSize} });
             } else {
                 console.log("getMovieLoading Torrent not exist or not started");
                 if (!torrent) {
@@ -375,6 +385,9 @@ class MoviesController {
                 return res.status(400).json({ error: 'Error with YTS API response, torrents null' });
             }
             ytsApiTorrents.forEach(torrent => {
+                console.log("torrent", torrent);
+                // torrentInfos.addTorrent(torrent.url);
+
                 const encodedUrl = titleLong.replaceAll(" ", "%20");
                 // const magnet = `magnet:?xt=urn:btih:${torrent.hash}`;
                 const magnet = `magnet:?xt=urn:btih:${torrent.hash}&dn=${encodedUrl}`;
