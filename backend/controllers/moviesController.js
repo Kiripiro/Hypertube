@@ -328,7 +328,8 @@ class MoviesController {
                 }
                 const size = torrent.getDownloadedSize();
                 const percentageDownloaded = torrent.percentageDownloaded;
-                return res.status(200).json({ data: { size: size, percentage: percentageDownloaded} });
+                const totalSize = torrent.fileSize;
+                return res.status(200).json({ data: { size: size, percentage: percentageDownloaded, totalSize: totalSize} });
             }
         } catch (error) {
             console.error('Error getMovieLoading:', error);

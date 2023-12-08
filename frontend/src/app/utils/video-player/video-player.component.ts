@@ -6,6 +6,7 @@ import { ThemePalette } from '@angular/material/core';
 import { ProgressSpinnerMode } from '@angular/material/progress-spinner';
 import { VgApiService } from '@videogular/ngx-videogular/core';
 import { MoviesService } from 'src/app/services/movie.service';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-video-player',
@@ -58,7 +59,8 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   constructor(
     private route: ActivatedRoute,
     private movieService: MoviesService,
-    private router: Router
+    private router: Router,
+    private http: HttpClient
   ) {
     this.url = environment.backendUrl || 'http://localhost:3000';
   }
@@ -66,9 +68,26 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.movieId = this.ytsId;
     console.log("this.movieId", this.movieId)
-    this.videoUrl = this.url + '/movies/movieStream/' + this.movieId;
     this.getLoadingMovie();
     this.getMovieFileSize();
+    // this.getStreamingVideo();
+    this.videoUrl = this.url + '/movies/movieStream/' + this.movieId;
+  }
+
+  getStreamingVideo() {
+    const streamUrl = this.url + '/movies/movieStream/' + this.movieId;
+    console.log("getStreamingVideo")
+    this.movieService.getStream(this.movieId).subscribe({
+      next: (response) => {
+        console.log("getStream", response)
+        const videoBlob = new Blob([response], { type: 'video/mp4' });
+        const videoUrl = URL.createObjectURL(videoBlob);
+        this.videoUrl = videoUrl;
+      },
+      error: (error) => {
+        console.log(error);
+      }
+    });
   }
 
   ngAfterViewInit() {
@@ -147,7 +166,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   getLoadingMovie() {
     this.movieService.getLoadingMovie(this.movieId).subscribe({
       next: (response) => {
-        console.log("getLoadingMovie", response)
+        // console.log("getLoadingMovie", response)
         this.progressValue = Math.floor(response.data.size * 100 / this.MIN_BYTES);
         this.totalSize = response.data.totalSize;
 
@@ -168,16 +187,16 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   getMovieFileSize() {
     this.movieService.getMovieFileSize(this.movieId).subscribe({
       next: (response) => {
-        console.log("getMovieFileSize", response)
+        // console.log("getMovieFileSize", response)
         const sizeNormalized = (response.data.size - this.SECU_BYTES) / this.totalSize;
         const value = (response.data.size >= this.totalSize) ? 100 : (sizeNormalized * 100)
         this.downloadedValue = value;
         this.maxProgressBar = value;
-        console.log("getMovieFileSize this.maxProgressBar", this.maxProgressBar)
+        // console.log("getMovieFileSize this.maxProgressBar", this.maxProgressBar)
         if (this.loadingBar) {
           this.loadingBar.style.width = this.downloadedValue + "%";
         }
-        console.log("getMovieFileSize this.totalSize", this.totalSize)
+        // console.log("getMovieFileSize this.totalSize", this.totalSize)
         if (this.totalSize > 0 && response.data.size < this.totalSize && this.router.url == ("/stream/" + this.movieId)) {
           setTimeout(() => {
             this.getMovieFileSize();

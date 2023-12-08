@@ -32,6 +32,10 @@ export class MoviesService {
     return this.http.get<TorrentInfosResponse>(this.url + '/movies/torrentInfos/' + movieId, { withCredentials: true });
   }
 
+  getStream(movieId: Number):Observable<any> {
+    return this.http.get<any>(this.url + '/movies/movieStream/' + movieId, { withCredentials: true });
+  }
+
 //   getMovieById(movieId: Number):Observable<GetMovieByIdResponseData> {
 //     return this.http.get<GetMovieByIdResponseData>(this.url + '/movies/' + movieId, { withCredentials: true });
 //   }
