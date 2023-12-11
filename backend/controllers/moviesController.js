@@ -19,14 +19,16 @@ class MoviesController {
             page: req.query.page || 1,
             query_term: req.query.query_term || '0',
             genre: req.query.genre || 'all',
-            sort_by: req.query.sort_by || 'year',
+            sort_by: req.query.sort_by || 'download_count',
             order_by: req.query.order_by || 'desc',
+            quality: req.query.quality || 'all',
         };
         const torrentApiUrl = process.env.TORRENT_API + 'list_movies.json';
         const omdbApiUrl = 'http://www.omdbapi.com/';
 
         try {
-            const { data } = await axios.get(torrentApiUrl, { params });
+            console.log("params", params);
+            const { data } = await axios.get(torrentApiUrl + `?limit=${params.limit}&page=${params.page}&query_term=${params.query_term}&genre=${params.genre}&sort_by=${params.sort_by}&order_by=${params.order_by}`);
             const { movie_count, movies } = data.data;
             if (movie_count === 0) {
                 return res.status(200).json({ movies: [], hasMore: false });
@@ -36,6 +38,8 @@ class MoviesController {
             if (movies) {
                 const filteredMovies = await Promise.all(
                     movies.map(async (movie) => {
+                        if (movie.year === 0)
+                            return null;
                         if (movie.medium_cover_image && (await this._isImageAvailable(movie.medium_cover_image))) {
                             let data = {
                                 title: movie.title,
@@ -83,19 +87,16 @@ class MoviesController {
 
     fetchMovieDetails = async (req, res) => {
         const { imdb_id } = req.params;
+        console.log("imdb_id", imdb_id);
         const omdbApiUrl = 'http://www.omdbapi.com/';
+        // http://www.omdbapi.com/?apikey=[yourkey]&i=imd_id
 
         try {
             const omdbResponse = await axios.get(`${omdbApiUrl}?i=${imdb_id}&apikey=${process.env.OMDB_API_KEY}`);
+            console.log("omdbResponse", omdbResponse);
 
             const omdbData = omdbResponse.data;
-            if (omdbData.Poster === 'N/A' || omdbData.Poster === undefined) {
-                return res.status(200).json({ movie: this._filteredMovieData(omdbData) });
-            } else if (omdbData.Poster) {
-                return res.status(200).json({ movie: this._filteredMovieData(omdbData) });
-            } else {
-                return res.status(200).json({ movie: this._filteredMovieData(omdbData) });
-            }
+            return res.status(200).json({ movie: this._filteredMovieData(omdbData) });
         } catch (error) {
             console.error(`Error fetching OMDB data for movie with imdb_id ${imdb_id}: ${error.message}`);
             return res.status(200).json({ movie: {} });
@@ -124,7 +125,6 @@ class MoviesController {
             language: omdbData.Language,
             awards: omdbData.Awards,
             release_date: omdbData.Year,
-            yts_id: movie.id
         };
     };
 

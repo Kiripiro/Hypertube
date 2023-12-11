@@ -2,6 +2,11 @@
 
 .home {
     .filmListFilters {
+        mat-form-field {
+            margin-bottom: 0;
+            margin-right: 2rem;
+        }
+
         display: flex;
         flex-direction: row;
         justify-content: space-between;

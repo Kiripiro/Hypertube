@@ -29,14 +29,13 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatOptionModule } from '@angular/material/core';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatBadgeModule } from '@angular/material/badge';
-import {ProgressSpinnerMode, MatProgressSpinnerModule} from '@angular/material/progress-spinner';
-import {MatSliderModule} from '@angular/material/slider';
+import { ProgressSpinnerMode, MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSliderModule } from '@angular/material/slider';
 
-import {VgCoreModule} from '@videogular/ngx-videogular/core';
-import {VgControlsModule} from '@videogular/ngx-videogular/controls';
-import {VgOverlayPlayModule} from '@videogular/ngx-videogular/overlay-play';
-import {VgBufferingModule} from '@videogular/ngx-videogular/buffering';
-
+import { VgCoreModule } from '@videogular/ngx-videogular/core';
+import { VgControlsModule } from '@videogular/ngx-videogular/controls';
+import { VgOverlayPlayModule } from '@videogular/ngx-videogular/overlay-play';
+import { VgBufferingModule } from '@videogular/ngx-videogular/buffering';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { NavBarComponent } from './navbar/nav-bar.component';
@@ -55,6 +54,7 @@ import { MovieModalComponent } from './utils/movie-modal/movie-modal.component';
 import { NestedCommentsComponent } from './utils/movie-modal/nested-comments/nested-comments.component';
 import { DetailsComponent } from './details/details.component';
 import { VideoPlayerComponent } from './utils/video-player/video-player.component';
+import { ScrollToTopComponent } from './utils/scroll-to-top/scroll-to-top.component';
 
 @NgModule({
   declarations: [
@@ -70,7 +70,8 @@ import { VideoPlayerComponent } from './utils/video-player/video-player.componen
     ResetComponent,
     NestedCommentsComponent,
     DetailsComponent,
-    VideoPlayerComponent
+    VideoPlayerComponent,
+    ScrollToTopComponent
   ],
   imports: [
     BrowserModule,

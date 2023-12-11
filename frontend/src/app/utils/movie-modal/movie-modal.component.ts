@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Inject, Output } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { CommentsService } from 'src/app/services/comments.service';
@@ -42,7 +42,7 @@ export class MovieModalComponent {
       }
     });
     this.commentForm = this.formBuilder.group({
-      comment: ['', Validators.required]
+      comment: ['', Validators.required, [Validators.minLength(1), Validators.maxLength(500)]],
     });
     this.movieService.getTorrentInfos(data.yts_id).subscribe({
       next: (response: any) => {
@@ -59,6 +59,10 @@ export class MovieModalComponent {
   }
   handleEditNestedComment(selectedComment: Comment) {
     this.editComment(selectedComment);
+  }
+
+  handleDeleteNestedComment(selectedComment: Comment) {
+    this.deleteComment(selectedComment);
   }
 
   close(): void {
@@ -78,6 +82,7 @@ export class MovieModalComponent {
     if (comment) {
       this.selectedComment = comment;
       this.replying = true;
+      this.editing = false;
     }
   }
 
@@ -96,7 +101,29 @@ export class MovieModalComponent {
   editComment(comment: Comment) {
     this.selectedComment = comment;
     this.editing = true;
+    this.replying = false;
     this.commentForm.setValue({ comment: comment.text });
+  }
+
+  deleteComment(comment: Comment) {
+    this.commentsService.deleteComment(comment).subscribe({
+      next: (response: any) => {
+        this.commentsService.getComments(this.data.imdb_id).subscribe({
+          next: (response: any) => {
+            if (response && response.comments && Array.isArray(response.comments)) {
+              this.comments = response.comments;
+            } else {
+              console.error('Invalid response format:', response);
+            }
+          }, error: (error) => {
+            console.log(error);
+          }
+        });
+
+      }, error: (error) => {
+        console.log(error);
+      }
+    });
   }
 
   onSubmit() {

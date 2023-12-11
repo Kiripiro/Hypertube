@@ -50,8 +50,13 @@
                             (click)="editComment(comment)">
                             <mat-hint class="hint">Edit</mat-hint>
                         </button>
+                        <button *ngIf="comment.author_id === id" class="comment-reply-button"
+                            (click)="deleteComment(comment)">
+                            <mat-hint class="hint">Delete</mat-hint>
+                        </button>
                         <app-nested-comments (replyToNestedCommentEvent)="handleReplyToNestedComment($event)"
-                            (editNestedCommentEvent)="handleEditNestedComment($event)" [parentComment]="comment"
+                            (editNestedCommentEvent)="handleEditNestedComment($event)"
+                            (deleteNestedCommentEvent)="handleDeleteNestedComment($event)" [parentComment]="comment"
                             [allComments]="comments" [replying]="replying"></app-nested-comments>
                     </div>
                 </ng-container>
@@ -70,9 +75,9 @@
                     <button *ngIf="!replying && !editing" mat-raised-button type="submit" class="movie-modal-button"
                         (click)="onSubmit()">Add
                         comment</button>
-                    <button *ngIf="replying" mat-raised-button class="movie-modal-button"
+                    <button *ngIf="replying && !editing" mat-raised-button class="movie-modal-button"
                         (click)="onSubmit()">Reply</button>
-                    <button *ngIf="editing" mat-raised-button class="movie-modal-button"
+                    <button *ngIf="editing && !replying" mat-raised-button class="movie-modal-button"
                         (click)="onSubmit()">Edit</button>
                     <button *ngIf="replying || editing" mat-raised-button class="movie-modal-button"
                         (click)="cancelReplyOrEdit()">Cancel</button>

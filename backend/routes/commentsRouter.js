@@ -27,4 +27,12 @@ commentsRouter.put('/updateComment/', auth, async (req, res) => {
     }
 });
 
+commentsRouter.delete('/deleteComment/:id', auth, async (req, res) => {
+    try {
+        await CommentsController.deleteComment(req, res);
+    } catch (error) {
+        console.error(error);
+    }
+});
+
 module.exports = commentsRouter;

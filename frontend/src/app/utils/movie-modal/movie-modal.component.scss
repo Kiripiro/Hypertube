@@ -59,6 +59,12 @@
             }
         }
 
+        .comment-input {
+            width: 60vw;
+            margin-right: 10px;
+            margin-left: 20px;
+        }
+
         .movie-modal-button {
             background-color: $surface;
             color: $onPrimary;

@@ -29,4 +29,8 @@ export class CommentsService {
         console.log(comment);
         return this.http.put<Comment>(this.apiUrl + '/updateComment/', { comment: comment }, { withCredentials: true });
     }
+
+    deleteComment(comment: Comment): Observable<Comment> {
+        return this.http.delete<Comment>(this.apiUrl + '/deleteComment/' + comment.id, { withCredentials: true });
+    }
 }

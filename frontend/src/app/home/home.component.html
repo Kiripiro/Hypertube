@@ -1,4 +1,5 @@
 <div class="home">
+    <app-scroll-to-top></app-scroll-to-top>
     <div *ngIf="!notConnected" class=" filmListFilters">
         <div class="filmListFilter">
             <mat-form-field>
@@ -10,9 +11,13 @@
             <mat-form-field>
                 <mat-label>Sort by</mat-label>
                 <mat-select [(value)]="sortBy" (selectionChange)="sortFilms()">
+                    <mat-option>None</mat-option>
                     <mat-option value="title">Title</mat-option>
-                    <mat-option value="release_date">Release Date</mat-option>
+                    <mat-option value="date_added">Date added</mat-option>
                     <mat-option value="imdb_rating">IMDb Rating</mat-option>
+                    <mat-option value="download_count">Download Count</mat-option>
+                    <mat-option value="like_count">Like Count</mat-option>
+                    <mat-option value="year">Release date</mat-option>
                 </mat-select>
             </mat-form-field>
         </div>
@@ -25,6 +30,18 @@
                 </mat-select>
             </mat-form-field>
         </div>
+        <div class="filmListFilter">
+            <mat-form-field>
+                <mat-label>Quality</mat-label>
+                <mat-select [(value)]="quality" (selectionChange)="sortFilms()">
+                    <mat-option value="720p">720p</mat-option>
+                    <mat-option value="1080p">1080p</mat-option>
+                    <mat-option value="2160p">2160p</mat-option>
+                    <mat-option value="3D">3D</mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+        <button mat-raised-button (click)="resetParams()">Reset</button>
     </div>
     <div class="centerDiv" *ngIf="!notConnected" infinite-scroll [infiniteScrollDistance]="scrollDistance"
         [infiniteScrollUpDistance]="scrollUpDistance" (scrolled)="loadData()">

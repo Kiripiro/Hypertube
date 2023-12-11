@@ -6,7 +6,6 @@ import { HomeService } from 'src/app/services/home.service';
 import { FilmDetails } from 'src/app/models/models';
 import { MatDialog } from '@angular/material/dialog';
 import { MovieModalComponent } from '../utils/movie-modal/movie-modal.component';
-import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-home',
@@ -28,13 +27,16 @@ export class HomeComponent implements OnInit {
     page: 1,
     query_term: '0',
     genre: 'all',
-    sort_by: 'year',
+    sort_by: 'download_count',
     order_by: 'desc',
+    quality: 'all',
   };
+  isModalOpen = false;
 
   search: string = '';
-  sortBy: string = 'title';
-  order: string = 'asc';
+  sortBy: string = '';
+  order: string = '';
+  quality: string = '';
 
   private searchTerms$ = new Subject<string>();
 
@@ -77,6 +79,23 @@ export class HomeComponent implements OnInit {
     }
   }
 
+  resetParams() {
+    this.params = {
+      limit: 20,
+      page: 1,
+      query_term: '0',
+      genre: 'all',
+      sort_by: 'download_count',
+      order_by: 'desc',
+      quality: 'all',
+    };
+    this.search = '';
+    this.sortBy = '';
+    this.order = '';
+    this.quality = '';
+    this.loadMovies();
+  }
+
   loadMovies() {
     this.homeService.getMovies(this.params).subscribe({
       next: (response) => {
@@ -117,11 +136,15 @@ export class HomeComponent implements OnInit {
       ...this.params,
       sort_by: this.sortBy,
       order_by: this.order,
+      quality: this.quality,
     };
     this.loadMovies();
   }
 
   openFilmModal(film: any): void {
+    if (this.isModalOpen) return;
+    this.isModalOpen = true;
+
     this.homeService.getMovieDetails(film.imdb_id).subscribe({
       next: (response: any) => {
         const movie = response.movie;
@@ -134,19 +157,19 @@ export class HomeComponent implements OnInit {
           actors: film.actors || movie.actors,
           genre: film.genre,
           language: film.language || movie.language,
-          plot: film.plot || movie.plot,
+          plot: movie.plot ? movie.plot : film.plot,
           awards: film.awards || movie.awards,
           poster_path: this.films.find((f: any) => f.imdb_id === film.imdb_id)?.poster_path || null,
           imdb_id: film.imdb_id,
           imdb_rating: film.imdb_rating,
           yts_id: film.yts_id
         };
-        //get the comments for the movie and add them to the data
         this.dialog.open(MovieModalComponent, {
           data: {
             ...data,
           },
         });
+        this.isModalOpen = false;
       },
       error: (error) => {
         console.log(error);

@@ -188,7 +188,7 @@ class UserController {
                     lastName: userData?.family_name || null,
                     email: userData.email,
                     email_checked: true,
-                    avatar: userData.avatar,
+                    avatar: userData.avatar || 'baseAvatar.png',
                     token: refreshToken,
                     tokenCreationDate: this._getTimestampString(),
                     tokenExpirationDate: this._getTimestampString(1),

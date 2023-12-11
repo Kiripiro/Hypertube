@@ -19,6 +19,9 @@ import { LocalStorageService } from 'src/app/services/local-storage.service';
         <button *ngIf="nestedComment.author_id === id" class="comment-reply-button" (click)="editNestedComment(nestedComment)">
           <mat-hint class="hint">Edit</mat-hint>
         </button>
+        <button *ngIf="nestedComment.author_id === id" class="comment-reply-button" (click)="deleteNestedComment(nestedComment)">
+          <mat-hint class="hint">Delete</mat-hint>
+        </button>
         <app-nested-comments (replyToNestedCommentEvent)="replyToNestedComment($event)" (editNestedCommentEvent)="editNestedComment($event)" [parentComment]="nestedComment" [allComments]="allComments" [replying]="replying"></app-nested-comments>
       </div>
     </div>
@@ -35,6 +38,7 @@ export class NestedCommentsComponent {
   @Input() editing!: boolean;
   @Output() replyToNestedCommentEvent = new EventEmitter<Comment>();
   @Output() editNestedCommentEvent = new EventEmitter<Comment>();
+  @Output() deleteNestedCommentEvent = new EventEmitter<Comment>();
 
   selectedNestedComment: Comment | null = null;
   id = this.localStorageService.getItem('id') || null;
@@ -51,6 +55,10 @@ export class NestedCommentsComponent {
   editNestedComment(comment: Comment) {
     this.selectedNestedComment = comment;
     this.editNestedCommentEvent.emit(comment);
+  }
+
+  deleteNestedComment(comment: Comment) {
+    this.deleteNestedCommentEvent.emit(comment);
   }
 
   ngOnChanges() {
