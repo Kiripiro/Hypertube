@@ -4,20 +4,22 @@
     .filmListFilters {
         mat-form-field {
             margin-bottom: 0;
-            margin-right: 2rem;
+            margin-right: 1rem;
+            width: 10vw;
+            height: auto;
         }
 
         display: flex;
         flex-direction: row;
-        justify-content: space-between;
         align-items: center;
-        padding-inline: 20rem;
+        justify-content: center;
         margin-top: 2rem;
+        width: 98vw;
     }
 
 
     .filmList {
-        width: 100vw;
+        width: 980vw;
         height: 100%;
         display: flex;
         flex-wrap: wrap;
@@ -36,6 +38,7 @@
             .filmImage {
                 width: 300px;
                 height: 450px;
+                border: 2px solid $primary;
                 border-radius: 20px;
                 box-shadow: 5px 5px 15px rgba(70, 70, 70, 0.12), -1px -1px 50px rgba(70, 70, 70, 0.12);
                 margin-bottom: 1rem;
@@ -48,6 +51,10 @@
                     width: 100%;
                     height: 100%;
                     border-radius: 20px;
+                }
+
+                &.seen {
+                    border: 3px solid $onPrimary;
                 }
             }
 
@@ -144,6 +151,112 @@
     }
 }
 
-@media (max-width: 1024px) {}
+@media (max-width: 1024px) {
+    .home {
+        .filmListFilters {
+            mat-form-field {
+                margin-bottom: 0;
+                margin-right: 0.8rem;
+                width: 20vw;
+                height: auto;
+            }
 
-@media (max-width: 786px) {}
+            display: flex;
+            flex-wrap: wrap;
+            flex-direction: row;
+            flex-flow: wrap;
+            align-items: center;
+            justify-content: center;
+            margin-top: 2rem;
+            width: 98vw;
+        }
+
+        .filmList {
+            display: flex;
+            justify-content: space-between;
+
+            .film {
+                width: 200px;
+                height: 400px;
+                margin-right: 1rem;
+
+                .filmImage {
+                    width: 200px;
+                    height: 300px;
+                }
+            }
+        }
+
+        .filmList {
+            .film {
+                width: 200px;
+                height: 400px;
+                margin-right: 0.5rem;
+
+                .filmImage {
+                    width: 200px;
+                    height: 300px;
+                }
+            }
+        }
+    }
+}
+
+@media (max-width: 786px) {
+    .home {
+        .filmListFilters {
+            mat-form-field {
+                margin-bottom: 0;
+                margin-right: 0.8rem;
+                width: 30vw;
+                height: auto;
+            }
+
+            display: flex;
+            flex-wrap: wrap;
+            flex-direction: row;
+            flex-flow: wrap;
+            align-items: center;
+            justify-content: center;
+            margin-top: 2rem;
+            width: 98vw;
+
+
+
+        }
+
+        .filmList {
+            display: flex;
+            justify-content: space-between;
+            padding-inline: 1rem;
+
+            .film {
+                width: 150px;
+                height: 300px;
+                margin-right: 0.5rem;
+
+                .filmImage {
+                    width: 150px;
+                    height: 225px;
+                }
+            }
+        }
+
+        .filmList {
+            .film {
+                width: 150px;
+                height: 300px;
+                margin-right: 1rem;
+
+                .filmImage {
+                    width: 150px;
+                    height: 225px;
+                }
+            }
+        }
+    }
+}
+
+.reset-button {
+    margin-bottom: 20px;
+}

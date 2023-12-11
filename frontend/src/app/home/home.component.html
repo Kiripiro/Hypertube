@@ -34,6 +34,7 @@
             <mat-form-field>
                 <mat-label>Quality</mat-label>
                 <mat-select [(value)]="quality" (selectionChange)="sortFilms()">
+                    <mat-option value="all">All</mat-option>
                     <mat-option value="720p">720p</mat-option>
                     <mat-option value="1080p">1080p</mat-option>
                     <mat-option value="2160p">2160p</mat-option>
@@ -41,14 +42,29 @@
                 </mat-select>
             </mat-form-field>
         </div>
-        <button mat-raised-button (click)="resetParams()">Reset</button>
+        <div class="filmListFilter">
+            <mat-form-field>
+                <mat-label>Imdb Rating</mat-label>
+                <mat-select [(value)]="minimum_rating" (selectionChange)="sortFilms()">
+                    <mat-option value="1">1+</mat-option>
+                    <mat-option value="2">2+</mat-option>
+                    <mat-option value="3">3+</mat-option>
+                    <mat-option value="4">4+</mat-option>
+                    <mat-option value="5">5+</mat-option>
+                    <mat-option value="6">6+</mat-option>
+                    <mat-option value="7">7+</mat-option>
+                    <mat-option value="8">8+</mat-option>
+                    <mat-option value="9">9+</mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+        <button mat-raised-button class="reset-button" (click)="resetParams()">Reset</button>
     </div>
     <div class="centerDiv" *ngIf="!notConnected" infinite-scroll [infiniteScrollDistance]="scrollDistance"
         [infiniteScrollUpDistance]="scrollUpDistance" (scrolled)="loadData()">
         <div class="filmList">
-
             <div class="film" *ngFor="let film of films" (click)="openFilmModal(film)">
-                <div class="filmImage">
+                <div class="filmImage" [class.seen]="film.seen">
                     <img [src]="film.poster_path" alt="film image">
                 </div>
                 <div class="filmTitle">

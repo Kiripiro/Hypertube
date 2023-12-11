@@ -60,5 +60,13 @@ moviesRouter.get('/torrentInfos/:id', auth, async (req, res) => {
     }
 });
 
+moviesRouter.post('/addMovieHistory', auth, async (req, res) => {
+    try {
+        await MoviesController.addMovieHistory(req, res);
+    } catch (error) {
+        console.error(error);
+    }
+});
+
 
 module.exports = moviesRouter;

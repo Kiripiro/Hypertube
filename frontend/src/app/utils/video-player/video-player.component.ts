@@ -16,6 +16,8 @@ import { HttpClient } from '@angular/common/http';
 export class VideoPlayerComponent implements OnInit, AfterViewInit {
   @Input()
   ytsId!: number;
+  @Input()
+  imdbId!: string;
 
   MIN_BYTES = 30000000;
   SECU_BYTES = 5000000;
@@ -27,7 +29,9 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   progressValue = 0;
   totalSize = 0;
   downloadedValue = 0;
-  
+
+  imdb_id = "";
+
   url = "";
   videoUrl: SafeResourceUrl | undefined;
 
@@ -55,7 +59,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   thumbLabel = false;
   value = 0;
   isHidden = true;
-  
+
   constructor(
     private route: ActivatedRoute,
     private movieService: MoviesService,
@@ -66,8 +70,14 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    this.movieId = this.ytsId;
-    console.log("this.movieId", this.movieId)
+    this.route.params.subscribe(params => {
+      console.log("params", params);
+      this.movieId = params['movieId'];
+      this.imdbId = params['imdbId'];
+
+      console.log("this.movieId", this.movieId)
+      console.log("this.imdbId", this.imdbId)
+    });
     this.getLoadingMovie();
     this.getMovieFileSize();
     // this.getStreamingVideo();
@@ -91,7 +101,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    
+
   }
 
   onVideoLoad() {
@@ -108,14 +118,14 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
     this.videoLoaded = true;
   }
 
-  togglevideo(){
+  togglevideo() {
     if (!this.videoLoaded)
-      return ;
-    if(!this.videoPlaying){
+      return;
+    if (!this.videoPlaying) {
       this.video.play();
       this.videoPlaying = true;
       this.videoPlayButtonIcon = "pause";
-    }else{
+    } else {
       this.video.pause();
       this.videoPlaying = false;
       this.videoPlayButtonIcon = "play_arrow";
@@ -124,7 +134,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
 
   changeSeekBar(event: MouseEvent) {
     if (!this.videoLoaded)
-      return ;
+      return;
     const clickPosition = (event as MouseEvent).clientX - this.progressRange.getBoundingClientRect().left;
     const progressRangeWidth = this.progressRange.getBoundingClientRect().width;
     const percentage = (clickPosition / progressRangeWidth) * 100;
@@ -135,10 +145,10 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
     }
   }
 
-  onTimeUpdate(){
+  onTimeUpdate() {
     if (!this.videoLoaded)
-      return ;
-      const videoTimeMax = this.maxProgressBar * this.video.duration / 100;
+      return;
+    const videoTimeMax = this.maxProgressBar * this.video.duration / 100;
     if (this.video.currentTime > videoTimeMax) {
       this.video.currentTime = this.oldCurrentTime;
     }
@@ -156,6 +166,15 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
     this.movieService.stopLoadingMovie(this.movieId).subscribe({
       next: (response) => {
         console.log("stopLoadingMovie", response.message);
+      },
+      error: (error) => {
+        console.log(error);
+      }
+    });
+    console.log('ngOnDestroy');
+    this.movieService.addMovieHistory(this.imdbId).subscribe({
+      next: (response) => {
+        console.log("addMovieHistory", response.seen);
       },
       error: (error) => {
         console.log(error);
@@ -211,16 +230,16 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
 
   changeVolumeBarDisplaying() {
     if (!this.videoLoaded)
-      return ;
+      return;
     this.showVolume = !this.showVolume;
     this.isHidden = !this.isHidden;
   }
 
   onChangeVolume(event: any) {
     if (!this.videoLoaded)
-      return ;
+      return;
     this.video.volume = this.value / 100;
   }
-  
+
 }
 

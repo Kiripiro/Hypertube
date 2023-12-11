@@ -42,7 +42,7 @@ export class MovieModalComponent {
       }
     });
     this.commentForm = this.formBuilder.group({
-      comment: ['', Validators.required, [Validators.minLength(1), Validators.maxLength(500)]],
+      comment: ['', [Validators.required, Validators.minLength(1), Validators.maxLength(500)]],
     });
     this.movieService.getTorrentInfos(data.yts_id).subscribe({
       next: (response: any) => {

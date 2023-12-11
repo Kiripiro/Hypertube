@@ -96,6 +96,7 @@ export interface FilmDetails {
 	release_date: string;
 	imdb_id: string;
 	imdb_rating: string;
+	seen: boolean;
 }
 
 export interface Comment {
@@ -360,5 +361,5 @@ export interface MovieFileSizeResponse {
 }
 
 export interface TorrentInfosResponse {
-	
+
 }

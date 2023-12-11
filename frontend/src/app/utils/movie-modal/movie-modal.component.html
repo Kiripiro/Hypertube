@@ -29,7 +29,8 @@
                 <p><strong>IMDb ID:</strong> <a [href]="'https://www.imdb.com/title/' + data.imdb_id" target="_blank">
                         {{ data.imdb_id }}</a></p>
                 <p *ngIf="data.imdb_rating"><strong>IMDb Rating:</strong> {{ data.imdb_rating }} / 10</p>
-                <button mat-button (click)="close()" [routerLink]="['stream/' + ytsId]">Watch</button>
+                <button mat-button (click)="close()"
+                    [routerLink]="['stream/' + ytsId + '/' + data.imdb_id]">Watch</button>
             </div>
         </div>
         <div *ngIf="showComments" mat-dialog-content>

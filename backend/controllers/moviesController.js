@@ -1,3 +1,4 @@
+const { MoviesHistory } = require('../models');
 require('dotenv').config();
 const axios = require('axios');
 const fs = require('fs');
@@ -14,6 +15,7 @@ class MoviesController {
     lastByteSent = 0;
 
     fetchYTSMovies = async (req, res) => {
+        const userId = req.user.userId;
         const params = {
             limit: req.query.limit || 20,
             page: req.query.page || 1,
@@ -22,13 +24,24 @@ class MoviesController {
             sort_by: req.query.sort_by || 'download_count',
             order_by: req.query.order_by || 'desc',
             quality: req.query.quality || 'all',
+            minimum_rating: req.query.minimum_rating || '0',
         };
         const torrentApiUrl = process.env.TORRENT_API + 'list_movies.json';
         const omdbApiUrl = 'http://www.omdbapi.com/';
 
         try {
-            console.log("params", params);
-            const { data } = await axios.get(torrentApiUrl + `?limit=${params.limit}&page=${params.page}&query_term=${params.query_term}&genre=${params.genre}&sort_by=${params.sort_by}&order_by=${params.order_by}`);
+            const { data } = await axios.get(torrentApiUrl, {
+                params: {
+                    limit: params.limit,
+                    page: params.page,
+                    query_term: params.query_term,
+                    genre: params.genre,
+                    sort_by: params.sort_by,
+                    order_by: params.order_by,
+                    quality: params.quality,
+                    minimum_rating: params.minimum_rating
+                }
+            });
             const { movie_count, movies } = data.data;
             if (movie_count === 0) {
                 return res.status(200).json({ movies: [], hasMore: false });
@@ -50,7 +63,8 @@ class MoviesController {
                                 plot: movie.synopsis,
                                 language: movie.language,
                                 release_date: movie.year,
-                                yts_id: movie.id
+                                yts_id: movie.id,
+                                seen: await this._isMovieSeen(userId, movie.imdb_code),
                             }
                             return data;
                         } else {
@@ -68,6 +82,7 @@ class MoviesController {
 
                                 const filteredMovieData = this._filteredMovieData(omdbData);
                                 filteredMovieData.poster_path = movie.thumbnail;
+                                filteredMovieData.seen = await this._isMovieSeen(userId, movie.imdb_code);
                                 return filteredMovieData;
                             } catch (error) {
                                 console.error(`Error fetching OMDB data for movie with imdb_code ${movie.imdb_code}: ${error.message}`);
@@ -87,13 +102,10 @@ class MoviesController {
 
     fetchMovieDetails = async (req, res) => {
         const { imdb_id } = req.params;
-        console.log("imdb_id", imdb_id);
         const omdbApiUrl = 'http://www.omdbapi.com/';
-        // http://www.omdbapi.com/?apikey=[yourkey]&i=imd_id
 
         try {
             const omdbResponse = await axios.get(`${omdbApiUrl}?i=${imdb_id}&apikey=${process.env.OMDB_API_KEY}`);
-            console.log("omdbResponse", omdbResponse);
 
             const omdbData = omdbResponse.data;
             return res.status(200).json({ movie: this._filteredMovieData(omdbData) });
@@ -141,7 +153,7 @@ class MoviesController {
                 const totalSize = torrent.fileSize;
                 console.log("getMovieLoading size", size);
                 console.log("getMovieLoading percentageDownloaded", percentageDownloaded);
-                return res.status(200).json({ data: { size: size, percentage: percentageDownloaded, totalSize: totalSize} });
+                return res.status(200).json({ data: { size: size, percentage: percentageDownloaded, totalSize: totalSize } });
             } else {
                 console.log("getMovieLoading Torrent not exist or not started");
                 if (!torrent) {
@@ -181,7 +193,7 @@ class MoviesController {
                 } else if (!torrent.downloadStarted) {
                     torrent.startDownload(
                         () => {
-    
+
                         },
                         () => {
                             console.log('callbackTorrentReady');
@@ -199,7 +211,7 @@ class MoviesController {
                 const size = torrent.getDownloadedSize();
                 const percentageDownloaded = torrent.percentageDownloaded;
                 const totalSize = torrent.fileSize;
-                return res.status(200).json({ data: { size: size, percentage: percentageDownloaded, totalSize: totalSize} });
+                return res.status(200).json({ data: { size: size, percentage: percentageDownloaded, totalSize: totalSize } });
             }
         } catch (error) {
             console.error('Error getMovieLoading:', error);
@@ -223,7 +235,7 @@ class MoviesController {
             const stat = fs.statSync(filePath)
             const fileSize = stat.size
             const expectedFileSize = file.expectedFileSize;
-            
+
             if (range) {
                 const parts = range.replace(/bytes=/, "").split("-")
                 const chunkSizeToSend = 100000;
@@ -255,7 +267,7 @@ class MoviesController {
                     }
                     this.lastByteSent = end;
                     const chunksize = ((end - start) > 0 ? (end - start) : -1) + 1
-                    
+
                     const readStream = fs.createReadStream(filePath, { start, end })
 
                     const head = {
@@ -312,7 +324,7 @@ class MoviesController {
         } catch (error) {
             console.error('Error getMovieLoading:', error);
             return res.status(500).json({ message: 'Internal Server Error' });
-        } 
+        }
     };
 
     stopMovieLoading = async (req, res) => {
@@ -425,6 +437,42 @@ class MoviesController {
             console.error('Error getting movie:', error);
             return res.status(500).json({ message: 'Internal Server Error' });
         }
+    };
+
+    addMovieHistory = async (req, res) => {
+        try {
+            const userId = req.user.userId;
+            const { imdbId } = req.body;
+            const seen = await MoviesHistory.findOne({
+                where: {
+                    userId,
+                    imdbId
+                }
+            });
+            if (seen) {
+                return res.status(200).json({ seen });
+            } else {
+                const movieHistory = await MoviesHistory.create({
+                    userId,
+                    imdbId,
+                });
+                return res.status(200).json({ movieHistory });
+            }
+
+        } catch (error) {
+            console.error('Error adding movie history:', error);
+            return res.status(500).json({ message: 'Internal Server Error' });
+        }
+    };
+
+    _isMovieSeen = async (userId, imdbId) => {
+        const movieHistory = await MoviesHistory.findOne({
+            where: {
+                userId,
+                imdbId
+            }
+        });
+        return movieHistory !== null;
     };
 }
 

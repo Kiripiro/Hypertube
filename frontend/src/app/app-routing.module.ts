@@ -13,7 +13,7 @@ import { DetailsComponent } from './details/details.component';
 const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'profile/:username', component: ProfileComponent },
-  { path: 'stream/:movieId', component: DetailsComponent },
+  { path: 'stream/:movieId/:imdbId', component: DetailsComponent },
   { path: 'auth', loadChildren: () => AuthModule },
   { path: 'settings', component: SettingsComponent },
   // { path: 'search', component: SearchComponent },
