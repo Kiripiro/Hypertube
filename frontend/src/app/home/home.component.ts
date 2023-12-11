@@ -53,6 +53,8 @@ export class HomeComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.authService.getLocationWithIp();
+    this.authService.getIpInfos();
     if (this.authService.checkLog()) {
       this.loadMovies();
 

@@ -94,26 +94,29 @@ class StreamController {
                 const chunkSizeToSend = 100000;
                 var start = parseInt(parts[0], 10)
 
-                if (start > fileSize) { //doesn't work, stop streaming
-                    // const start = fileSize - chunkSizeToSend - 1;
-                    // const end = fileSize - 1;
+                if (start > fileSize) {
+                    console.log(red + 'sendRange start > fileSize, start = ' + start + reset);
+                    var end = parts[1] ? parseInt(parts[1], 10) : start + chunkSizeToSend;
+                    if (end > file.expectedFileSize) {
+                        end = file.expectedFileSize - 1;
+                    }
+                    if (start > end) {
+                        start = end - 1;
+                    }
+                    const chunksize = ((end - start) > 0 ? (end - start) : -1) + 1
+                    const startData = fileSize - (chunksize * 4) - 1;
+                    const endData = start + chunksize;
+                    
+                    const readStream = fs.createReadStream(filePath, { startData, endData })
 
-                    // const readStream = fs.createReadStream(filePath, { start, end });
-                    // const chunksize = ((end - start) > 0 ? (end - start) : -1) + 1;
-                    // const head = {
-                    //     'Content-Range': `bytes ${start}-${end}/${expectedFileSize}`,
-                    //     'Accept-Ranges': 'bytes',
-                    //     'Content-Length': chunksize,
-                    //     'Content-Type': 'video/mp4',
-                    // }
-                    // res.writeHead(206, head)
-                    // readStream.pipe(res)
-                    console.log(red + 'sendRange start > fileSize' + reset);
-                    res.writeHead(416, {
-                        'Content-Range': `bytes */${fileSize}`,
-                        'Content-Type': 'text/plain'
-                      });
-                    res.end('Requested Range Not Satisfiable');
+                    const head = {
+                        'Content-Range': `bytes ${start}-${end}/${expectedFileSize}`,
+                        'Accept-Ranges': 'bytes',
+                        'Content-Length': chunksize,
+                        'Content-Type': 'video/mp4',
+                    }
+                    res.writeHead(206, head)
+                    readStream.pipe(res)
                 } else {
 
                     var end = parts[1] ? parseInt(parts[1], 10) : start + chunkSizeToSend;
@@ -243,49 +246,36 @@ class StreamController {
 
 module.exports = new StreamController();
 
-// sortTorrents(torrents, titleLong) {
-//     if (torrents == null || torrents == undefined || torrents.length <= 0) {
-//         return null;
-//     }
-//     let retTab = [];
-//     let retTab2 = [];
-//     console.log("titleLong", titleLong)
-//     const encodedUrl = titleLong.replaceAll(" ", "%20");
-//     for (let i = 0; i < torrents.length; i++) {
-//         // console.log("torrents[i]", torrents[i])
-//         const magnet = `magnet:?xt=urn:btih:${torrents[i].hash}&dn=${encodedUrl}`;
-//         // const magnet = `magnet:?xt=urn:btih:0719223EC1C863C85454DAD4F297F2D35F22B15E&amp;dn=Kla%20Fun%20(2024)&amp;tr=udp%3A%2F%2Fglotorrents.pw%3A6969%2Fannounce&amp;tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&amp;tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&amp;tr=udp%3A%2F%2Fp4p.arenabg.ch%3A1337&amp;tr=udp%3A%2F%2Ftracker.internetwarriors.net%3A1337`
-//         if (torrents[i].quality != undefined && torrents[i].quality == "720p") {
-//             retTab.push(
-//                 {
-//                     magnet: magnet,
-//                     hash: torrents[i].hash,
-//                     quality: torrents[i].quality,
-//                     size_bytes: torrents[i].size_bytes,
-//                     seeds: torrents[i].seeds
-//                 });
-//         }
-//         else {
-//             retTab2.push(
-//                 {
-//                     magnet: magnet,
-//                     hash: torrents[i].hash,
-//                     quality: torrents[i].quality,
-//                     size_bytes: torrents[i].size_bytes,
-//                     seeds: torrents[i].seeds
-//                 });
-//         }
-//     }
-//     retTab = retTab.concat(retTab2);
-//     console.log("retTab 1 ", retTab)
-//     retTab.sort((a, b) => {
-//         return b.seeds - a.seeds
-//     });
-//     console.log("retTab 2 ", retTab)
-//     return retTab;
+
+// if (start > fileSize) { //doesn't work, stop streaming
+    // const start = fileSize - chunkSizeToSend - 1;
+    // const end = fileSize - 1;
+    // const readStream = fs.createReadStream(filePath, { start, end });
+    // const chunksize = ((end - start) > 0 ? (end - start) : -1) + 1;
+    // const head = {
+    //     'Content-Range': `bytes ${start}-${end}/${expectedFileSize}`,
+    //     'Accept-Ranges': 'bytes',
+    //     'Content-Length': chunksize,
+    //     'Content-Type': 'video/mp4',
+    // }
+    // res.writeHead(206, head)
+    // readStream.pipe(res) //don't work
+
+    // res.writeHead(204);
+    // res.end(); //don't work
+
+    // res.writeHead(200, {
+    //     'Content-Length': 0
+    // });
+    // res.end(); //don't work
+
+    // console.log(red + 'sendRange start > fileSize' + reset);
+    // res.writeHead(416, {
+    //     'Content-Range': `bytes */${fileSize}`,
+    //     'Content-Type': 'text/plain'
+    //   });
+    // res.end('Requested Range Not Satisfiable'); //don't work
 // }
-
-
 
 //keep this for now
 

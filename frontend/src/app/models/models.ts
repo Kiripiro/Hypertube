@@ -363,3 +363,18 @@ export interface MovieFileSizeResponse {
 export interface TorrentInfosResponse {
 
 }
+
+// export interface MovieDetailsResponse {
+// 	title: string,
+// 	genre: string,
+// 	imdb_id: omdbData.imdbID,
+// 	imdb_rating: omdbData.imdbRating,
+// 	plot: omdbData.Plot,
+// 	director: omdbData.Director,
+// 	writer: omdbData.Writer,
+// 	actors: omdbData.Actors,
+// 	language: omdbData.Language,
+// 	awards: omdbData.Awards,
+// 	release_date: omdbData.Year,
+// 	yts_id: movie.id
+// }

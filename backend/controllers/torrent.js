@@ -8,6 +8,7 @@ PATH_DOWNLOAD_DIR = "/app/download"
 MIN_BYTES = 30000000;
 
 const green = "\x1b[32m";
+const red = "\x1b[31m";
 const reset = "\x1b[0m";
 
 class Torrent {
