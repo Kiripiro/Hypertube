@@ -19,8 +19,10 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   @Input()
   imdbId!: string;
 
+  color: ThemePalette = 'warn';
+
   MIN_BYTES = 30000000;
-  SECU_BYTES = 5000000;
+  SECU_BYTES = 20000000;
   SECU_TIME = 0;
 
   movieId = 0;
@@ -43,6 +45,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   progressRange: any;
   progressBar: any;
   loadingBar: any;
+  videoControls: any;
 
   videoPlaying = false;
   oldCurrentTime = 0;
@@ -59,6 +62,8 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   thumbLabel = false;
   value = 0;
   isHidden = true;
+  videoCurrentTime = "";
+  videoDuration = "";
 
   constructor(
     private route: ActivatedRoute,
@@ -72,32 +77,15 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.route.params.subscribe(params => {
       console.log("params", params);
-      this.movieId = params['movieId'];
+      this.movieId = params['ytsId'];
       this.imdbId = params['imdbId'];
 
-      console.log("this.movieId", this.movieId)
+      console.log("this.ytsId", this.ytsId)
       console.log("this.imdbId", this.imdbId)
     });
     this.getLoadingMovie();
     this.getMovieFileSize();
-    // this.getStreamingVideo();
     this.videoUrl = this.url + '/movies/movieStream/' + this.movieId;
-  }
-
-  getStreamingVideo() {
-    const streamUrl = this.url + '/movies/movieStream/' + this.movieId;
-    console.log("getStreamingVideo")
-    this.movieService.getStream(this.movieId).subscribe({
-      next: (response) => {
-        console.log("getStream", response)
-        const videoBlob = new Blob([response], { type: 'video/mp4' });
-        const videoUrl = URL.createObjectURL(videoBlob);
-        this.videoUrl = videoUrl;
-      },
-      error: (error) => {
-        console.log(error);
-      }
-    });
   }
 
   ngAfterViewInit() {
@@ -112,10 +100,15 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
     this.progressBar = document.getElementById('progressBar') as HTMLDivElement;
     this.loadingBar = document.getElementById('loadingBar') as HTMLDivElement;
     this.value = this.video.volume * 100;
+    console.log('Video metadata loaded downloadedValue', this.downloadedValue);
     if (this.downloadedValue > 0 && this.downloadedValue < 100) {
       this.loadingBar.style.width = this.downloadedValue + "%";
     }
     this.videoLoaded = true;
+    this.videoControls = document.getElementById('videoControls') as HTMLDivElement;
+    this.videoControls.style.display = "block";
+    this.videoDuration = this._convertSecondsToTime(this.video.duration);
+    this.videoCurrentTime = this._convertSecondsToTime(this.video.currentTime);
   }
 
   togglevideo() {
@@ -140,6 +133,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
     const percentage = (clickPosition / progressRangeWidth) * 100;
     const videoTimeSelected = (percentage * this.video.duration) / 100;
     const videoTimeMax = this.maxProgressBar * this.video.duration / 100;
+    console.log("percentage = " + percentage + ", maxProgressBar = " + this.maxProgressBar + ", videoTimeSelected = " + videoTimeSelected + ", videoTimeMax = " + videoTimeMax);
     if ((videoTimeSelected + this.SECU_TIME) < videoTimeMax) {
       this.video.currentTime = videoTimeSelected;
     }
@@ -157,9 +151,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
       const value = (this.video.currentTime / this.video.duration) * 100;
       this.progressBar.style.width = value + "%";
     }
-    // this.loadingBar.style.width = this.downloadedValue + "%";
-    // currentTime.textContent = formatTime(video.currentTime);
-    // duration.textContent = formatTime(video.duration);
+    this.videoCurrentTime = this._convertSecondsToTime(this.video.currentTime);
   }
 
   ngOnDestroy(): void {
@@ -183,43 +175,43 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   }
 
   getLoadingMovie() {
-    this.movieService.getLoadingMovie(this.movieId).subscribe({
-      next: (response) => {
-        // console.log("getLoadingMovie", response)
-        this.progressValue = Math.floor(response.data.size * 100 / this.MIN_BYTES);
-        this.totalSize = response.data.totalSize;
-
-        if (response.data.size < this.MIN_BYTES && this.router.url == ("/stream/" + this.movieId)) {
-          setTimeout(() => {
-            this.getLoadingMovie();
-          }, 5000);
-        } else if (response.data.size >= this.MIN_BYTES) {
-          this.loaded = true;
+    if (this.router.url == ("/stream/" + this.movieId + "/" + this.imdbId)) {
+      this.movieService.getLoadingMovie(this.movieId).subscribe({
+        next: (response) => {
+          this.progressValue = Math.floor(response.data.size * 100 / this.MIN_BYTES);
+          this.totalSize = response.data.totalSize;
+  
+          if (response.data.size < this.MIN_BYTES && this.router.url == ("/stream/" + this.movieId + "/" + this.imdbId)) {
+            setTimeout(() => {
+              this.getLoadingMovie();
+            }, 5000);
+          } else if (response.data.size >= this.MIN_BYTES) {
+            this.loaded = true;
+          }
+        },
+        error: (error) => {
+          console.log(error);
         }
-      },
-      error: (error) => {
-        console.log(error);
-      }
-    });
+      });
+    }
   }
 
   getMovieFileSize() {
     this.movieService.getMovieFileSize(this.movieId).subscribe({
       next: (response) => {
-        // console.log("getMovieFileSize", response)
+        console.log("getMovieFileSize size = " + response.data.size + ", totalSize = " + this.totalSize);
         const sizeNormalized = (response.data.size - this.SECU_BYTES) / this.totalSize;
-        const value = (response.data.size >= this.totalSize) ? 100 : (sizeNormalized * 100)
+        const value = (this.totalSize <= 0) ? 0 : ((response.data.size >= this.totalSize) ? 100 : (sizeNormalized * 100))
         this.downloadedValue = value;
+        console.log("getMovieFileSize sizeNormalized = " + sizeNormalized);
+        console.log("getMovieFileSize downloadedValue", this.downloadedValue);
         this.maxProgressBar = value;
-        // console.log("getMovieFileSize this.totalSize", this.totalSize)
-        // console.log("getMovieFileSize this.maxProgressBar", this.maxProgressBar)
         if (this.loadingBar) {
-          // console.log("getMovieFileSize this.downloadedValue", this.downloadedValue)
           this.loadingBar.style.width = this.downloadedValue + "%";
         }
-        // console.log("getMovieFileSize this.totalSize", this.totalSize)
+        console.log("getMovieFileSize this.totalSize = " + this.totalSize + ", response.data.size = " + response.data.size);
         if (((this.totalSize > 0 && response.data.size < this.totalSize) || response.data.size == 0)
-              && this.router.url == ("/stream/" + this.movieId)) {
+              && this.router.url == ("/stream/" + this.movieId + "/" + this.imdbId)) {
           setTimeout(() => {
             this.getMovieFileSize();
           }, 1000);
@@ -242,6 +234,38 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
     if (!this.videoLoaded)
       return;
     this.video.volume = this.value / 100;
+  }
+
+  fullScreen() {
+    if (this.downloadedValue >= this.totalSize && this.totalSize > 0)
+      return ;
+    this.video.controls = false;
+    if (!document.fullscreenElement) {
+      if (this.video.requestFullscreen) {
+        this.video.requestFullscreen();
+      } else if (this.video.mozRequestFullScreen) { /* Firefox */
+        this.video.mozRequestFullScreen();
+      } else if (this.video.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
+        this.video.webkitRequestFullscreen();
+      } else if (this.video.msRequestFullscreen) { /* IE/Edge */
+        this.video.msRequestFullscreen();
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+  }
+
+  _convertSecondsToTime(seconds: number): string {
+    const pad = (num: number) => (num < 10 ? '0' : '') + num;
+  
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+  
+    let timeString = pad(hours) + ':' + pad(minutes) + ':' + pad(secs);
+    return timeString;
   }
 
 }

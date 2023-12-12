@@ -72,6 +72,7 @@ class Torrent {
             console.log(red + 'TORRENT torrent.seeds = ' + this.torrents[0].seeds);
         }
         const magnet = this.torrents[0].magnet;
+        console.log(green + 'TORRENT magnet = ' + magnet + reset);
         this.engine = torrentStream(magnet);
 
         this.engine.on('download', data => {

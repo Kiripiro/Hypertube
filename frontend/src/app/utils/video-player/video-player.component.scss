@@ -5,33 +5,53 @@
     height: 100%;
 }
 
+video {
+    border-radius: 20px;
+}
+
 .detailsWait {
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 250px;
-    width: 250px;
-    background-color: $primary;
+    background-color: $test_surface;
     border-radius: 20px;
-    padding: 20px;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    padding-left: 10rem;
+    padding-right: 10rem;
+    @media (max-width: 550px) {
+        padding-left: 3rem;
+        padding-right: 3rem;
+    }
 
     p {
         color: $onPrimary;
         font-size: 2rem;
     }
 
-    mat-spinner {
+    mat-progress-spinner {
         margin-top: 1.5rem;
         margin-bottom: 2rem;
     }
+
+    .mat-warn {
+        --mdc-circular-progress-active-indicator-color: rgb(243, 118, 20);
+    }
+
 }
 
 .video-container {
     position: relative;
+
+    .progressVideoLoading {
+        display: flex;
+        justify-content: center;
+    }
 }
 
-.controls {
+#videoControls {
     position: absolute;
     bottom: 0;
     left: 0;
@@ -40,9 +60,8 @@
     margin-bottom: 0.5rem;
     display: flex;
     flex-direction: column;
-    // justify-content: start;
-    // align-items: center;
     height: 3rem;
+    display: none;
 }
 
 .topControl {
@@ -60,7 +79,7 @@
             top: 0;
             left: 0;
             z-index: 10;
-            background-color: blue;
+            background-color: $test_surfaceAlt;
             width: 0%;
             height: 100%;
             border-radius: 10px;
@@ -71,7 +90,7 @@
             position: absolute;
             top: 0;
             left: 0;
-            background-color: red;
+            background-color: $test_onSurface;
             width: 0%;
             height: 100%;
             border-radius: 10px;
@@ -95,6 +114,15 @@
             height: fit-content;
             width: fit-content;
             color: white;
+        }
+
+        #videoTime {
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 0;
+            margin-left: 0.5rem;
         }
     }
 
@@ -129,6 +157,13 @@
 
                 #volumeSlider {
                     width: 100px;
+                }
+
+                .mat-mdc-slider.mat-warn {
+                    --mdc-slider-handle-color: rgb(243, 118, 20);
+                    --mdc-slider-focus-handle-color: rgb(243, 118, 20);
+                    --mdc-slider-active-track-color: rgb(243, 118, 20);
+                    --mdc-slider-inactive-track-color: rgb(243, 118, 20);
                 }
             }
     
