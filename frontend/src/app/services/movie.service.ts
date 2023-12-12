@@ -40,6 +40,13 @@ export class MoviesService {
     console.log("addMovieHistory", imdbId,);
     return this.http.post<any>(this.url + '/movies/addMovieHistory/', { imdbId }, { withCredentials: true });
   }
+  // getMovieDetails(imdb_id: string): Observable<any> {
+  //   return this.http.get<any>(this.url + '/movies/fetchMovieDetails/' + imdb_id, { withCredentials: true });
+  // }
+
+//   getMovieById(movieId: Number):Observable<GetMovieByIdResponseData> {
+//     return this.http.get<GetMovieByIdResponseData>(this.url + '/movies/' + movieId, { withCredentials: true });
+//   }
 
   //   getMovieById(movieId: Number):Observable<GetMovieByIdResponseData> {
   //     return this.http.get<GetMovieByIdResponseData>(this.url + '/movies/' + movieId, { withCredentials: true });

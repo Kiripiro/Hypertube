@@ -218,4 +218,16 @@ export class AuthService {
   refreshToken(): Observable<any> {
     return this.http.post(this.url + '/user/refreshToken', {}, { withCredentials: true });
   }
+
+  getLocationWithIp() {
+    this.http.get<IpApiResponseData>('http://ip-api.com/json/?fields=status,message,lat,lon').subscribe(data => {
+      console.log("ip-api", data);
+    });
+  }
+
+  getIpInfos() {
+    this.http.get<any>('https://api.ipify.org?format=json').subscribe(data => {
+      console.log("ipify", data);
+    });
+  }
 }
