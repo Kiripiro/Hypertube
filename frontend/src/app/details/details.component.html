@@ -1,6 +1,70 @@
-<div id="mainDiv">
-    <!-- <app-video-player [ytsId]=movieId></app-video-player> -->
-    <!-- <div class="detailsHeader" [style.background-image]="'url(' + movieData.poster + ')'">
-        
-    </div> -->
+<div id="detailsMainDiv">
+    <div class="loading" *ngIf="loading && !error">
+        <mat-spinner></mat-spinner>
+    </div>
+    <div class="error" *ngIf="error">
+        <h1>Oops! Something went wrong.</h1>
+        <p>Try refreshing the page or check your internet connection.</p>
+    </div>
+    <div class="success" *ngIf="!loading && !error && success">
+        <div class="detailsHeader detailsCard">
+            <img [src]="posterUrl" alt="movie poster">
+            <div class="movieDetailsHeader">
+                <h1>{{imdbData.title}}</h1>
+                <p>{{imdbData.release_date}} - {{imdbData.genre}}</p>
+                <div class="rating">
+                    <p>{{imdbData.imdb_rating}}/10</p>
+                </div>
+                <div class="extraDetails">
+                    <p class="plot">{{imdbData.plot}}</p>
+                    <div class="detailsLine">
+                        <p>Director:</p>
+                        <p>{{imdbData.director}}</p>
+                    </div>
+                    <div class="detailsLine">
+                        <p>Actors:</p>
+                        <p>{{imdbData.actors}}</p>
+                    </div>
+                    <div class="detailsLine">
+                        <p>Writer:</p>
+                        <p>{{imdbData.writer}}</p>
+                    </div>
+                    <div class="detailsLine">
+                        <p>Language:</p>
+                        <p>{{imdbData.language}}</p>
+                    </div>
+                    <div class="detailsLine">
+                        <p>Awards:</p>
+                        <p>{{imdbData.awards}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="videoDiv detailsCard">
+            <app-video-player [ytsId]=ytsId></app-video-player>
+        </div>
+        <div class="extraDetails detailsCard footerDetails">
+            <p class="plot">{{imdbData.plot}}</p>
+            <div class="detailsLine">
+                <p>Director:</p>
+                <p>{{imdbData.director}}</p>
+            </div>
+            <div class="detailsLine">
+                <p>Actors:</p>
+                <p>{{imdbData.actors}}</p>
+            </div>
+            <div class="detailsLine">
+                <p>Writer:</p>
+                <p>{{imdbData.writer}}</p>
+            </div>
+            <div class="detailsLine">
+                <p>Language:</p>
+                <p>{{imdbData.language}}</p>
+            </div>
+            <div class="detailsLine">
+                <p>Awards:</p>
+                <p>{{imdbData.awards}}</p>
+            </div>
+        </div>
+    </div>
 </div>

@@ -3,27 +3,31 @@
         <p>
             Loading...
         </p>
-        <mat-spinner></mat-spinner>
-        <!-- <mat-progress-spinner
-            class="detailsWaitSpinner"
+        <mat-progress-spinner
             [color]="color"
-            [mode]="mode"
-            [value]="progressValue">
-        </mat-progress-spinner> -->
-        <p>
+            mode="indeterminate">
+        </mat-progress-spinner>
+        <p *ngIf="progressValue > 0">
             {{this.progressValue}}%
         </p>
     </div>
     <div class="detailsMovie" *ngIf="loaded">
         <div class="video-container">
-            <video width="600" id="videoPlayerOrigin"
+            <div class="progressVideoLoading" *ngIf="!videoLoaded">
+                <mat-progress-spinner
+                    [color]="color"
+                    mode="indeterminate">
+                </mat-progress-spinner>
+            </div>
+            <video id="videoPlayerOrigin"
             (timeupdate)="onTimeUpdate()"
             (loadedmetadata)="onVideoLoad()"
-            preload="auto">
+            preload="auto"
+            width="100%">
                 <source [src]="videoUrl" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
-            <div class="controls">
+            <div id="videoControls">
                 <div class="topControl">
                     <div id="progressRange" (click)="changeSeekBar($event)" title="Seek">
                         <div id="loadingBar"></div>
@@ -33,6 +37,7 @@
                 <div class="bottomControl">
                     <div class="bottonControlLeft">
                         <mat-icon (click)="togglevideo()" id="videoPlayButton">{{videoPlayButtonIcon}}</mat-icon>
+                        <p id="videoTime">{{videoCurrentTime}} / {{videoDuration}}</p>
                     </div>
                     <div class="bottonControlRight">
                         <div class="volume-control">
@@ -46,12 +51,13 @@
                                     [step]="step"
                                     [discrete]="thumbLabel"
                                     [showTickMarks]="showTicks"
+                                    [color]="color"
                                     vertical>
                                 <input matSliderThumb [(ngModel)]="value" (input)="onChangeVolume($event)" #slider>
                                 </mat-slider>
                             </div>
                         </div>
-                        <mat-icon id="fullscreenButton">fullscreen</mat-icon>
+                        <mat-icon (click)="fullScreen()" id="fullscreenButton">fullscreen</mat-icon>
                     </div>
                 </div>
             </div>
