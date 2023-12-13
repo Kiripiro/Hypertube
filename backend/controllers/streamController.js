@@ -91,10 +91,14 @@ class StreamController {
             
             if (range) {
                 const parts = range.replace(/bytes=/, "").split("-")
-                const chunkSizeToSend = 100000;
+                const fileSizeSecuNormalized = 0.95;
+                var chunkSizeToSend = 100000;
                 var start = parseInt(parts[0], 10)
-
-                if (start > fileSize) {
+                const startNormalized = start / fileSize;
+                if (startNormalized >= fileSizeSecuNormalized) {
+                    chunkSizeToSend = 10000;
+                }
+                if (start >= fileSize) {
                     console.log(red + 'sendRange start > fileSize, start = ' + start + reset);
                     var end = parts[1] ? parseInt(parts[1], 10) : start + chunkSizeToSend;
                     if (end > file.expectedFileSize) {
@@ -125,6 +129,7 @@ class StreamController {
                     }
                     if (start > end) {
                         console.log("AIE")
+                        console.log("start" + start + " end" + end + " fileSize" + fileSize);
                         start = end - 1;
                     }
                     this.lastByteSent = end;
