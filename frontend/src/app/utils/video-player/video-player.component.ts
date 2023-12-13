@@ -7,6 +7,7 @@ import { ProgressSpinnerMode } from '@angular/material/progress-spinner';
 import { VgApiService } from '@videogular/ngx-videogular/core';
 import { MoviesService } from 'src/app/services/movie.service';
 import { HttpClient } from '@angular/common/http';
+import { DialogService } from 'src/app/services/dialog.service';
 
 @Component({
   selector: 'app-video-player',
@@ -21,8 +22,8 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
 
   color: ThemePalette = 'warn';
 
-  MIN_BYTES = 30000000;
-  SECU_BYTES = 20000000;
+  MIN_BYTES = 150000000;
+  SECU_BYTES = 100000000;
   SECU_TIME = 0;
 
   movieId = 0;
@@ -51,6 +52,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   oldCurrentTime = 0;
 
   maxProgressBar = 1000;
+  bytesPerSeconds = 0;
 
   //volumeSlider
   showVolume = false;
@@ -69,7 +71,8 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
     private route: ActivatedRoute,
     private movieService: MoviesService,
     private router: Router,
-    private http: HttpClient
+    private http: HttpClient,
+    private dialogService: DialogService,
   ) {
     this.url = environment.backendUrl || 'http://localhost:3000';
   }
@@ -109,12 +112,18 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
     this.videoControls.style.display = "block";
     this.videoDuration = this._convertSecondsToTime(this.video.duration);
     this.videoCurrentTime = this._convertSecondsToTime(this.video.currentTime);
+    this.bytesPerSeconds = this.totalSize / this.video.duration;
   }
 
   togglevideo() {
     if (!this.videoLoaded)
       return;
     if (!this.videoPlaying) {
+      const videoTimeMax = this.maxProgressBar * this.video.duration / 100;
+      if (this.video.currentTime >= videoTimeMax) {
+        console.log("force pause togglevideo")
+        return ;
+      }
       this.video.play();
       this.videoPlaying = true;
       this.videoPlayButtonIcon = "pause";
@@ -133,7 +142,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
     const percentage = (clickPosition / progressRangeWidth) * 100;
     const videoTimeSelected = (percentage * this.video.duration) / 100;
     const videoTimeMax = this.maxProgressBar * this.video.duration / 100;
-    console.log("percentage = " + percentage + ", maxProgressBar = " + this.maxProgressBar + ", videoTimeSelected = " + videoTimeSelected + ", videoTimeMax = " + videoTimeMax);
+    console.log("percentage = " + percentage + ", maxProgressBar = " + this.maxProgressBar + ", videoTimeSelected = " + videoTimeSelected + ", videoTimeMax = " + videoTimeMax + ", this.totalSize = " + this.totalSize);
     if ((videoTimeSelected + this.SECU_TIME) < videoTimeMax) {
       this.video.currentTime = videoTimeSelected;
     }
@@ -145,6 +154,18 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
     const videoTimeMax = this.maxProgressBar * this.video.duration / 100;
     if (this.video.currentTime > videoTimeMax) {
       this.video.currentTime = this.oldCurrentTime;
+      console.log("force pause onTimeUpdate 1")
+      this.video.pause();
+      this.videoPlaying = false;
+      this.videoPlayButtonIcon = "play_arrow";
+      const data = {
+        title: 'Download error',
+        text: 'There is an issue with the download. This may be due to an internet connection problem.',
+        text_yes_button: 'Ok',
+        yes_callback: () => { },
+        reload: false,
+      };
+      this.dialogService.openDialog(data);
     }
     else {
       this.oldCurrentTime = this.video.currentTime;
@@ -152,6 +173,12 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
       this.progressBar.style.width = value + "%";
     }
     this.videoCurrentTime = this._convertSecondsToTime(this.video.currentTime);
+    if (this.videoPlaying && this.video.currentTime >= videoTimeMax) {
+      console.log("force pause onTimeUpdate 2")
+      this.video.pause();
+      this.videoPlaying = false;
+      this.videoPlayButtonIcon = "play_arrow";
+    }
   }
 
   ngOnDestroy(): void {
@@ -178,6 +205,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
     if (this.router.url == ("/stream/" + this.movieId + "/" + this.imdbId)) {
       this.movieService.getLoadingMovie(this.movieId).subscribe({
         next: (response) => {
+          console.log("getLoadingMovie", response.data);
           this.progressValue = Math.floor(response.data.size * 100 / this.MIN_BYTES);
           this.totalSize = response.data.totalSize;
   
@@ -199,17 +227,17 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   getMovieFileSize() {
     this.movieService.getMovieFileSize(this.movieId).subscribe({
       next: (response) => {
-        console.log("getMovieFileSize size = " + response.data.size + ", totalSize = " + this.totalSize);
+        // console.log("getMovieFileSize size = " + response.data.size + ", totalSize = " + this.totalSize);
         const sizeNormalized = (response.data.size - this.SECU_BYTES) / this.totalSize;
         const value = (this.totalSize <= 0) ? 0 : ((response.data.size >= this.totalSize) ? 100 : (sizeNormalized * 100))
         this.downloadedValue = value;
-        console.log("getMovieFileSize sizeNormalized = " + sizeNormalized);
-        console.log("getMovieFileSize downloadedValue", this.downloadedValue);
-        this.maxProgressBar = value;
+        // console.log("getMovieFileSize sizeNormalized = " + sizeNormalized);
+        // console.log("getMovieFileSize downloadedValue", this.downloadedValue);
+        this.maxProgressBar = value >= 100 ? 100 : value;
         if (this.loadingBar) {
           this.loadingBar.style.width = this.downloadedValue + "%";
         }
-        console.log("getMovieFileSize this.totalSize = " + this.totalSize + ", response.data.size = " + response.data.size);
+        // console.log("getMovieFileSize this.totalSize = " + this.totalSize + ", response.data.size = " + response.data.size);
         if (((this.totalSize > 0 && response.data.size < this.totalSize) || response.data.size == 0)
               && this.router.url == ("/stream/" + this.movieId + "/" + this.imdbId)) {
           setTimeout(() => {
