@@ -16,12 +16,8 @@ export class SearchService {
     this.url = environment.backendUrl || 'http://localhost:3000';
   }
 
-  getCities(): Observable<GetCitiesResponseData> {
-    return this.http.get<GetCitiesResponseData>(this.url + '/users/cities', { withCredentials: true });
-  }
-
-  getSearchResult(age: string, fameRating: string, location: string, tags: string): Observable<GetSearchResultResponseData> {
-    return this.http.get<GetSearchResultResponseData>(this.url + '/users/search/' + age + "/" + fameRating + "/" + location + "/" + tags, { withCredentials: true });
+  getAllUsernames(): Observable<GetSearchResultResponseData> {
+    return this.http.get<any>(this.url + '/user/allUsernames', { withCredentials: true });
   }
 
 }

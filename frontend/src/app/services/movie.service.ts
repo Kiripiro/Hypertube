@@ -36,9 +36,9 @@ export class MoviesService {
     return this.http.get<any>(this.url + '/movies/movieStream/' + movieId, { withCredentials: true });
   }
 
-  addMovieHistory(imdbId: String): Observable<any> {
+  addMovieHistory(imdbId: String, title: String): Observable<any> {
     console.log("addMovieHistory", imdbId,);
-    return this.http.post<any>(this.url + '/movies/addMovieHistory/', { imdbId }, { withCredentials: true });
+    return this.http.post<any>(this.url + '/movies/addMovieHistory/', { imdbId, title }, { withCredentials: true });
   }
   
   getMovieDetails(imdbId: Number): Observable<MovieDetailsResponse> {
@@ -49,11 +49,11 @@ export class MoviesService {
 //     return this.http.get<GetMovieByIdResponseData>(this.url + '/movies/' + movieId, { withCredentials: true });
 //   }
 
-  //   getMovieById(movieId: Number):Observable<GetMovieByIdResponseData> {
-  //     return this.http.get<GetMovieByIdResponseData>(this.url + '/movies/' + movieId, { withCredentials: true });
-  //   }
+  getMovieHistory(): Observable<any> {
+    return this.http.get<any>(this.url + '/movies/getMovieHistory/', { withCredentials: true });
+  }
 
-  //   getMovieStream(movieId: Number):Observable<GetMovieByIdResponseData> {
-  //     return this.http.get<GetMovieByIdResponseData>(this.url + '/movies/stream/' + movieId, { withCredentials: true });
-  //   }
+  getMovieHistoryById(id: Number): Observable<any> {
+    return this.http.get<any>(this.url + '/movies/getMovieHistoryById/' + id, { withCredentials: true });
+  }
 }

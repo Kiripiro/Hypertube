@@ -2,7 +2,7 @@ const { User, InvalidTokens, Comments } = require('../models');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid')
-const axios = require('axios');
+const axiosInstance = require('../config/openVpn');
 
 const { OAuth2Client } = require('google-auth-library');
 const client = new OAuth2Client();
@@ -127,7 +127,7 @@ class UserController {
     login42 = async (req, res) => {
         try {
             const { code } = req.body;
-            const response = await axios.post('https://api.intra.42.fr/oauth/token', {
+            const response = await axiosInstance.post('https://api.intra.42.fr/oauth/token', {
                 grant_type: 'authorization_code',
                 client_id: process.env.CLIENT_UID_42,
                 client_secret: process.env.CLIENT_SECRET_42,
@@ -136,7 +136,7 @@ class UserController {
             });
             const accessToken = response.data.access_token;
             const headers = { Authorization: 'Bearer ' + accessToken };
-            const user = await axios.get('https://api.intra.42.fr/v2/me', {
+            const user = await axiosInstance.get('https://api.intra.42.fr/v2/me', {
                 headers: headers
             });
             const userExists = await User.findOne({ where: { email: user.data.email } });
@@ -340,6 +340,17 @@ class UserController {
             return res.status(500).json({ message: 'Internal Server Error' });
         }
     };
+
+    async getAllUsernames(req, res) {
+        try {
+            const users = await User.findAll();
+            const usernames = users.map(user => user.username);
+            return res.status(200).json({ message: 'Usernames found', usernames: usernames });
+        } catch (error) {
+            console.error('Error getting usernames:', error);
+            return res.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
 
     async settingsUpdateInfos(req, res) {
         try {

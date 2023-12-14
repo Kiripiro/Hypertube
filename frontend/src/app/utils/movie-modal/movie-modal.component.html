@@ -30,7 +30,7 @@
                         {{ data.imdb_id }}</a></p>
                 <p *ngIf="data.imdb_rating"><strong>IMDb Rating:</strong> {{ data.imdb_rating }} / 10</p>
                 <button mat-button (click)="close()"
-                    [routerLink]="['stream/' + ytsId + '/' + data.imdb_id]">Watch</button>
+                    [routerLink]="['stream/' + ytsId + '/' + data.imdb_id + '/' + data.title]">Watch</button>
             </div>
         </div>
         <div *ngIf="showComments" mat-dialog-content>

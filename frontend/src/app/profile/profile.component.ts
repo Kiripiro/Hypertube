@@ -3,10 +3,8 @@ import { LocalStorageService, localStorageName } from '../services/local-storage
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
-import { MatIconModule } from '@angular/material/icon';
-import { RelationService } from 'src/app/services/relation.service';
-import { ElementListData, User } from 'src/app/models/models';
 import { DialogService } from 'src/app/services/dialog.service';
+import { MoviesService } from '../services/movie.service';
 
 @Component({
   selector: 'app-profile',
@@ -21,11 +19,12 @@ export class ProfileComponent implements OnInit {
   error = false;
   personalProfil = false;
   private id: number;
+  movieHistory: [] = [];
 
   constructor(
     private localStorageService: LocalStorageService,
     private authService: AuthService,
-    private relationService: RelationService,
+    private movieService: MoviesService,
     private dialogService: DialogService,
     private router: Router,
     private route: ActivatedRoute
@@ -54,6 +53,27 @@ export class ProfileComponent implements OnInit {
             this.userInfos.avatar = "data:image/png;base64," + this.userInfos.avatar;
           }
           this.loading = false;
+          if (this.personalProfil) {
+            this.movieService.getMovieHistory().subscribe({
+              next: (response) => {
+                this.movieHistory = response.movieHistory.map((movie: any) => { return movie.title });
+                console.log("movieHistory", this.movieHistory);
+              },
+              error: (error) => {
+                console.log(error);
+              }
+            });
+          } else {
+            this.movieService.getMovieHistoryById(this.userInfos.id).subscribe({
+              next: (response) => {
+                this.movieHistory = response.movieHistory.map((movie: any) => { return movie.title });
+                console.log("movieHistory", this.movieHistory);
+              },
+              error: (error) => {
+                console.log(error);
+              }
+            });
+          }
         },
         error: (error) => {
           console.log(error);
@@ -72,6 +92,7 @@ export class ProfileComponent implements OnInit {
         }
       });
     });
+
   }
 
   ngOnInit(): void {

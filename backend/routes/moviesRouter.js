@@ -68,5 +68,21 @@ moviesRouter.post('/addMovieHistory', auth, async (req, res) => {
     }
 });
 
+moviesRouter.get('/getMovieHistory', auth, async (req, res) => {
+    try {
+        await MoviesController.getMovieHistory(req, res);
+    } catch (error) {
+        console.error(error);
+    }
+});
+
+moviesRouter.get('/getMovieHistoryById/:id', auth, async (req, res) => {
+    try {
+        await MoviesController.getMovieHistory(req, res);
+    } catch (error) {
+        console.error(error);
+    }
+});
+
 
 module.exports = moviesRouter;

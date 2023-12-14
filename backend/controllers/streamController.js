@@ -1,5 +1,5 @@
 require('dotenv').config();
-const axios = require('axios');
+const axiosInstance = require('../config/openVpn');
 const fs = require('fs');
 const Torrent = require('./torrent');
 const MovieFile = require('./movieFile');
@@ -27,11 +27,11 @@ class StreamController {
                 const size = torrent.getDownloadedSize();
                 const totalSize = torrent.fileSize;
                 console.log(blue + 'streamLauncher torrent exist and started. size: ' + size + ' totalSize: ' + totalSize + '' + reset);
-                return res.status(200).json({ data: { size: size, totalSize: totalSize} });
+                return res.status(200).json({ data: { size: size, totalSize: totalSize } });
             } else {
                 if (!torrent) {
                     console.log(blue + 'streamLauncher torrent not exist' + reset);
-                    const ytsApiResponse = await axios.get(`${process.env.TORRENT_API}${YTS_MOVIE_DETAUILS_URL}${ytsId}`);
+                    const ytsApiResponse = await axiosInstance.get(`${process.env.TORRENT_API}${YTS_MOVIE_DETAUILS_URL}${ytsId}`);
                     if (!ytsApiResponse || !ytsApiResponse.data || !ytsApiResponse.data.data || !ytsApiResponse.data.data.movie) {
                         console.error('Error streamLauncher with YTS API response');
                         return res.status(400).json({ error: 'Error with YTS API response' });
@@ -39,7 +39,7 @@ class StreamController {
                     const sortedTorrents = TorrentHelper.sortTorrents(
                         ytsApiResponse.data.data.movie.torrents,
                         ytsApiResponse.data.data.movie.title_long
-                        );
+                    );
                     if (sortedTorrents == null) {
                         console.error('Error streamLauncher with YTS API response');
                         return res.status(400).json({ error: 'Error with YTS API torrent response' });
@@ -50,7 +50,7 @@ class StreamController {
                 if (!torrent.downloadStarted) {
                     console.log(blue + 'streamLauncher torrent not started' + reset);
                     torrent.startDownload(
-                        () => {},
+                        () => { },
                         () => {
                             const file = this.fileTab.find(it => it.fileName == (torrent ? (torrent.torrentName ? torrent.torrentName : "") : ""));
                             if (!file) {
@@ -58,13 +58,13 @@ class StreamController {
                                 this.fileTab.push(newFile);
                             }
                         },
-                        () => {}
+                        () => { }
                     );
                 }
                 const size = torrent.getDownloadedSize();
                 const totalSize = torrent.fileSize;
                 console.log(blue + 'streamLauncher torrent not exist and/or not started. size: ' + size + ' totalSize: ' + totalSize + reset);
-                return res.status(200).json({ data: { size: size, totalSize: totalSize} });
+                return res.status(200).json({ data: { size: size, totalSize: totalSize } });
             }
         } catch (error) {
             console.error('Error streamLauncher:', error);
@@ -88,7 +88,7 @@ class StreamController {
             const stat = fs.statSync(filePath)
             const fileSize = stat.size
             const expectedFileSize = file.expectedFileSize;
-            
+
             if (range) {
                 const parts = range.replace(/bytes=/, "").split("-")
                 const fileSizeSecuNormalized = 0.95;
@@ -110,7 +110,7 @@ class StreamController {
                     const chunksize = ((end - start) > 0 ? (end - start) : -1) + 1
                     const startData = fileSize - (chunksize * 4) - 1;
                     const endData = start + chunksize;
-                    
+
                     const readStream = fs.createReadStream(filePath, { startData, endData })
 
                     const head = {
@@ -134,7 +134,7 @@ class StreamController {
                     }
                     this.lastByteSent = end;
                     const chunksize = ((end - start) > 0 ? (end - start) : -1) + 1
-                    
+
                     const readStream = fs.createReadStream(filePath, { start, end })
 
                     const head = {
@@ -189,7 +189,7 @@ class StreamController {
         } catch (error) {
             console.error('Error getFileSize:', error);
             return res.status(500).json({ message: 'Internal Server Error' });
-        } 
+        }
     };
 
     stopStream = async (req, res) => {
@@ -214,7 +214,7 @@ class StreamController {
         try {
             const ytsId = req.params.id;
             const moveDetailsUrl = 'movie_details.json?movie_id=';
-            const ytsApiResponse = await axios.get(`${process.env.TORRENT_API}${moveDetailsUrl}${ytsId}`);
+            const ytsApiResponse = await axiosInstanceInstance.get(`${process.env.TORRENT_API}${moveDetailsUrl}${ytsId}`);
             if (!ytsApiResponse || !ytsApiResponse.data || !ytsApiResponse.data.data || !ytsApiResponse.data.data.movie) {
                 return res.status(400).json({ error: 'Error with YTS API response' });
             }
@@ -251,36 +251,79 @@ class StreamController {
 
 module.exports = new StreamController();
 
-
 // if (start > fileSize) { //doesn't work, stop streaming
-    // const start = fileSize - chunkSizeToSend - 1;
-    // const end = fileSize - 1;
-    // const readStream = fs.createReadStream(filePath, { start, end });
-    // const chunksize = ((end - start) > 0 ? (end - start) : -1) + 1;
-    // const head = {
-    //     'Content-Range': `bytes ${start}-${end}/${expectedFileSize}`,
-    //     'Accept-Ranges': 'bytes',
-    //     'Content-Length': chunksize,
-    //     'Content-Type': 'video/mp4',
-    // }
-    // res.writeHead(206, head)
-    // readStream.pipe(res) //don't work
-
-    // res.writeHead(204);
-    // res.end(); //don't work
-
-    // res.writeHead(200, {
-    //     'Content-Length': 0
-    // });
-    // res.end(); //don't work
-
-    // console.log(red + 'sendRange start > fileSize' + reset);
-    // res.writeHead(416, {
-    //     'Content-Range': `bytes */${fileSize}`,
-    //     'Content-Type': 'text/plain'
-    //   });
-    // res.end('Requested Range Not Satisfiable'); //don't work
+// const start = fileSize - chunkSizeToSend - 1;
+// const end = fileSize - 1;
+// const readStream = fs.createReadStream(filePath, { start, end });
+// const chunksize = ((end - start) > 0 ? (end - start) : -1) + 1;
+// const head = {
+//     'Content-Range': `bytes ${start}-${end}/${expectedFileSize}`,
+//     'Accept-Ranges': 'bytes',
+//     'Content-Length': chunksize,
+//     'Content-Type': 'video/mp4',
 // }
+// res.writeHead(206, head)
+// readStream.pipe(res) //don't work
+
+// res.writeHead(204);
+// res.end(); //don't work
+
+// res.writeHead(200, {
+//     'Content-Length': 0
+// });
+// res.end(); //don't work
+
+// console.log(red + 'sendRange start > fileSize' + reset);
+// res.writeHead(416, {
+//     'Content-Range': `bytes */${fileSize}`,
+//     'Content-Type': 'text/plain'
+//   });
+// res.end('Requested Range Not Satisfiable'); //don't work
+// }
+
+// sortTorrents(torrents, titleLong) {
+//     if (torrents == null || torrents == undefined || torrents.length <= 0) {
+//         return null;
+//     }
+//     let retTab = [];
+//     let retTab2 = [];
+//     console.log("titleLong", titleLong)
+//     const encodedUrl = titleLong.replaceAll(" ", "%20");
+//     for (let i = 0; i < torrents.length; i++) {
+//         // console.log("torrents[i]", torrents[i])
+//         const magnet = `magnet:?xt=urn:btih:${torrents[i].hash}&dn=${encodedUrl}`;
+//         // const magnet = `magnet:?xt=urn:btih:0719223EC1C863C85454DAD4F297F2D35F22B15E&amp;dn=Kla%20Fun%20(2024)&amp;tr=udp%3A%2F%2Fglotorrents.pw%3A6969%2Fannounce&amp;tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&amp;tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&amp;tr=udp%3A%2F%2Fp4p.arenabg.ch%3A1337&amp;tr=udp%3A%2F%2Ftracker.internetwarriors.net%3A1337`
+//         if (torrents[i].quality != undefined && torrents[i].quality == "720p") {
+//             retTab.push(
+//                 {
+//                     magnet: magnet,
+//                     hash: torrents[i].hash,
+//                     quality: torrents[i].quality,
+//                     size_bytes: torrents[i].size_bytes,
+//                     seeds: torrents[i].seeds
+//                 });
+//         }
+//         else {
+//             retTab2.push(
+//                 {
+//                     magnet: magnet,
+//                     hash: torrents[i].hash,
+//                     quality: torrents[i].quality,
+//                     size_bytes: torrents[i].size_bytes,
+//                     seeds: torrents[i].seeds
+//                 });
+//         }
+//     }
+//     retTab = retTab.concat(retTab2);
+//     console.log("retTab 1 ", retTab)
+//     retTab.sort((a, b) => {
+//         return b.seeds - a.seeds
+//     });
+//     console.log("retTab 2 ", retTab)
+//     return retTab;
+// }
+
+
 
 //keep this for now
 
@@ -304,7 +347,7 @@ module.exports = new StreamController();
 //             if (!torrent) {
 //                 console.log("Torrent not exist");
 //                 const moveDetailsUrl = 'movie_details.json?movie_id=';
-//                 const ytsApiResponse = await axios.get(`${process.env.TORRENT_API}${moveDetailsUrl}${ytsId}`);
+//                 const ytsApiResponse = await axiosInstanceInstance.get(`${process.env.TORRENT_API}${moveDetailsUrl}${ytsId}`);
 //                 if (!ytsApiResponse || !ytsApiResponse.data || !ytsApiResponse.data.data || !ytsApiResponse.data.data.movie) {
 //                     return res.status(400).json({ error: 'Error with YTS API response' });
 //                 }

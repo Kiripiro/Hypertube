@@ -18,12 +18,14 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   @Input()
   ytsId!: number;
   @Input()
-  imdbId!: string;
+  imdbId!: any;
+  @Input()
+  movieTitle!: any;
 
   color: ThemePalette = 'warn';
 
-  MIN_BYTES = 150000000;
-  SECU_BYTES = 100000000;
+  MIN_BYTES = 30000000;
+  SECU_BYTES = 5000000;
   SECU_TIME = 0;
 
   movieId = 0;
@@ -82,9 +84,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
       console.log("params", params);
       this.movieId = params['ytsId'];
       this.imdbId = params['imdbId'];
-
-      console.log("this.ytsId", this.ytsId)
-      console.log("this.imdbId", this.imdbId)
+      this.movieTitle = params['title'];
     });
     this.getLoadingMovie();
     this.getMovieFileSize();
@@ -122,7 +122,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
       const videoTimeMax = this.maxProgressBar * this.video.duration / 100;
       if (this.video.currentTime >= videoTimeMax) {
         console.log("force pause togglevideo")
-        return ;
+        return;
       }
       this.video.play();
       this.videoPlaying = true;
@@ -191,7 +191,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
       }
     });
     console.log('ngOnDestroy');
-    this.movieService.addMovieHistory(this.imdbId).subscribe({
+    this.movieService.addMovieHistory(this.imdbId, this.movieTitle).subscribe({
       next: (response) => {
         console.log("addMovieHistory", response.seen);
       },
@@ -208,7 +208,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
           console.log("getLoadingMovie", response.data);
           this.progressValue = Math.floor(response.data.size * 100 / this.MIN_BYTES);
           this.totalSize = response.data.totalSize;
-  
+
           if (response.data.size < this.MIN_BYTES && this.router.url == ("/stream/" + this.movieId + "/" + this.imdbId)) {
             setTimeout(() => {
               this.getLoadingMovie();
@@ -239,7 +239,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
         }
         // console.log("getMovieFileSize this.totalSize = " + this.totalSize + ", response.data.size = " + response.data.size);
         if (((this.totalSize > 0 && response.data.size < this.totalSize) || response.data.size == 0)
-              && this.router.url == ("/stream/" + this.movieId + "/" + this.imdbId)) {
+          && this.router.url == ("/stream/" + this.movieId + "/" + this.imdbId)) {
           setTimeout(() => {
             this.getMovieFileSize();
           }, 1000);
@@ -266,7 +266,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
 
   fullScreen() {
     if (this.downloadedValue >= this.totalSize && this.totalSize > 0)
-      return ;
+      return;
     this.video.controls = false;
     if (!document.fullscreenElement) {
       if (this.video.requestFullscreen) {
@@ -287,11 +287,11 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
 
   _convertSecondsToTime(seconds: number): string {
     const pad = (num: number) => (num < 10 ? '0' : '') + num;
-  
+
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = Math.floor(seconds % 60);
-  
+
     let timeString = pad(hours) + ':' + pad(minutes) + ':' + pad(secs);
     return timeString;
   }

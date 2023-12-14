@@ -76,6 +76,14 @@ userRouter.get('/id', auth, async (req, res) => {
     }
 });
 
+userRouter.get('/allUsernames', auth, async (req, res) => {
+    try {
+        await UserController.getAllUsernames(req, res);
+    } catch (error) {
+        console.error(error);
+    }
+});
+
 userRouter.post('/settingsUpdate', auth, async (req, res) => {
     try {
         await UserController.settingsUpdateInfos(req, res);

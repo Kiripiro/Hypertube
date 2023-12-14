@@ -7,7 +7,14 @@
         <div class="mainDivProfil" id="mainDivPersonnal">
             <p id="infos">{{userInfos.firstName}} {{userInfos.lastName}} - {{userInfos.username}}</p>
         </div>
-        <!-- Ajouter films vus et likes ? -->
+        <div class="movieHistory">
+            <p class="title">Movies seen</p>
+            <ul>
+                @for (movie of movieHistory; track movie) {
+                <li>{{movie}}</li>
+                }
+            </ul>
+        </div>
     </div>
     <div class="errorCard" *ngIf="error">
         <p>User not found</p>

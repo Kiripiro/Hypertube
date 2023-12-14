@@ -1,6 +1,6 @@
 const { MoviesHistory } = require('../models');
 require('dotenv').config();
-const axios = require('axios');
+const axiosInstance = require('../config/openVpn');
 const fs = require('fs');
 const Torrent = require('./torrent');
 const MovieFile = require('./movieFile');
@@ -30,7 +30,19 @@ class MoviesController {
         const omdbApiUrl = 'http://www.omdbapi.com/';
 
         try {
-            const { data } = await axios.get(torrentApiUrl, {
+            // const { data } = await axiosInstance.get(torrentApiUrl, {
+            //     params: {
+            //         limit: params.limit,
+            //         page: params.page,
+            //         query_term: params.query_term,
+            //         genre: params.genre,
+            //         sort_by: params.sort_by,
+            //         order_by: params.order_by,
+            //         quality: params.quality,
+            //         minimum_rating: params.minimum_rating
+            //     }
+            // });
+            const response = await axiosInstance.get(torrentApiUrl, {
                 params: {
                     limit: params.limit,
                     page: params.page,
@@ -42,6 +54,7 @@ class MoviesController {
                     minimum_rating: params.minimum_rating
                 }
             });
+            console.log(response.headers);
             const { movie_count, movies } = data.data;
             if (movie_count === 0) {
                 return res.status(200).json({ movies: [], hasMore: false });
@@ -69,7 +82,8 @@ class MoviesController {
                             return data;
                         } else {
                             try {
-                                const omdbResponse = await axios.get(`${omdbApiUrl}?i=${movie.imdb_code}&apikey=${process.env.OMDB_API_KEY}`);
+                                const omdbResponse = await axiosInstance.get(`${omdbApiUrl}?i=${movie.imdb_code}&apikey=${process.env.OMDB_API_KEY}`);
+                                console.log("omdbResponse", omdbResponse);
                                 const omdbData = omdbResponse.data;
 
                                 if (omdbData.Poster === 'N/A' || omdbData.Poster === undefined) {
@@ -103,13 +117,13 @@ class MoviesController {
     fetchMovieDetails = async (req, res) => {
         const { imdb_id } = req.params;
         const omdbApiUrl = 'http://www.omdbapi.com/';
-
         try {
-            const omdbResponse = await axios.get(`${omdbApiUrl}?i=${imdb_id}&apikey=${process.env.OMDB_API_KEY}`);
-
+            const omdbResponse = await axiosInstance.get(`${omdbApiUrl}?i=${imdb_id}&apikey=${process.env.OMDB_API_KEY}`);
+            console.log("omdbResponse", omdbResponse);
             const omdbData = omdbResponse.data;
             return res.status(200).json({ movie: this._filteredMovieData(omdbData) });
         } catch (error) {
+            console.log("error", error);
             console.error(`Error fetching OMDB data for movie with imdb_id ${imdb_id}: ${error.message}`);
             return res.status(200).json({ movie: {} });
         }
@@ -117,7 +131,7 @@ class MoviesController {
 
     _isImageAvailable = async (imageUrl) => {
         try {
-            const response = await axios.head(imageUrl);
+            const response = await axiosInstance.head(imageUrl);
             return response.status === 200;
         } catch (error) {
             return false;
@@ -160,7 +174,7 @@ class MoviesController {
                 if (!torrent) {
                     console.log("getMovieLoading Torrent not exist");
                     const moveDetailsUrl = 'movie_details.json?movie_id=';
-                    const ytsApiResponse = await axios.get(`${process.env.TORRENT_API}${moveDetailsUrl}${ytsId}`);
+                    const ytsApiResponse = await axiosInstance.get(`${process.env.TORRENT_API}${moveDetailsUrl}${ytsId}`);
                     if (!ytsApiResponse || !ytsApiResponse.data || !ytsApiResponse.data.data || !ytsApiResponse.data.data.movie) {
                         return res.status(400).json({ error: 'Error with YTS API response' });
                     }
@@ -350,7 +364,7 @@ class MoviesController {
         try {
             const ytsId = req.params.id;
             const moveDetailsUrl = 'movie_details.json?movie_id=';
-            const ytsApiResponse = await axios.get(`${process.env.TORRENT_API}${moveDetailsUrl}${ytsId}`);
+            const ytsApiResponse = await axiosInstance.get(`${process.env.TORRENT_API}${moveDetailsUrl}${ytsId}`);
             if (!ytsApiResponse || !ytsApiResponse.data || !ytsApiResponse.data.data || !ytsApiResponse.data.data.movie) {
                 return res.status(400).json({ error: 'Error with YTS API response' });
             }
@@ -404,7 +418,7 @@ class MoviesController {
                 if (!torrent) {
                     console.log("Torrent not exist");
                     const moveDetailsUrl = 'movie_details.json?movie_id=';
-                    const ytsApiResponse = await axios.get(`${process.env.TORRENT_API}${moveDetailsUrl}${ytsId}`);
+                    const ytsApiResponse = await axiosInstance.get(`${process.env.TORRENT_API}${moveDetailsUrl}${ytsId}`);
                     if (!ytsApiResponse || !ytsApiResponse.data || !ytsApiResponse.data.data || !ytsApiResponse.data.data.movie) {
                         return res.status(400).json({ error: 'Error with YTS API response' });
                     }
@@ -443,11 +457,12 @@ class MoviesController {
     addMovieHistory = async (req, res) => {
         try {
             const userId = req.user.userId;
-            const { imdbId } = req.body;
+            const { imdbId, title } = req.body;
             const seen = await MoviesHistory.findOne({
                 where: {
                     userId,
-                    imdbId
+                    imdbId,
+                    title
                 }
             });
             if (seen) {
@@ -456,12 +471,30 @@ class MoviesController {
                 const movieHistory = await MoviesHistory.create({
                     userId,
                     imdbId,
+                    title
                 });
                 return res.status(200).json({ movieHistory });
             }
 
         } catch (error) {
             console.error('Error adding movie history:', error);
+            return res.status(500).json({ message: 'Internal Server Error' });
+        }
+    };
+
+    getMovieHistory = async (req, res) => {
+        try {
+            const userId = req.user.userId;
+            const { id } = req.params;
+            let condition = id ? id : userId;
+            const movieHistory = await MoviesHistory.findAll({
+                where: {
+                    userId: condition
+                }
+            });
+            return res.status(200).json({ movieHistory });
+        } catch (error) {
+            console.error('Error getting movie history:', error);
             return res.status(500).json({ message: 'Internal Server Error' });
         }
     };

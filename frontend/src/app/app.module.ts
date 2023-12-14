@@ -31,6 +31,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatBadgeModule } from '@angular/material/badge';
 import { ProgressSpinnerMode, MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSliderModule } from '@angular/material/slider';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
 import { VgCoreModule } from '@videogular/ngx-videogular/core';
 import { VgControlsModule } from '@videogular/ngx-videogular/controls';
@@ -55,6 +56,7 @@ import { NestedCommentsComponent } from './utils/movie-modal/nested-comments/nes
 import { DetailsComponent } from './details/details.component';
 import { VideoPlayerComponent } from './utils/video-player/video-player.component';
 import { ScrollToTopComponent } from './utils/scroll-to-top/scroll-to-top.component';
+import { SearchComponent } from './search/search.component';
 
 @NgModule({
   declarations: [
@@ -64,6 +66,7 @@ import { ScrollToTopComponent } from './utils/scroll-to-top/scroll-to-top.compon
     NavBarComponent,
     DialogComponent,
     MovieModalComponent,
+    SearchComponent,
     ProfileComponent,
     SettingsComponent,
     WaitComponent,
@@ -99,6 +102,7 @@ import { ScrollToTopComponent } from './utils/scroll-to-top/scroll-to-top.compon
     MatProgressSpinnerModule,
     ReactiveFormsModule,
     MatRadioModule,
+    MatAutocompleteModule,
     MatCheckboxModule,
     MatBadgeModule,
     InfiniteScrollModule,
