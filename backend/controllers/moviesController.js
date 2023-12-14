@@ -49,8 +49,6 @@ class MoviesController {
             });
             const responseBody = JSON.parse(response.body);
             const { movie_count, movies } = responseBody.data;
-            console.log("movie_count", movie_count);
-            console.log("movies", movies);
             if (movie_count === 0) {
                 return res.status(200).json({ movies: [], hasMore: false });
             }
@@ -78,7 +76,6 @@ class MoviesController {
                         } else {
                             try {
                                 const omdbResponse = await axios.get(`${omdbApiUrl}?i=${movie.imdb_code}&apikey=${process.env.OMDB_API_KEY}`);
-                                console.log("omdbResponse", omdbResponse);
                                 const omdbData = omdbResponse.data;
 
                                 if (omdbData.Poster === 'N/A' || omdbData.Poster === undefined) {

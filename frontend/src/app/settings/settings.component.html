@@ -26,6 +26,14 @@
 						<input matInput formControlName="confirm_password" type="password"
 							placeholder="Confirm password">
 					</mat-form-field>
+					<mat-label>Language</mat-label>
+					<mat-form-field>
+						<mat-select formControlName="language" placeholder="{{selected}}">
+							@for(language of languages; track language) {
+							<mat-option value="{{language.value}}">{{language.viewValue}}</mat-option>
+							}
+						</mat-select>
+					</mat-form-field>
 				</div>
 
 				<div class="profile-pictures">

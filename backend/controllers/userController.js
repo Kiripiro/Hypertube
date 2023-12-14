@@ -24,7 +24,7 @@ class UserController {
 
     register = async (req, res) => {
         try {
-            const { username, firstName, lastName, email, password } = req.body;
+            const { username, firstName, lastName, email, password, language } = req.body;
 
             const existingUser = await User.findOne({ where: { email } });
             if (existingUser) {
@@ -47,7 +47,8 @@ class UserController {
                 avatar: 'baseAvatar.png',
                 token: token,
                 tokenCreationDate: this._getTimestampString(),
-                tokenExpirationDate: this._getTimestampString(1)
+                tokenExpirationDate: this._getTimestampString(1),
+                language
             });
             // mailOptions.to = userData.email;
             // mailOptions.subject = "Email verification";
@@ -153,6 +154,7 @@ class UserController {
                     tokenCreationDate: this._getTimestampString(),
                     tokenExpirationDate: this._getTimestampString(1),
                     loginApi: true,
+                    language: 'en'
                 });
                 res.cookie('accessToken', this._generateToken(newUser.id), { httpOnly: true, maxAge: maxAgeAccessToken });
                 res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: maxAgeRefreshToken });
@@ -193,6 +195,7 @@ class UserController {
                     tokenCreationDate: this._getTimestampString(),
                     tokenExpirationDate: this._getTimestampString(1),
                     loginApi: true,
+                    language: 'en'
                 });
                 res.cookie('accessToken', this._generateToken(newUser.id), { httpOnly: true, maxAge: maxAgeAccessToken });
                 res.cookie('refreshToken', userData.sub, { httpOnly: true, maxAge: maxAgeRefreshToken });
@@ -284,6 +287,7 @@ class UserController {
                     "lastName": user.lastName,
                     "avatar": avatar,
                     "loginApi": user.loginApi,
+                    "language": user.language,
                 };
                 return res.status(200).json({ message: 'User found', user: userData });
             }

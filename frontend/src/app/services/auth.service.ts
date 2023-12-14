@@ -75,8 +75,8 @@ export class AuthService {
     });
   }
 
-  register(username: string, firstName: string, lastName: string, email: string, password: string): any {
-    this.http.post<RegisterResponseData>(this.url + '/user/register', { username, firstName, lastName, email, password }, { withCredentials: true })
+  register(username: string, firstName: string, lastName: string, email: string, password: string, language: string): any {
+    this.http.post<RegisterResponseData>(this.url + '/user/register', { username, firstName, lastName, email, password, language }, { withCredentials: true })
       .subscribe({
         next: (response) => {
           const dialogData = {

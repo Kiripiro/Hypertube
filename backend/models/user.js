@@ -69,7 +69,11 @@ module.exports = (sequelize, Sequelize) => {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false,
-    }
+    },
+    language: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   });
 
   return User;

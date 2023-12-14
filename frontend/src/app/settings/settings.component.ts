@@ -7,6 +7,7 @@ import { AuthService } from 'src/app/services/auth.service';
 import { DialogService } from 'src/app/services/dialog.service';
 import { LocalStorageService, localStorageName } from 'src/app/services/local-storage.service';
 import { SettingsService } from 'src/app/services/settings.service';
+import { languages } from 'src/app/models/models';
 
 @Component({
   selector: 'app-settings',
@@ -21,6 +22,8 @@ export class SettingsComponent implements OnInit {
   file!: string;;
   actualImg!: string;
   id!: number;
+  languages = languages;
+  selected: string = "";
 
   constructor(
     private fb: FormBuilder,
@@ -47,6 +50,7 @@ export class SettingsComponent implements OnInit {
       password: ['', Validators.minLength(8)],
       confirm_password: ['', Validators.minLength(8)],
       fileStatus: [false],
+      language: [''],
     });
     this.getUser();
   }
@@ -54,8 +58,10 @@ export class SettingsComponent implements OnInit {
   getUser() {
     this.authService.getUserInfosById(this.id).subscribe((userJson: any) => {
       this.user = userJson.user;
-      console.log(this.user);
       if (this.user) {
+        this.selected = this.languages.find((lang) => lang.value === this.user?.language)?.viewValue || "";
+        console.log(this.user);
+        console.log(this.selected);
         if (this.user.avatar) {
           if (this.user.avatar.includes("http") || this.user.avatar.includes("https"))
             this.actualImg = this.user.avatar;
@@ -180,6 +186,7 @@ export class SettingsComponent implements OnInit {
       "username",
       "lastName",
       "firstName",
+      "language",
     ];
 
     const updatedFields: Partial<UserSettings> = {};

@@ -66,6 +66,7 @@ export interface GetUserResponseData {
 		email_checked: boolean,
 		avatar: string,
 		loginApi: boolean,
+		language: string,
 	};
 }
 
@@ -301,6 +302,7 @@ export interface UserSettings {
 	confirm_password: string;
 	avatar: string;
 	loginApi: boolean;
+	language: string;
 }
 
 export interface UserSettingsUpdate {
@@ -380,3 +382,29 @@ export interface MovieDetailsResponse {
 		poster: string
 	}
 }
+
+export const languages = [
+	{ value: 'en', viewValue: 'English' },
+	{ value: 'fr', viewValue: 'Français' },
+	{ value: 'es', viewValue: 'Español' },
+	{ value: 'de', viewValue: 'Deutsch' },
+	{ value: 'it', viewValue: 'Italiano' },
+	{ value: 'pt', viewValue: 'Português' },
+	{ value: 'ru', viewValue: 'Русский' },
+	{ value: 'zh', viewValue: '中文' },
+	{ value: 'ja', viewValue: '日本語' },
+	{ value: 'ko', viewValue: '한국어' },
+	{ value: 'ar', viewValue: 'العربية' },
+	{ value: 'tr', viewValue: 'Türkçe' },
+	{ value: 'pl', viewValue: 'Polski' },
+	{ value: 'nl', viewValue: 'Nederlands' },
+	{ value: 'sv', viewValue: 'Svenska' },
+	{ value: 'da', viewValue: 'Dansk' },
+	{ value: 'fi', viewValue: 'Suomi' },
+	{ value: 'no', viewValue: 'Norsk' },
+	{ value: 'el', viewValue: 'Ελληνικά' },
+	{ value: 'cs', viewValue: 'Čeština' },
+	{ value: 'hu', viewValue: 'Magyar' },
+	{ value: 'th', viewValue: 'ภาษาไทย' },
+	{ value: 'vi', viewValue: 'Tiếng Việt' },
+];

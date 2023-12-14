@@ -27,6 +27,15 @@
                 <mat-label>Repeat password</mat-label>
                 <input matInput type="password" id="repeat_password" formControlName="repeat_password" minlength="8">
             </mat-form-field>
+            <!-- language selector -->
+            <mat-form-field class="form-field" hideRequiredMarker>
+                <mat-label>Language</mat-label>
+                <mat-select id="language" formControlName="language">
+                    @for (language of languages; track language) {
+                    <mat-option value="{{language.value}}">{{language.viewValue}}</mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
             <button type="submit" [disabled]="registerForm.invalid" mat-raised-button>Register</button>
         </form>
     </div>

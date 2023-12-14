@@ -14,6 +14,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { OAuthModule } from 'angular-oauth2-oidc';
+import { MatSelectModule } from '@angular/material/select';
 @NgModule({
   declarations: [RegisterComponent, LoginComponent],
   imports: [
@@ -26,6 +27,7 @@ import { OAuthModule } from 'angular-oauth2-oidc';
     MatIconModule,
     MatToolbarModule,
     MatRadioModule,
+    MatSelectModule,
     MatCheckboxModule,
     HttpClientModule,
     RouterModule.forChild([
