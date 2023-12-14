@@ -5,11 +5,11 @@ const MovieFile = require('./movieFile');
 var parseTorrent = require('parse-torrent');
 const TorrentHelper = require('../helpers/torrent.helper');
 const axios = require('axios');
+const SubtitlesHelper = require('../helpers/subtitles.helper');
 
 const YTS_MOVIE_DETAUILS_URL = 'movie_details.json?movie_id=';
 
 const red = "\x1b[31m";
-const yellow = "\x1b[33m";
 const blue = "\x1b[34m";
 const reset = "\x1b[0m";
 
@@ -210,120 +210,89 @@ class StreamController {
         }
     };
 
-    getTorrentInfos = async (req, res) => { //for test, WIP
+    downloadSubtitles = async (req, res) => {
         try {
-            const ytsId = req.params.id;
-            const moveDetailsUrl = 'movie_details.json?movie_id=';
-            const ytsApiResponse = await axios.get(`${process.env.TORRENT_API}${moveDetailsUrl}${ytsId}`);
-            if (!ytsApiResponse || !ytsApiResponse.data || !ytsApiResponse.data.data || !ytsApiResponse.data.data.movie) {
-                return res.status(400).json({ error: 'Error with YTS API response' });
+            console.log("downloadSubtitles");
+            const imdbId = req.params.imdbId;
+            const lang = req.params.lang;
+            const tabLang = lang.split("-");
+            if (tabLang.length <= 0) {
+                return res.status(400).json({ message: 'Missing language parameter' });
+            } else if (tabLang.length > 2) {
+                return res.status(400).json({ message: 'Max two language parameters' });
             }
-            const ytsApiTorrents = ytsApiResponse.data.data.movie.torrents;
-            const titleLong = ytsApiResponse.data.data.movie.title_long;
-            if (ytsApiTorrents == null || ytsApiTorrents == undefined || ytsApiTorrents.length <= 0) {
-                console.log("getTorrentInfos ytsApiTorrents null");
-                return res.status(400).json({ error: 'Error with YTS API response, torrents null' });
+            let retTab = [];
+            for (let i = 0; i < tabLang.length; i++) {
+                const filePath = await SubtitlesHelper.getSubtitles(imdbId, tabLang[i]);
+                if (filePath == -1) {
+                    retTab.push({
+                        lang: lang,
+                        filePath: null,
+                        error: "Error with OpenSubtitles API response"
+                    });
+                } else if (filePath == 0) {
+                    retTab.push({
+                        lang: lang,
+                        filePath: null,
+                        error: "Subtitle not found"
+                    });
+                }
+                if (filePath != null) {
+                    const fileName = filePath.replace('/app/subtitles/vtt/', '');
+                    retTab.push({
+                        lang: lang,
+                        filePath: fileName,
+                        error: ""
+                    });
+                }
             }
-            ytsApiTorrents.forEach(torrent => {
-                // console.log("torrent", torrent);
-                // torrentInfos.addTorrent(torrent.url);
-
-                const encodedUrl = titleLong.replaceAll(" ", "%20");
-                // const magnet = `magnet:?xt=urn:btih:${torrent.hash}`;
-                const magnet = `magnet:?xt=urn:btih:${torrent.hash}&dn=${encodedUrl}`;
-                const a = parseTorrent(magnet);
-                // console.log("a", a);
-            });
-            // const b = 'magnet:?xt=urn:btih:0719223EC1C863C85454DAD4F297F2D35F22B15E&amp;dn=Kla%20Fun%20(2024)&amp;tr=udp%3A%2F%2Fglotorrents.pw%3A6969%2Fannounce&amp;tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&amp;tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&amp;tr=udp%3A%2F%2Fp4p.arenabg.ch%3A1337&amp;tr=udp%3A%2F%2Ftracker.internetwarriors.net%3A1337';
-            // const a2 = parseTorrent(b);
-            // console.log("a2", a2);
-            // const slug = ytsApiResponse.data.data.movie.slug;
-            // const titleLong = ytsApiResponse.data.data.movie.title_long;
-            // // console.log("movie", ytsApiResponse.data.data.movie)
-            // const sortedTorrents = this.sortTorrents(ytsApiTorrents, titleLong);
-            return res.status(200).json({});
+            return res.status(200).json({ subtitles: retTab });
         } catch (error) {
-            console.error('Error getMovieLoading:', error);
+            console.error('Error downloadSubtitles:', error);
             return res.status(500).json({ message: 'Internal Server Error' });
         }
     };
+
+    // getTorrentInfos = async (req, res) => { // FOR TEST, TO DELETE
+    //     try {
+    //         const ytsId = req.params.id;
+    //         const moveDetailsUrl = 'movie_details.json?movie_id=';
+    //         const ytsApiResponse = await axios.get(`${process.env.TORRENT_API}${moveDetailsUrl}${ytsId}`);
+    //         if (!ytsApiResponse || !ytsApiResponse.data || !ytsApiResponse.data.data || !ytsApiResponse.data.data.movie) {
+    //             return res.status(400).json({ error: 'Error with YTS API response' });
+    //         }
+    //         const ytsApiTorrents = ytsApiResponse.data.data.movie.torrents;
+    //         const titleLong = ytsApiResponse.data.data.movie.title_long;
+    //         if (ytsApiTorrents == null || ytsApiTorrents == undefined || ytsApiTorrents.length <= 0) {
+    //             console.log("getTorrentInfos ytsApiTorrents null");
+    //             return res.status(400).json({ error: 'Error with YTS API response, torrents null' });
+    //         }
+    //         ytsApiTorrents.forEach(torrent => {
+    //             // console.log("torrent", torrent);
+    //             // torrentInfos.addTorrent(torrent.url);
+
+    //             const encodedUrl = titleLong.replaceAll(" ", "%20");
+    //             // const magnet = `magnet:?xt=urn:btih:${torrent.hash}`;
+    //             const magnet = `magnet:?xt=urn:btih:${torrent.hash}&dn=${encodedUrl}`;
+    //             const a = parseTorrent(magnet);
+    //             // console.log("a", a);
+    //         });
+    //         // const b = 'magnet:?xt=urn:btih:0719223EC1C863C85454DAD4F297F2D35F22B15E&amp;dn=Kla%20Fun%20(2024)&amp;tr=udp%3A%2F%2Fglotorrents.pw%3A6969%2Fannounce&amp;tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&amp;tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&amp;tr=udp%3A%2F%2Fp4p.arenabg.ch%3A1337&amp;tr=udp%3A%2F%2Ftracker.internetwarriors.net%3A1337';
+    //         // const a2 = parseTorrent(b);
+    //         // console.log("a2", a2);
+    //         // const slug = ytsApiResponse.data.data.movie.slug;
+    //         // const titleLong = ytsApiResponse.data.data.movie.title_long;
+    //         // // console.log("movie", ytsApiResponse.data.data.movie)
+    //         // const sortedTorrents = this.sortTorrents(ytsApiTorrents, titleLong);
+    //         return res.status(200).json({});
+    //     } catch (error) {
+    //         console.error('Error getMovieLoading:', error);
+    //         return res.status(500).json({ message: 'Internal Server Error' });
+    //     }
+    // };
 }
 
 module.exports = new StreamController();
-
-// if (start > fileSize) { //doesn't work, stop streaming
-// const start = fileSize - chunkSizeToSend - 1;
-// const end = fileSize - 1;
-// const readStream = fs.createReadStream(filePath, { start, end });
-// const chunksize = ((end - start) > 0 ? (end - start) : -1) + 1;
-// const head = {
-//     'Content-Range': `bytes ${start}-${end}/${expectedFileSize}`,
-//     'Accept-Ranges': 'bytes',
-//     'Content-Length': chunksize,
-//     'Content-Type': 'video/mp4',
-// }
-// res.writeHead(206, head)
-// readStream.pipe(res) //don't work
-
-// res.writeHead(204);
-// res.end(); //don't work
-
-// res.writeHead(200, {
-//     'Content-Length': 0
-// });
-// res.end(); //don't work
-
-// console.log(red + 'sendRange start > fileSize' + reset);
-// res.writeHead(416, {
-//     'Content-Range': `bytes */${fileSize}`,
-//     'Content-Type': 'text/plain'
-//   });
-// res.end('Requested Range Not Satisfiable'); //don't work
-// }
-
-// sortTorrents(torrents, titleLong) {
-//     if (torrents == null || torrents == undefined || torrents.length <= 0) {
-//         return null;
-//     }
-//     let retTab = [];
-//     let retTab2 = [];
-//     console.log("titleLong", titleLong)
-//     const encodedUrl = titleLong.replaceAll(" ", "%20");
-//     for (let i = 0; i < torrents.length; i++) {
-//         // console.log("torrents[i]", torrents[i])
-//         const magnet = `magnet:?xt=urn:btih:${torrents[i].hash}&dn=${encodedUrl}`;
-//         // const magnet = `magnet:?xt=urn:btih:0719223EC1C863C85454DAD4F297F2D35F22B15E&amp;dn=Kla%20Fun%20(2024)&amp;tr=udp%3A%2F%2Fglotorrents.pw%3A6969%2Fannounce&amp;tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&amp;tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&amp;tr=udp%3A%2F%2Fp4p.arenabg.ch%3A1337&amp;tr=udp%3A%2F%2Ftracker.internetwarriors.net%3A1337`
-//         if (torrents[i].quality != undefined && torrents[i].quality == "720p") {
-//             retTab.push(
-//                 {
-//                     magnet: magnet,
-//                     hash: torrents[i].hash,
-//                     quality: torrents[i].quality,
-//                     size_bytes: torrents[i].size_bytes,
-//                     seeds: torrents[i].seeds
-//                 });
-//         }
-//         else {
-//             retTab2.push(
-//                 {
-//                     magnet: magnet,
-//                     hash: torrents[i].hash,
-//                     quality: torrents[i].quality,
-//                     size_bytes: torrents[i].size_bytes,
-//                     seeds: torrents[i].seeds
-//                 });
-//         }
-//     }
-//     retTab = retTab.concat(retTab2);
-//     console.log("retTab 1 ", retTab)
-//     retTab.sort((a, b) => {
-//         return b.seeds - a.seeds
-//     });
-//     console.log("retTab 2 ", retTab)
-//     return retTab;
-// }
-
-
 
 //keep this for now
 
