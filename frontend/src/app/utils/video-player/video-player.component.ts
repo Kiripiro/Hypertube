@@ -8,6 +8,7 @@ import { VgApiService } from '@videogular/ngx-videogular/core';
 import { MoviesService } from 'src/app/services/movie.service';
 import { HttpClient } from '@angular/common/http';
 import { DialogService } from 'src/app/services/dialog.service';
+import { SubtitlesItemResponse } from 'src/app/models/models';
 
 @Component({
   selector: 'app-video-player',
@@ -69,12 +70,22 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   videoCurrentTime = "";
   videoDuration = "";
 
+  subUrl: SafeResourceUrl | undefined;
+
+  sub: any;
+
+  subtitlesError = false;
+  subtitlesErrorMessage = "";
+  subtitles: SubtitlesItemResponse[] = [];
+  subtitlesChoiceToDisplay: string[] = ["None"];
+  currentSubtitles = "None";
+
   constructor(
     private route: ActivatedRoute,
     private movieService: MoviesService,
     private router: Router,
     private http: HttpClient,
-    private dialogService: DialogService,
+    private dialogService: DialogService
   ) {
     this.url = environment.backendUrl || 'http://localhost:3000';
   }
@@ -86,9 +97,40 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
       this.imdbId = params['imdbId'];
       this.movieTitle = params['title'];
     });
+    this.movieService.downloadSubtitles(this.imdbId, ['en']).subscribe({
+      next: (response) => {
+        console.log("downloadSubtitles", response);
+        const subtitlesReceived = response.subtitles;
+        this.subtitlesErrorMessage = "";
+        subtitlesReceived.forEach((sub: SubtitlesItemResponse) => {
+          if (sub.filePath == null || sub.filePath.length <= 0) {
+            this.subtitlesError = true;
+            this.subtitlesErrorMessage = this.subtitlesErrorMessage + sub.error + " (" + sub.lang + ")\n";
+            return ;
+          }
+        });
+        console.log("subtitlesReceived", subtitlesReceived);
+        this.subtitles = subtitlesReceived;
+        if (this.videoLoaded) {
+          console.log("this.subtitles get", this.subtitles)
+          this._addSubtitles();
+        }
+      },
+      error: (error) => {
+        console.log(error);
+        this.subtitlesError = true;
+        this.subtitlesErrorMessage = "Error with subtitles api";
+      }
+    });
     this.getLoadingMovie();
     this.getMovieFileSize();
     this.videoUrl = this.url + '/movies/movieStream/' + this.movieId;
+    this.subUrl = this.url + '/movies/testMovies';
+  }
+
+  addSubtitlesToVideo(subtitles: string) {
+    const videoElement = document.querySelector('video');
+    
   }
 
   ngAfterViewInit() {
@@ -113,6 +155,53 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
     this.videoDuration = this._convertSecondsToTime(this.video.duration);
     this.videoCurrentTime = this._convertSecondsToTime(this.video.currentTime);
     this.bytesPerSeconds = this.totalSize / this.video.duration;
+
+    this._addSubtitles();
+
+  }
+
+  _addSubtitles() {
+    console.log("this.subtitles add", this.subtitles)
+    console.log("this.subtitles.length", this.subtitles.length)
+    if (this.subtitles != null && this.subtitles.length > 0) {
+      this.subtitles.forEach((sub: SubtitlesItemResponse) => {
+        console.log("sub", sub)
+        if (sub.filePath != null && sub.filePath.length > 0) {
+          this.movieService.getSubtitles(sub.filePath).subscribe(subtitles => {
+            const blob = new Blob([subtitles], { type: 'webvtt' });
+            console.log("blob", blob)
+            const subBlobUrl = URL.createObjectURL(blob);
+            const track = document.createElement('track');
+            track.kind = 'subtitles';
+            track.label = sub.lang;
+            track.srclang = sub.lang;
+            track.src = subBlobUrl;
+            this.video.appendChild(track);
+            this.subtitlesChoiceToDisplay.push(sub.lang);
+          });
+        }
+      });
+    }
+  }
+
+  changeSubtitles(newSub: string) {
+    console.log("changeSubtitles", newSub)
+    if (newSub != this.currentSubtitles) {
+      const tracks = this.video.textTracks;
+      for (let i = 0; i < tracks.length; i++) {
+        const track = tracks[i];
+        console.log("track", track)
+        if (track.language == newSub) {
+          track.mode = 'showing';
+          this.currentSubtitles = newSub;
+        } else {
+          track.mode = 'hidden';
+        }
+      }
+      if (newSub == "None") {
+        this.currentSubtitles = "None";
+      }
+    }
   }
 
   togglevideo() {

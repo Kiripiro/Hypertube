@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment.template';
-import { LoadingMovieResponse, MovieDetailsResponse, MovieFileSizeResponse, StopLoadingMovieResponse, TorrentInfosResponse } from '../models/models';
+import { DownloadSubtitlesResponse, LoadingMovieResponse, MovieDetailsResponse, MovieFileSizeResponse, StopLoadingMovieResponse, TorrentInfosResponse } from '../models/models';
 
 
 @Injectable({
@@ -45,15 +45,22 @@ export class MoviesService {
     return this.http.get<MovieDetailsResponse>(this.url + '/movies/fetchMovieDetails/' + imdbId, { withCredentials: true });
   }
 
-//   getMovieById(movieId: Number):Observable<GetMovieByIdResponseData> {
-//     return this.http.get<GetMovieByIdResponseData>(this.url + '/movies/' + movieId, { withCredentials: true });
-//   }
+  downloadSubtitles(imdbId: string, lang: string[]): Observable<DownloadSubtitlesResponse> {
+    const langToSend = lang.join('-');
+    return this.http.get<DownloadSubtitlesResponse>(this.url + '/movies/downloadSubtitles/' + imdbId + '/' + langToSend, { withCredentials: true });
+  }
 
   getMovieHistory(): Observable<any> {
     return this.http.get<any>(this.url + '/movies/getMovieHistory/', { withCredentials: true });
+  }
+  getSubtitles(fileName: string) : Observable<any> {
+    return this.http.get(this.url + '/subtitles/' + fileName, { responseType: 'text', withCredentials: true });
   }
 
   getMovieHistoryById(id: Number): Observable<any> {
     return this.http.get<any>(this.url + '/movies/getMovieHistoryById/' + id, { withCredentials: true });
   }
+  // getMovieTest() : Observable<any> { // FOR TEST, TO DELETE
+  //   return this.http.get<MovieDetailsResponse>(this.url + '/movies/testMovies', { withCredentials: true });
+  // }
 }

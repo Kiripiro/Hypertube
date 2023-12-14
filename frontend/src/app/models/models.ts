@@ -383,6 +383,17 @@ export interface MovieDetailsResponse {
 	}
 }
 
+export interface SubtitlesItemResponse {
+	lang: string,
+	filePath: string,
+	error: string
+}
+
+export interface DownloadSubtitlesResponse {
+	subtitles: SubtitlesItemResponse[]
+}
+
+
 export const languages = [
 	{ value: 'en', viewValue: 'English' },
 	{ value: 'fr', viewValue: 'Français' },

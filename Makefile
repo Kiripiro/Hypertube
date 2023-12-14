@@ -7,6 +7,10 @@ BACKEND_NODE_MODULES := $(wildcard $(BACKEND_DIR)/node_modules)
 
 BACKEND_NODE_DOWNLOAD := $(wildcard $(BACKEND_DIR)/download/*.*)
 
+BACKEND_NODE_SRT_FILES := $(wildcard $(BACKEND_DIR)/subtitles/srt/*.*)
+
+BACKEND_NODE_VTT_FILES := $(wildcard $(BACKEND_DIR)/subtitles/vtt/*.*)
+
 all:	start
 
 start:	check_node_modules 
@@ -19,6 +23,8 @@ clean:
 	# rm -rf $(FRONTEND_NODE_MODULES)
 	# rm -rf $(BACKEND_NODE_MODULES)
 	rm -rf $(BACKEND_NODE_DOWNLOAD)
+	rm -rf $(BACKEND_NODE_SRT_FILES)
+	rm -rf $(BACKEND_NODE_VTT_FILES)
 	@if [ -n "$(wildcard $(BACKEND_DIR)/imagesSaved/*)" ]; then \
 		echo "Removing files in $(BACKEND_DIR)/imagesSaved..."; \
 		find $(BACKEND_DIR)/imagesSaved -type f ! -name 'baseAvatar.png' -delete; \

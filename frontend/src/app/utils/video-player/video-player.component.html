@@ -57,10 +57,22 @@
                                 </mat-slider>
                             </div>
                         </div>
+                        <button id="subtitlesButton" mat-icon-button [matMenuTriggerFor]="menu" aria-label="Subtitles button">
+                            <mat-icon>subtitles</mat-icon>
+                        </button>
+                        <mat-menu #menu="matMenu">
+                            <button (click)="changeSubtitles(item)" mat-menu-item *ngFor="let item of subtitlesChoiceToDisplay">
+                                <mat-icon *ngIf="currentSubtitles == item">done</mat-icon>
+                                <span>{{ item }}</span>
+                            </button>
+                        </mat-menu>
                         <mat-icon (click)="fullScreen()" id="fullscreenButton">fullscreen</mat-icon>
                     </div>
                 </div>
             </div>
+        </div>
+        <div class="subtitlesError" *ngIf="subtitlesError">
+            <p>{{subtitlesErrorMessage}}</p>
         </div>
     </div>
 </div>

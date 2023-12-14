@@ -52,17 +52,17 @@ moviesRouter.get('/fileSize/:id', auth, async (req, res) => {
     }
 });
 
-moviesRouter.get('/torrentInfos/:id', auth, async (req, res) => {
+moviesRouter.post('/addMovieHistory', auth, async (req, res) => {
     try {
-        await StreamController.getTorrentInfos(req, res);
+        await MoviesController.addMovieHistory(req, res);
     } catch (error) {
         console.error(error);
     }
 });
 
-moviesRouter.post('/addMovieHistory', auth, async (req, res) => {
+moviesRouter.get('/downloadSubtitles/:imdbId/:lang', auth, async (req, res) => {
     try {
-        await MoviesController.addMovieHistory(req, res);
+        await StreamController.downloadSubtitles(req, res);
     } catch (error) {
         console.error(error);
     }
@@ -75,6 +75,13 @@ moviesRouter.get('/getMovieHistory', auth, async (req, res) => {
         console.error(error);
     }
 });
+// moviesRouter.get('/torrentInfos/:id', auth, async (req, res) => { // FOR TEST, TO DELETE
+//     try {
+//         await StreamController.getTorrentInfos(req, res);
+//     } catch (error) {
+//         console.error(error);
+//     }
+// });
 
 moviesRouter.get('/getMovieHistoryById/:id', auth, async (req, res) => {
     try {
@@ -83,6 +90,16 @@ moviesRouter.get('/getMovieHistoryById/:id', auth, async (req, res) => {
         console.error(error);
     }
 });
+
+
+// moviesRouter.get('/testMovies', auth, async (req, res) => { // FOR TEST, TO DELETE
+//     try {
+//         console.log("testMovies");
+//         await MoviesController.getTestMovies(req, res);
+//     } catch (error) {
+//         console.error(error);
+//     }
+// });
 
 
 module.exports = moviesRouter;
