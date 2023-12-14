@@ -1,17 +1,15 @@
-const Sequelize = require('sequelize');
-const UserModel = require('./models/user');
 const express = require('express');
 const app = express();
 const cors = require('cors');
 const sequelize = require('./config/db');
 const mainRouter = require('./routes/mainRouter');
+const job = require('./config/cron');
 
 require('./config/checkEnv');
-const _pingTorrentApi = require('./config/checkTorrentApi');
-_pingTorrentApi();
-const port = process.env.NODE_PORT;
+require('./config/checkTorrentApi');
+require('./config/cron');
 
-const User = UserModel(sequelize, Sequelize);
+const port = process.env.NODE_PORT;
 
 sequelize.sync({ alter: true }) //enable alter to update tables, disable to prevent data loss
     .then(() => {
@@ -40,3 +38,5 @@ app.use(mainRouter);
 app.listen(port, () => {
     console.log(`Server started on port ${port}`);
 });
+
+job.start();

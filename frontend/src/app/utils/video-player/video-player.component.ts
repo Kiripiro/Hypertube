@@ -18,14 +18,14 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   @Input()
   ytsId!: number;
   @Input()
-  imdbId!: any;
+  imdbId!: string;
   @Input()
   movieTitle!: any;
 
   color: ThemePalette = 'warn';
 
-  MIN_BYTES = 30000000;
-  SECU_BYTES = 5000000;
+  MIN_BYTES = 150000000;
+  SECU_BYTES = 100000000;
   SECU_TIME = 0;
 
   movieId = 0;

@@ -1,10 +1,10 @@
 require('dotenv').config();
-const axiosInstance = require('../config/openVpn');
 const fs = require('fs');
 const Torrent = require('./torrent');
 const MovieFile = require('./movieFile');
 var parseTorrent = require('parse-torrent');
 const TorrentHelper = require('../helpers/torrent.helper');
+const axios = require('axios');
 
 const YTS_MOVIE_DETAUILS_URL = 'movie_details.json?movie_id=';
 
@@ -31,7 +31,7 @@ class StreamController {
             } else {
                 if (!torrent) {
                     console.log(blue + 'streamLauncher torrent not exist' + reset);
-                    const ytsApiResponse = await axiosInstance.get(`${process.env.TORRENT_API}${YTS_MOVIE_DETAUILS_URL}${ytsId}`);
+                    const ytsApiResponse = await axios.get(`${process.env.TORRENT_API}${YTS_MOVIE_DETAUILS_URL}${ytsId}`);
                     if (!ytsApiResponse || !ytsApiResponse.data || !ytsApiResponse.data.data || !ytsApiResponse.data.data.movie) {
                         console.error('Error streamLauncher with YTS API response');
                         return res.status(400).json({ error: 'Error with YTS API response' });
@@ -214,7 +214,7 @@ class StreamController {
         try {
             const ytsId = req.params.id;
             const moveDetailsUrl = 'movie_details.json?movie_id=';
-            const ytsApiResponse = await axiosInstanceInstance.get(`${process.env.TORRENT_API}${moveDetailsUrl}${ytsId}`);
+            const ytsApiResponse = await axios.get(`${process.env.TORRENT_API}${moveDetailsUrl}${ytsId}`);
             if (!ytsApiResponse || !ytsApiResponse.data || !ytsApiResponse.data.data || !ytsApiResponse.data.data.movie) {
                 return res.status(400).json({ error: 'Error with YTS API response' });
             }
@@ -347,7 +347,7 @@ module.exports = new StreamController();
 //             if (!torrent) {
 //                 console.log("Torrent not exist");
 //                 const moveDetailsUrl = 'movie_details.json?movie_id=';
-//                 const ytsApiResponse = await axiosInstanceInstance.get(`${process.env.TORRENT_API}${moveDetailsUrl}${ytsId}`);
+//                 const ytsApiResponse = await axios.get(`${process.env.TORRENT_API}${moveDetailsUrl}${ytsId}`);
 //                 if (!ytsApiResponse || !ytsApiResponse.data || !ytsApiResponse.data.data || !ytsApiResponse.data.data.movie) {
 //                     return res.status(400).json({ error: 'Error with YTS API response' });
 //                 }

@@ -1,0 +1,11 @@
+<div class="centerDiv">
+    <div class="searchCard">
+        <input class="seach-input" type="text" placeholder="Search by username..." [formControl]="control"
+            [matAutocomplete]="auto">
+        <mat-autocomplete #auto="matAutocomplete">
+            @for (username of filteredUsernames | async; track username) {
+            <mat-option [value]="username" (click)="goToProfile(username)">{{username}}</mat-option>
+            }
+        </mat-autocomplete>
+    </div>
+</div>
