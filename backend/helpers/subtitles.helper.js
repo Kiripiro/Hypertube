@@ -17,7 +17,6 @@ class SubtitlesHelper {
 
     async getSubtitlesFileId(imdbId, lang) {
         try {
-            console.log("imdbId", imdbId)
             const options = {
                 method: 'get',
                 url: this.subtitlesApiUrl + this.subtitlesDataEndPoint,
@@ -65,10 +64,10 @@ class SubtitlesHelper {
                 }
                 return file.file_id;
             });
-            console.log("fileId", fileId)
             return fileId;
         } catch (error) {
             console.error("Subtitles getSubtitlesFileId error", error);
+            return -1;
         }
     }
 
@@ -126,6 +125,7 @@ class SubtitlesHelper {
             return ret;
         } catch (error) {
             console.error("Subtitles downloadSubtitles error", error.message ? error.message : error);
+            return -1;
         }
     }
 
@@ -138,6 +138,9 @@ class SubtitlesHelper {
             const pathVtt = PATH_SUBTITLES_DIR + "/vtt/" + fileName.replace(".srt", ".vtt");;
             const srtContent = fs.readFileSync(pathSrt, 'utf8');
             let vttContent = subsrt.convert(srtContent, { format: 'vtt' });
+            if (vttContent == null || vttContent == undefined || vttContent.length == 0) {
+                return null;
+            }
             vttContent = vttContent.replace(/^\d+\s+/gm, '');
             vttContent = vttContent.replace(/(\d{2}),(\d{3})/g, '$1.$2');
             await fs.writeFileSync(pathVtt, vttContent, 'utf8');
@@ -151,7 +154,6 @@ class SubtitlesHelper {
     async getSubtitles(imdbId, lang) {
         try {
             const fileId = await this.getSubtitlesFileId(imdbId, lang);
-            console.log("fileId", fileId)
             if (fileId == -1 || fileId == 0) {
                 console.log(red + "SUBTITLES_HELPER getSubtitles fileId error" + reset);
                 return fileId;
@@ -165,7 +167,6 @@ class SubtitlesHelper {
             } else {
                 // console.log(yellow + "SUBTITLES_HELPER getSubtitles subtitles downloaded: " + fileName + reset);
             }
-            console.log("fileName", fileName)
             const convertRet = await this.convertSrtToVtt(fileName);
             if (convertRet == null) {
                 console.log(red + "SUBTITLES_HELPER getSubtitles convertSrtToVtt error" + reset);

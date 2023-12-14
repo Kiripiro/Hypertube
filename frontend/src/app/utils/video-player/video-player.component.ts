@@ -161,8 +161,6 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   }
 
   _addSubtitles() {
-    console.log("this.subtitles add", this.subtitles)
-    console.log("this.subtitles.length", this.subtitles.length)
     if (this.subtitles != null && this.subtitles.length > 0) {
       this.subtitles.forEach((sub: SubtitlesItemResponse) => {
         console.log("sub", sub)
@@ -291,14 +289,14 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   }
 
   getLoadingMovie() {
-    if (this.router.url == ("/stream/" + this.movieId + "/" + this.imdbId)) {
+    if (this.router.url.includes("/stream/" + this.movieId)) {
       this.movieService.getLoadingMovie(this.movieId).subscribe({
         next: (response) => {
           console.log("getLoadingMovie", response.data);
           this.progressValue = Math.floor(response.data.size * 100 / this.MIN_BYTES);
           this.totalSize = response.data.totalSize;
 
-          if (response.data.size < this.MIN_BYTES && this.router.url == ("/stream/" + this.movieId + "/" + this.imdbId)) {
+          if (response.data.size < this.MIN_BYTES && this.router.url.includes("/stream/" + this.movieId)) {
             setTimeout(() => {
               this.getLoadingMovie();
             }, 5000);
@@ -328,7 +326,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
         }
         // console.log("getMovieFileSize this.totalSize = " + this.totalSize + ", response.data.size = " + response.data.size);
         if (((this.totalSize > 0 && response.data.size < this.totalSize) || response.data.size == 0)
-          && this.router.url == ("/stream/" + this.movieId + "/" + this.imdbId)) {
+          && this.router.url.includes("/stream/" + this.movieId)) {
           setTimeout(() => {
             this.getMovieFileSize();
           }, 1000);

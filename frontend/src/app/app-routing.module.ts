@@ -13,7 +13,7 @@ import { SearchComponent } from './search/search.component';
 const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'profile/:username', component: ProfileComponent },
-  { path: 'stream/:movieId/:imdbId/:title', component: DetailsComponent },
+  { path: 'stream/:ytsId/:imdbId/:title', component: DetailsComponent },
   { path: 'auth', loadChildren: () => AuthModule },
   { path: 'settings', component: SettingsComponent },
   { path: 'search', component: SearchComponent },

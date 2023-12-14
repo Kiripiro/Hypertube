@@ -44,13 +44,13 @@ export class MovieModalComponent {
     this.commentForm = this.formBuilder.group({
       comment: ['', [Validators.required, Validators.minLength(1), Validators.maxLength(500)]],
     });
-    this.movieService.getTorrentInfos(data.yts_id).subscribe({
-      next: (response: any) => {
-        console.log("getTorrentInfos", response);
-      }, error: (error) => {
-        console.log(error);
-      }
-    });
+    // this.movieService.getTorrentInfos(data.yts_id).subscribe({
+    //   next: (response: any) => {
+    //     console.log("getTorrentInfos", response);
+    //   }, error: (error) => {
+    //     console.log(error);
+    //   }
+    // });
   }
 
   handleReplyToNestedComment(selectedComment: Comment) {
