@@ -7,6 +7,9 @@ PATH_DOWNLOAD_DIR = "/app/download"
 
 MIN_BYTES = 30000000;
 
+COUNT_BEFORE_ERROR = 30;
+COUNT_BEFORE_ERROR_WHEN_DOWNLOADSTARTED = 30;
+
 const green = "\x1b[32m";
 const red = "\x1b[31m";
 const reset = "\x1b[0m";
@@ -25,6 +28,8 @@ class Torrent {
 
     _percentageDownloaded;
     engine;
+    countBeforeError;
+    lastFileSize;
 
     constructor(ytsId, sortedTorrents) {
         this.ytsId = ytsId;
@@ -36,6 +41,35 @@ class Torrent {
         this.downloadStarted = false;
         this._percentageDownloaded = 0;
         this.engine = null;
+        this.countBeforeError = 0;
+        this.lastFileSize = 0;
+    }
+
+    checkDownload() {
+        const currentSize = this.getDownloadedSize();
+        console.log("currentSize = " + currentSize + ", lastFileSize = " + this.lastFileSize + ", size = " + this.size);
+        if (currentSize == this.lastFileSize) {
+            console.log("this.countBeforeError", this.countBeforeError)
+            if (this.downloadStarted) {
+                if (this.countBeforeError > COUNT_BEFORE_ERROR_WHEN_DOWNLOADSTARTED) {
+                    return false;
+                } else {
+                    this.countBeforeError++;
+                    return true;
+                }
+            } else {
+                if (this.countBeforeError > COUNT_BEFORE_ERROR) {
+                    return false;
+                } else {
+                    this.countBeforeError++;
+                    return true;
+                }
+            }
+        } else {
+            this.lastFileSize = currentSize;
+            this.countBeforeError = 0;
+            return true;
+        }
     }
 
     checkCanStream() {
@@ -111,7 +145,8 @@ class Torrent {
                     this.torrentName = file.name;
                     this.fileSize = file.length;
                     var stream = file.createReadStream();
-                    var destinationPath = path.join(PATH_DOWNLOAD_DIR, file.name);
+                    const extname = path.extname(file.name);
+                    var destinationPath = path.join(PATH_DOWNLOAD_DIR, this.ytsId + extname);
                     this.path = destinationPath;
                     var writeStream = fs.createWriteStream(destinationPath);
                     stream.pipe(writeStream);

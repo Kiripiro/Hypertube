@@ -51,5 +51,6 @@ export const localStorageName = {
   age: "age",
   emailChecked: "email_checked",
   avatar: "avatar",
-  loginApi: "loginApi"
+  loginApi: "loginApi",
+  language: "language"
 }

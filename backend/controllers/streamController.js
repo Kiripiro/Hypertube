@@ -13,6 +13,19 @@ const red = "\x1b[31m";
 const blue = "\x1b[34m";
 const reset = "\x1b[0m";
 
+const languages = [
+    'en',
+    'fr',
+    'es',
+    'de',
+    'it',
+    'ru',
+    'zh',
+    'ja',
+    'ko',
+    'ar'
+];
+
 class StreamController {
 
     torrentTab = [];
@@ -23,11 +36,12 @@ class StreamController {
         try {
             const ytsId = req.params.id;
             var torrent = this.torrentTab.find(it => it.ytsId == ytsId);
-            if (torrent && torrent.downloadStarted) {
+            if (torrent && (torrent.downloadStarted || torrent.downloaded)) {
                 const size = torrent.getDownloadedSize();
                 const totalSize = torrent.fileSize;
+                const error = !torrent.checkDownload();
                 console.log(blue + 'streamLauncher torrent exist and started. size: ' + size + ' totalSize: ' + totalSize + '' + reset);
-                return res.status(200).json({ data: { size: size, totalSize: totalSize } });
+                return res.status(200).json({ data: { size: size, totalSize: totalSize, downloadError: error } });
             } else {
                 if (!torrent) {
                     console.log(blue + 'streamLauncher torrent not exist' + reset);
@@ -221,29 +235,43 @@ class StreamController {
             } else if (tabLang.length > 2) {
                 return res.status(400).json({ message: 'Max two language parameters' });
             }
+            console.log("tabLang", tabLang);
             let retTab = [];
             for (let i = 0; i < tabLang.length; i++) {
-                const filePath = await SubtitlesHelper.getSubtitles(imdbId, tabLang[i]);
-                if (filePath == -1) {
+                if (languages.indexOf(tabLang[i]) == -1) {
                     retTab.push({
-                        lang: lang,
+                        lang: tabLang[i],
                         filePath: null,
-                        error: "Error with OpenSubtitles API response"
+                        error: "Unsupported language"
                     });
-                } else if (filePath == 0) {
-                    retTab.push({
-                        lang: lang,
-                        filePath: null,
-                        error: "Subtitle not found"
-                    });
-                }
-                if (filePath != null) {
-                    const fileName = filePath.replace('/app/subtitles/vtt/', '');
-                    retTab.push({
-                        lang: lang,
-                        filePath: fileName,
-                        error: ""
-                    });
+                } else {
+                    const filePath = await SubtitlesHelper.getSubtitles(imdbId, tabLang[i]);
+                    if (filePath == -1) {
+                        retTab.push({
+                            lang: tabLang[i],
+                            filePath: null,
+                            error: "Error with OpenSubtitles API response"
+                        });
+                    } else if (filePath == 0) {
+                        retTab.push({
+                            lang: tabLang[i],
+                            filePath: null,
+                            error: "Subtitle not found"
+                        });
+                    } else if (filePath != null && filePath != undefined && filePath.length > 0) {
+                        const fileName = filePath.replace('/app/subtitles/vtt/', '');
+                        retTab.push({
+                            lang: tabLang[i],
+                            filePath: fileName,
+                            error: ""
+                        });
+                    } else {
+                        retTab.push({
+                            lang: tabLang[i],
+                            filePath: null,
+                            error: "Error OpenSubtitles API response (1)"
+                        });
+                    }
                 }
             }
             return res.status(200).json({ subtitles: retTab });

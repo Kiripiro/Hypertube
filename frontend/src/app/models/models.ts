@@ -53,6 +53,7 @@ export interface LoginResponseData {
 		email_checked: boolean,
 		avatar: string,
 		loginApi: boolean,
+		language: string
 	};
 }
 
@@ -346,9 +347,9 @@ export interface Notification {
 
 export interface LoadingMovieResponse {
 	data: {
-		percentage: number,
 		size: number,
-		totalSize: number
+		totalSize: number,
+		downloadError: boolean
 	}
 }
 

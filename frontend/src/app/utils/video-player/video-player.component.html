@@ -62,8 +62,9 @@
                         </button>
                         <mat-menu #menu="matMenu">
                             <button (click)="changeSubtitles(item)" mat-menu-item *ngFor="let item of subtitlesChoiceToDisplay">
-                                <mat-icon *ngIf="currentSubtitles == item">done</mat-icon>
-                                <span>{{ item }}</span>
+                                <mat-icon *ngIf="currentSubtitles == item.value"
+                                [style]="{display: 'flex', 'justify-content': 'center', 'align-items': 'center', 'font-size': '1rem', 'margin-right': '0'}">done</mat-icon>
+                                <span>{{ item.viewValue }}</span>
                             </button>
                         </mat-menu>
                         <mat-icon (click)="fullScreen()" id="fullscreenButton">fullscreen</mat-icon>

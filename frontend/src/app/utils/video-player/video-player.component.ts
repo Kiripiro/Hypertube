@@ -3,12 +3,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { SafeResourceUrl } from '@angular/platform-browser'
 import { environment } from 'src/environments/environment.template';
 import { ThemePalette } from '@angular/material/core';
-import { ProgressSpinnerMode } from '@angular/material/progress-spinner';
-import { VgApiService } from '@videogular/ngx-videogular/core';
 import { MoviesService } from 'src/app/services/movie.service';
-import { HttpClient } from '@angular/common/http';
 import { DialogService } from 'src/app/services/dialog.service';
-import { SubtitlesItemResponse } from 'src/app/models/models';
+import { SubtitlesItemResponse, languages } from 'src/app/models/models';
+import { LocalStorageService } from 'src/app/services/local-storage.service';
 
 @Component({
   selector: 'app-video-player',
@@ -77,15 +75,15 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   subtitlesError = false;
   subtitlesErrorMessage = "";
   subtitles: SubtitlesItemResponse[] = [];
-  subtitlesChoiceToDisplay: string[] = ["None"];
-  currentSubtitles = "None";
+  subtitlesChoiceToDisplay = [{ value: 'none', viewValue: 'None' }];
+  currentSubtitles = "none";
 
   constructor(
     private route: ActivatedRoute,
     private movieService: MoviesService,
     private router: Router,
-    private http: HttpClient,
-    private dialogService: DialogService
+    private dialogService: DialogService,
+    private localStorageService: LocalStorageService
   ) {
     this.url = environment.backendUrl || 'http://localhost:3000';
   }
@@ -97,7 +95,10 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
       this.imdbId = params['imdbId'];
       this.movieTitle = params['title'];
     });
-    this.movieService.downloadSubtitles(this.imdbId, ['en']).subscribe({
+    const userLanguage = this.localStorageService.getItem("language");
+    console.log("userLanguage", userLanguage);
+    const languages = (userLanguage != null && userLanguage.length > 0 && userLanguage != "en") ? ['en', userLanguage] : ['en'];
+    this.movieService.downloadSubtitles(this.imdbId, languages).subscribe({
       next: (response) => {
         console.log("downloadSubtitles", response);
         const subtitlesReceived = response.subtitles;
@@ -171,33 +172,35 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
             const subBlobUrl = URL.createObjectURL(blob);
             const track = document.createElement('track');
             track.kind = 'subtitles';
+            const labelToDisplay = languages.find((lang) => lang.value == sub.lang)?.viewValue || sub.lang;
             track.label = sub.lang;
             track.srclang = sub.lang;
             track.src = subBlobUrl;
             this.video.appendChild(track);
-            this.subtitlesChoiceToDisplay.push(sub.lang);
+            this.subtitlesChoiceToDisplay.push({ value: sub.lang, viewValue: labelToDisplay });
           });
         }
       });
     }
   }
 
-  changeSubtitles(newSub: string) {
+  changeSubtitles(newSub: {value: string, viewValue: string}) {
     console.log("changeSubtitles", newSub)
-    if (newSub != this.currentSubtitles) {
+    if (newSub.value != this.currentSubtitles) {
+      console.log("change ok")
       const tracks = this.video.textTracks;
       for (let i = 0; i < tracks.length; i++) {
         const track = tracks[i];
         console.log("track", track)
-        if (track.language == newSub) {
+        if (track.language == newSub.value) {
           track.mode = 'showing';
-          this.currentSubtitles = newSub;
+          this.currentSubtitles = newSub.value;
         } else {
           track.mode = 'hidden';
         }
       }
-      if (newSub == "None") {
-        this.currentSubtitles = "None";
+      if (newSub.value == "none") {
+        this.currentSubtitles = "none";
       }
     }
   }
@@ -293,6 +296,17 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
       this.movieService.getLoadingMovie(this.movieId).subscribe({
         next: (response) => {
           console.log("getLoadingMovie", response.data);
+          if (response.data.downloadError) {
+            const data = {
+              title: 'Download error',
+              text: 'There is an issue with the download. This may be due to an internet connection problem.',
+              text_yes_button: 'Ok',
+              yes_callback: () => { },
+              reload: false,
+            };
+            this.dialogService.openDialog(data);
+            return;
+          }
           this.progressValue = Math.floor(response.data.size * 100 / this.MIN_BYTES);
           this.totalSize = response.data.totalSize;
 
@@ -314,18 +328,18 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   getMovieFileSize() {
     this.movieService.getMovieFileSize(this.movieId).subscribe({
       next: (response) => {
-        // console.log("getMovieFileSize size = " + response.data.size + ", totalSize = " + this.totalSize);
+        console.log("getMovieFileSize size = " + response.data.size + ", totalSize = " + this.totalSize);
         const sizeNormalized = (response.data.size - this.SECU_BYTES) / this.totalSize;
         const value = (this.totalSize <= 0) ? 0 : ((response.data.size >= this.totalSize) ? 100 : (sizeNormalized * 100))
         this.downloadedValue = value;
-        // console.log("getMovieFileSize sizeNormalized = " + sizeNormalized);
-        // console.log("getMovieFileSize downloadedValue", this.downloadedValue);
+        console.log("getMovieFileSize sizeNormalized = " + sizeNormalized);
+        console.log("getMovieFileSize downloadedValue", this.downloadedValue);
         this.maxProgressBar = value >= 100 ? 100 : value;
         if (this.loadingBar) {
           this.loadingBar.style.width = this.downloadedValue + "%";
         }
-        // console.log("getMovieFileSize this.totalSize = " + this.totalSize + ", response.data.size = " + response.data.size);
-        if (((this.totalSize > 0 && response.data.size < this.totalSize) || response.data.size == 0)
+        console.log("getMovieFileSize this.totalSize = " + this.totalSize + ", response.data.size = " + response.data.size);
+        if (((this.totalSize > 0 && response.data.size < this.totalSize) || response.data.size == 0 || this.totalSize == 0)
           && this.router.url.includes("/stream/" + this.movieId)) {
           setTimeout(() => {
             this.getMovieFileSize();

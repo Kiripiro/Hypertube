@@ -119,6 +119,7 @@ export class AuthService {
             { key: localStorageName.emailChecked, value: response.user.email_checked || false },
             { key: localStorageName.avatar, value: response.user.avatar || "" },
             { key: localStorageName.loginApi, value: response.user.loginApi || "" },
+            { key: localStorageName.language, value: response.user.language || "" },
           );
           this.router.navigate(['']);
           location.reload();

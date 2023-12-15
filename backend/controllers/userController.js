@@ -114,6 +114,7 @@ class UserController {
                 "firstName": userExists.firstName,
                 "lastName": userExists.lastName,
                 "avatar": userExists.avatar,
+                "language": userExists.language
             };
             console.log(Date.now());
             res.cookie('accessToken', accessToken, { httpOnly: true, maxAge: maxAgeAccessToken });

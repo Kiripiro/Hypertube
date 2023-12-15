@@ -263,6 +263,7 @@ export class SettingsComponent implements OnInit {
             { key: localStorageName.emailChecked, value: response.user.email_checked || false },
             { key: localStorageName.avatar, value: response.user.avatar || "" },
             { key: localStorageName.loginApi, value: response.user.loginApi || "" },
+            { key: localStorageName.language, value: response.user.language || "" }
           );
           const data = {
             title: 'Success',

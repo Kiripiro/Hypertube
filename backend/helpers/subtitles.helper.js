@@ -71,7 +71,7 @@ class SubtitlesHelper {
         }
     }
 
-    async downloadSubtitles(fileId) {
+    async downloadSubtitles(imdbId, lang, fileId) {
         try {
             const url = 'https://api.opensubtitles.com/api/v1/download';
             const data = {
@@ -99,10 +99,11 @@ class SubtitlesHelper {
                 const fileName = bodyParsed.file_name;
                 return { link: link, fileName: fileName };
             });
-            const path = PATH_SUBTITLES_DIR + "/srt/" + fileData.fileName;
+            const name = imdbId + "-" + lang + ".srt";
+            const path = PATH_SUBTITLES_DIR + "/srt/" + name;
             if (fs.existsSync(path)) {
                 console.log(yellow + "SUBTITLES_HELPER getSubtitles subtitles already exist" + reset);
-                return fileData.fileName;
+                return name;
             }
             const ret = await axios.get(fileData.link, { responseType: 'stream' })
             .then(response => {
@@ -116,7 +117,7 @@ class SubtitlesHelper {
                 });
             })
             .then(() => {
-                return fileData.fileName;
+                return name;
             })
             .catch(error => {
                 console.error('Error downloading the file:', error);
@@ -158,7 +159,7 @@ class SubtitlesHelper {
                 console.log(red + "SUBTITLES_HELPER getSubtitles fileId error" + reset);
                 return fileId;
             }
-            const fileName = await this.downloadSubtitles(fileId);
+            const fileName = await this.downloadSubtitles(imdbId, lang, fileId);
             if (fileName == -1) {
                 return fileName;
             } else if (fileName == 0) {
