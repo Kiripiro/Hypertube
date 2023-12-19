@@ -1,6 +1,6 @@
 <div class="centerDiv">
     <div class="searchCard">
-        <input class="seach-input" type="text" placeholder="Search by username..." [formControl]="control"
+        <input class="seach-input" type="text" placeholder="Search..." [formControl]="control"
             [matAutocomplete]="auto">
         <mat-autocomplete #auto="matAutocomplete">
             @for (username of filteredUsernames | async; track username) {

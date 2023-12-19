@@ -2,10 +2,10 @@ require('dotenv').config();
 const fs = require('fs');
 const Torrent = require('./torrent');
 const MovieFile = require('./movieFile');
-var parseTorrent = require('parse-torrent');
 const TorrentHelper = require('../helpers/torrent.helper');
 const axios = require('axios');
 const SubtitlesHelper = require('../helpers/subtitles.helper');
+const FreeTorrentScrapper = require('../helpers/freeTorrentScrapper.helper');
 
 const YTS_MOVIE_DETAUILS_URL = 'movie_details.json?movie_id=';
 
@@ -34,8 +34,15 @@ class StreamController {
 
     streamLauncher = async (req, res) => {
         try {
-            const ytsId = req.params.id;
-            var torrent = this.torrentTab.find(it => it.ytsId == ytsId);
+            const ytsId = req.params.ytsId;
+            const freeId = req.params.freeId;
+            console.log("streamLauncher ytsId", ytsId);
+            console.log("streamLauncher freeId", freeId);
+            if (ytsId > 0) {
+                var torrent = this.torrentTab.find(it => it.ytsId == movieId);
+            } else {
+                var torrent = this.torrentTab.find(it => it.freeId == freeId);
+            }
             if (torrent && (torrent.downloadStarted || torrent.downloaded)) {
                 const size = torrent.getDownloadedSize();
                 const totalSize = torrent.fileSize;
@@ -45,20 +52,36 @@ class StreamController {
             } else {
                 if (!torrent) {
                     console.log(blue + 'streamLauncher torrent not exist' + reset);
-                    const ytsApiResponse = await axios.get(`${process.env.TORRENT_API}${YTS_MOVIE_DETAUILS_URL}${ytsId}`);
-                    if (!ytsApiResponse || !ytsApiResponse.data || !ytsApiResponse.data.data || !ytsApiResponse.data.data.movie) {
-                        console.error('Error streamLauncher with YTS API response');
-                        return res.status(400).json({ error: 'Error with YTS API response' });
+                    var sortedTorrents = [];
+                    if (ytsId > 0) {
+                        const ytsApiResponse = await axios.get(`${process.env.TORRENT_API}${YTS_MOVIE_DETAUILS_URL}${ytsId}`);
+                        console.log("ytsApiResponse", ytsApiResponse);
+                        if (!ytsApiResponse || !ytsApiResponse.data || !ytsApiResponse.data.data || !ytsApiResponse.data.data.movie) {
+                            console.error('Error streamLauncher with YTS API response');
+                            return res.status(400).json({ error: 'Error with YTS API response' });
+                        }
+                        sortedTorrents = TorrentHelper.sortTorrents(
+                            ytsApiResponse.data.data.movie.torrents,
+                            ytsApiResponse.data.data.movie.title_long
+                        );
+                        if (sortedTorrents == null) {
+                            console.error('Error streamLauncher with YTS API response');
+                            return res.status(400).json({ error: 'Error with YTS API torrent response' });
+                        }
+                    } else {
+                        sortedTorrents = [{
+                            magnet: FreeTorrentScrapper.getMovieMagnet(freeId),
+                            hash: "",
+                            quality: "",
+                            size_bytes: "",
+                            seeds: 1000
+                        }]
+                        if (sortedTorrents[0].magnet == null || sortedTorrents[0].magnet == undefined) {
+                            console.error('Error streamLauncher with FreeTorrentScrapper');
+                            return res.status(400).json({ error: 'Error with FreeTorrentScrapper' });
+                        }
                     }
-                    const sortedTorrents = TorrentHelper.sortTorrents(
-                        ytsApiResponse.data.data.movie.torrents,
-                        ytsApiResponse.data.data.movie.title_long
-                    );
-                    if (sortedTorrents == null) {
-                        console.error('Error streamLauncher with YTS API response');
-                        return res.status(400).json({ error: 'Error with YTS API torrent response' });
-                    }
-                    torrent = new Torrent(ytsId, sortedTorrents);
+                    torrent = new Torrent(ytsId, freeId, sortedTorrents);
                     this.torrentTab.push(torrent);
                 }
                 if (!torrent.downloadStarted) {
@@ -174,8 +197,13 @@ class StreamController {
 
     getStream = async (req, res) => {
         try {
-            const ytsId = req.params.id;
-            var torrent = this.torrentTab.find(it => it.ytsId == ytsId);
+            const ytsId = req.params.ytsId;
+            const freeId = req.params.freeId;
+            if (ytsId > 0) {
+                var torrent = this.torrentTab.find(it => it.ytsId == movieId);
+            } else {
+                var torrent = this.torrentTab.find(it => it.freeId == freeId);
+            }
             const file = this.fileTab.find(it => it.fileName == (torrent.torrentName ? torrent.torrentName : ""));
             if (torrent && file && file.checkExist()) {
                 const range = req.headers.range;
@@ -192,8 +220,13 @@ class StreamController {
 
     getFileSize = async (req, res) => {
         try {
-            const ytsId = req.params.id;
-            var torrent = this.torrentTab.find(it => it.ytsId == ytsId);
+            const ytsId = req.params.ytsId;
+            const freeId = req.params.freeId;
+            if (ytsId > 0) {
+                var torrent = this.torrentTab.find(it => it.ytsId == movieId);
+            } else {
+                var torrent = this.torrentTab.find(it => it.freeId == freeId);
+            }
             if (torrent) {
                 let size = torrent.getDownloadedSize();
                 return res.status(200).json({ data: { size: size } });
@@ -208,8 +241,13 @@ class StreamController {
 
     stopStream = async (req, res) => {
         try {
-            const ytsId = req.params.id;
-            var torrent = this.torrentTab.find(it => it.ytsId == ytsId);
+            const ytsId = req.params.ytsId;
+            const freeId = req.params.freeId;
+            if (ytsId > 0) {
+                var torrent = this.torrentTab.find(it => it.ytsId == movieId);
+            } else {
+                var torrent = this.torrentTab.find(it => it.freeId == freeId);
+            }
             if (torrent) {
                 console.log(blue + 'stopStream' + reset);
                 torrent.stopDownload();

@@ -20,7 +20,7 @@ moviesRouter.get('/fetchMovieDetails/:imdb_id', auth, async (req, res) => {
     }
 });
 
-moviesRouter.get('/movieStream/:id', auth, async (req, res) => {
+moviesRouter.get('/movieStream/:ytsId/:freeId', auth, async (req, res) => {
     try {
         await StreamController.getStream(req, res);
     } catch (error) {
@@ -28,7 +28,7 @@ moviesRouter.get('/movieStream/:id', auth, async (req, res) => {
     }
 });
 
-moviesRouter.get('/movieLoading/:id', auth, async (req, res) => {
+moviesRouter.get('/movieLoading/:ytsId/:freeId', auth, async (req, res) => {
     try {
         await StreamController.streamLauncher(req, res);
     } catch (error) {
@@ -36,7 +36,7 @@ moviesRouter.get('/movieLoading/:id', auth, async (req, res) => {
     }
 });
 
-moviesRouter.get('/stopMovieLoading/:id', auth, async (req, res) => {
+moviesRouter.get('/stopMovieLoading/:ytsId/:freeId', auth, async (req, res) => {
     try {
         await StreamController.stopStream(req, res);
     } catch (error) {
@@ -44,7 +44,7 @@ moviesRouter.get('/stopMovieLoading/:id', auth, async (req, res) => {
     }
 });
 
-moviesRouter.get('/fileSize/:id', auth, async (req, res) => {
+moviesRouter.get('/fileSize/:ytsId/:freeId', auth, async (req, res) => {
     try {
         await StreamController.getFileSize(req, res);
     } catch (error) {
@@ -92,14 +92,14 @@ moviesRouter.get('/getMovieHistoryById/:id', auth, async (req, res) => {
 });
 
 
-// moviesRouter.get('/testMovies', auth, async (req, res) => { // FOR TEST, TO DELETE
-//     try {
-//         console.log("testMovies");
-//         await MoviesController.getTestMovies(req, res);
-//     } catch (error) {
-//         console.error(error);
-//     }
-// });
+moviesRouter.get('/testMovies', auth, async (req, res) => { // FOR TEST, TO DELETE
+    try {
+        console.log("testMovies");
+        await MoviesController.getTestMovies(req, res);
+    } catch (error) {
+        console.error(error);
+    }
+});
 
 
 module.exports = moviesRouter;

@@ -101,4 +101,16 @@ export class ProfileComponent implements OnInit {
       return;
     }
   }
+
+  test() {
+    console.log("test");
+    this.movieService.getMovieTest().subscribe({
+      next: (response) => {
+        console.log(response);
+      },
+      error: (error) => {
+        console.log(error);
+      }
+    });
+  }
 }

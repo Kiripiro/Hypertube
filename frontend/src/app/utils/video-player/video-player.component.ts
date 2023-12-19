@@ -28,6 +28,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   SECU_TIME = 0;
 
   movieId = 0;
+  freeId = "";
   loaded = false;
   videoLoaded = false;
   progressValue = 0;
@@ -92,6 +93,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
     this.route.params.subscribe(params => {
       console.log("params", params);
       this.movieId = params['ytsId'];
+      this.freeId = params['freeId'];
       this.imdbId = params['imdbId'];
       this.movieTitle = params['title'];
     });
@@ -107,7 +109,6 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
           if (sub.filePath == null || sub.filePath.length <= 0) {
             this.subtitlesError = true;
             this.subtitlesErrorMessage = this.subtitlesErrorMessage + sub.error + " (" + sub.lang + ")\n";
-            return ;
           }
         });
         console.log("subtitlesReceived", subtitlesReceived);
@@ -125,7 +126,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
     });
     this.getLoadingMovie();
     this.getMovieFileSize();
-    this.videoUrl = this.url + '/movies/movieStream/' + this.movieId;
+    this.videoUrl = this.url + '/movies/movieStream/' + this.movieId + '/' + this.freeId;
     this.subUrl = this.url + '/movies/testMovies';
   }
 
@@ -272,7 +273,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   }
 
   ngOnDestroy(): void {
-    this.movieService.stopLoadingMovie(this.movieId).subscribe({
+    this.movieService.stopLoadingMovie(this.movieId, this.freeId).subscribe({
       next: (response) => {
         console.log("stopLoadingMovie", response.message);
       },
@@ -293,9 +294,10 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
 
   getLoadingMovie() {
     if (this.router.url.includes("/stream/" + this.movieId)) {
-      this.movieService.getLoadingMovie(this.movieId).subscribe({
+      // console.log("getLoadingMovie " + this.movieId + " " + this.freeId);
+      this.movieService.getLoadingMovie(this.movieId, this.freeId).subscribe({
         next: (response) => {
-          console.log("getLoadingMovie", response.data);
+          // console.log("getLoadingMovie", response.data);
           if (response.data.downloadError) {
             const data = {
               title: 'Download error',
@@ -309,6 +311,10 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
           }
           this.progressValue = Math.floor(response.data.size * 100 / this.MIN_BYTES);
           this.totalSize = response.data.totalSize;
+          // console.log("this.totalSize", this.totalSize)
+          if (this.totalSize > 0 && this.totalSize <= this.MIN_BYTES) {
+            this.MIN_BYTES = this.totalSize;
+          }
 
           if (response.data.size < this.MIN_BYTES && this.router.url.includes("/stream/" + this.movieId)) {
             setTimeout(() => {
@@ -326,19 +332,19 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   }
 
   getMovieFileSize() {
-    this.movieService.getMovieFileSize(this.movieId).subscribe({
+    this.movieService.getMovieFileSize(this.movieId, this.freeId).subscribe({
       next: (response) => {
-        console.log("getMovieFileSize size = " + response.data.size + ", totalSize = " + this.totalSize);
+        // console.log("getMovieFileSize size = " + response.data.size + ", totalSize = " + this.totalSize);
         const sizeNormalized = (response.data.size - this.SECU_BYTES) / this.totalSize;
         const value = (this.totalSize <= 0) ? 0 : ((response.data.size >= this.totalSize) ? 100 : (sizeNormalized * 100))
         this.downloadedValue = value;
-        console.log("getMovieFileSize sizeNormalized = " + sizeNormalized);
-        console.log("getMovieFileSize downloadedValue", this.downloadedValue);
+        // console.log("getMovieFileSize sizeNormalized = " + sizeNormalized);
+        // console.log("getMovieFileSize downloadedValue", this.downloadedValue);
         this.maxProgressBar = value >= 100 ? 100 : value;
         if (this.loadingBar) {
           this.loadingBar.style.width = this.downloadedValue + "%";
         }
-        console.log("getMovieFileSize this.totalSize = " + this.totalSize + ", response.data.size = " + response.data.size);
+        // console.log("getMovieFileSize this.totalSize = " + this.totalSize + ", response.data.size = " + response.data.size);
         if (((this.totalSize > 0 && response.data.size < this.totalSize) || response.data.size == 0 || this.totalSize == 0)
           && this.router.url.includes("/stream/" + this.movieId)) {
           setTimeout(() => {

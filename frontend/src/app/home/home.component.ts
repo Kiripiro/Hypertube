@@ -169,7 +169,8 @@ export class HomeComponent implements OnInit {
           poster_path: this.films.find((f: any) => f.imdb_id === film.imdb_id)?.poster_path || null,
           imdb_id: film.imdb_id,
           imdb_rating: film.imdb_rating,
-          yts_id: film.yts_id
+          yts_id: film.yts_id,
+          free_movie_id: film.free_movie_id
         };
         this.dialog.open(MovieModalComponent, {
           data: {
