@@ -28,7 +28,7 @@ moviesRouter.get('/movieStream/:ytsId/:freeId', auth, async (req, res) => {
     }
 });
 
-moviesRouter.get('/movieLoading/:ytsId/:freeId', auth, async (req, res) => {
+moviesRouter.get('/movieLoading/:ytsId/:freeId/:imdbId', auth, async (req, res) => {
     try {
         await StreamController.streamLauncher(req, res);
     } catch (error) {

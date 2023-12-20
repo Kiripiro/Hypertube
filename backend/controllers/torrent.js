@@ -18,6 +18,7 @@ class Torrent {
     
     ytsId = 0;
     freeId = 0;
+    imdbId = "";
     torrents = [];
 
     torrentName;
@@ -32,9 +33,10 @@ class Torrent {
     countBeforeError;
     lastFileSize;
 
-    constructor(ytsId, freeId, sortedTorrents) {
+    constructor(ytsId, freeId, imdbId, sortedTorrents) {
         this.ytsId = ytsId;
         this.freeId = freeId;
+        this.imdbId = imdbId;
         this.torrents = sortedTorrents;
         this.torrentName = "";
         this.fileSize = 0;
@@ -139,7 +141,7 @@ class Torrent {
                     this.fileSize = file.length;
                     var stream = file.createReadStream();
                     const extname = path.extname(file.name);
-                    var destinationPath = path.join(PATH_DOWNLOAD_DIR, this.ytsId + extname);
+                    var destinationPath = path.join(PATH_DOWNLOAD_DIR, this.imdbId + extname);
                     this.path = destinationPath;
                     var writeStream = fs.createWriteStream(destinationPath);
                     stream.pipe(writeStream);

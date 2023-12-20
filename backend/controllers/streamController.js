@@ -36,10 +36,12 @@ class StreamController {
         try {
             const ytsId = req.params.ytsId;
             const freeId = req.params.freeId;
+            const imdbId = req.params.imdbId;
             console.log("streamLauncher ytsId", ytsId);
             console.log("streamLauncher freeId", freeId);
+            console.log("streamLauncher imdbId", imdbId);
             if (ytsId > 0) {
-                var torrent = this.torrentTab.find(it => it.ytsId == movieId);
+                var torrent = this.torrentTab.find(it => it.ytsId == ytsId);
             } else {
                 var torrent = this.torrentTab.find(it => it.freeId == freeId);
             }
@@ -81,7 +83,7 @@ class StreamController {
                             return res.status(400).json({ error: 'Error with FreeTorrentScrapper' });
                         }
                     }
-                    torrent = new Torrent(ytsId, freeId, sortedTorrents);
+                    torrent = new Torrent(ytsId, freeId, imdbId, sortedTorrents);
                     this.torrentTab.push(torrent);
                 }
                 if (!torrent.downloadStarted) {
@@ -200,7 +202,7 @@ class StreamController {
             const ytsId = req.params.ytsId;
             const freeId = req.params.freeId;
             if (ytsId > 0) {
-                var torrent = this.torrentTab.find(it => it.ytsId == movieId);
+                var torrent = this.torrentTab.find(it => it.ytsId == ytsId);
             } else {
                 var torrent = this.torrentTab.find(it => it.freeId == freeId);
             }
@@ -223,7 +225,7 @@ class StreamController {
             const ytsId = req.params.ytsId;
             const freeId = req.params.freeId;
             if (ytsId > 0) {
-                var torrent = this.torrentTab.find(it => it.ytsId == movieId);
+                var torrent = this.torrentTab.find(it => it.ytsId == ytsId);
             } else {
                 var torrent = this.torrentTab.find(it => it.freeId == freeId);
             }
@@ -244,7 +246,7 @@ class StreamController {
             const ytsId = req.params.ytsId;
             const freeId = req.params.freeId;
             if (ytsId > 0) {
-                var torrent = this.torrentTab.find(it => it.ytsId == movieId);
+                var torrent = this.torrentTab.find(it => it.ytsId == ytsId);
             } else {
                 var torrent = this.torrentTab.find(it => it.freeId == freeId);
             }

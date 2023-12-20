@@ -16,8 +16,8 @@ export class MoviesService {
     this.url = environment.backendUrl || 'http://localhost:3000';
   }
 
-  getLoadingMovie(movieId: Number, freeId: String): Observable<LoadingMovieResponse> {
-    return this.http.get<LoadingMovieResponse>(this.url + '/movies/movieLoading/' + movieId + '/' + freeId, { withCredentials: true });
+  getLoadingMovie(movieId: Number, freeId: String, imdbId: String): Observable<LoadingMovieResponse> {
+    return this.http.get<LoadingMovieResponse>(this.url + '/movies/movieLoading/' + movieId + '/' + freeId + '/' + imdbId, { withCredentials: true });
   }
 
   stopLoadingMovie(movieId: Number, freeId: String): Observable<StopLoadingMovieResponse> {

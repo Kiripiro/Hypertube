@@ -295,7 +295,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   getLoadingMovie() {
     if (this.router.url.includes("/stream/" + this.movieId)) {
       // console.log("getLoadingMovie " + this.movieId + " " + this.freeId);
-      this.movieService.getLoadingMovie(this.movieId, this.freeId).subscribe({
+      this.movieService.getLoadingMovie(this.movieId, this.freeId, this.imdbId).subscribe({
         next: (response) => {
           // console.log("getLoadingMovie", response.data);
           if (response.data.downloadError) {

@@ -20,7 +20,7 @@ export class MovieModalComponent {
   selectedComment: Comment | null = null;
   id: number = this.localStorageService.getItem('id') || null;
   ytsId: number = 0;
-  freeMovieId: string = "";
+  freeMovieId: string = "undefined";
 
   constructor(
     public dialogRef: MatDialogRef<MovieModalComponent>,
@@ -33,8 +33,9 @@ export class MovieModalComponent {
     if (data.yts_id) {
       this.ytsId = data.yts_id;
     } else {
-      this.freeMovieId = data.free_movie_id;
+      this.freeMovieId = data.free_movie_id ? data.free_movie_id : "";
     }
+    console.log("data", data);
     this.commentsService.getComments(this.data.imdb_id).subscribe({
       next: (response: any) => {
         if (response && response.comments && Array.isArray(response.comments)) {
