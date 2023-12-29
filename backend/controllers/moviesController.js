@@ -159,7 +159,8 @@ class MoviesController {
             language: omdbData.Language,
             awards: omdbData.Awards,
             release_date: omdbData.Year,
-            poster: omdbData.Poster
+            poster: omdbData.Poster,
+            runtime: omdbData.Runtime
         };
     };
 

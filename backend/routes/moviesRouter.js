@@ -20,7 +20,7 @@ moviesRouter.get('/fetchMovieDetails/:imdb_id', auth, async (req, res) => {
     }
 });
 
-moviesRouter.get('/movieStream/:ytsId/:freeId', auth, async (req, res) => {
+moviesRouter.get('/movieStream/:ytsId/:freeId/:time', auth, async (req, res) => {
     try {
         await StreamController.getStream(req, res);
     } catch (error) {

@@ -85,6 +85,17 @@ video {
             border-radius: 10px;
             transition: all 0.5s ease;
         }
+
+        #mkvLoadingBar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background-color: $test_mkvLoadingBar;
+            width: 0%;
+            height: 100%;
+            border-radius: 10px;
+            transition: all 0.5s ease;
+        }
     
         #loadingBar {
             position: absolute;

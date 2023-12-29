@@ -13,6 +13,7 @@ export class DetailsComponent implements OnInit {
   ytsId = 0;
   imdbId = 0;
   imdbData: any;
+  duration = 0;
 
   posterUrl = "";
 
@@ -37,6 +38,8 @@ export class DetailsComponent implements OnInit {
           this.posterUrl = this.imdbData.poster;
           this.loading = false;
           this.success = true;
+          this.duration = this.convertDurationToNumber(this.imdbData.runtime);
+          console.log(this.duration);
         },
         error: (error) => {
           console.log(error);
@@ -46,5 +49,14 @@ export class DetailsComponent implements OnInit {
       });
     })
   }
+
+    convertDurationToNumber(duration: string): number {
+    const result = duration.match(/\d+/g);
+    if (result) {
+      return parseInt(result[0], 10);
+    }
+    return 0;
+  }
+
 }
 

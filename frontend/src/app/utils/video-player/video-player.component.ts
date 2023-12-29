@@ -15,11 +15,7 @@ import { LocalStorageService } from 'src/app/services/local-storage.service';
 })
 export class VideoPlayerComponent implements OnInit, AfterViewInit {
   @Input()
-  ytsId!: number;
-  @Input()
-  imdbId!: string;
-  @Input()
-  movieTitle!: any;
+  durationData!: number;
 
   color: ThemePalette = 'warn';
 
@@ -29,11 +25,15 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
 
   movieId = 0;
   freeId = "";
+  imdbId = "";
+  movieTitle= "";
   loaded = false;
   videoLoaded = false;
   progressValue = 0;
   totalSize = 0;
   downloadedValue = 0;
+  isMKV = false;
+  startTime = "";
 
   imdb_id = "";
 
@@ -47,6 +47,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   videoPlayButtonIcon = "play_arrow";
   progressRange: any;
   progressBar: any;
+  mkvLoadingBar: any;
   loadingBar: any;
   videoControls: any;
 
@@ -68,6 +69,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   isHidden = true;
   videoCurrentTime = "";
   videoDuration = "";
+  videoDurationSeconds = 0;
 
   subUrl: SafeResourceUrl | undefined;
 
@@ -91,14 +93,13 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
-      console.log("params", params);
       this.movieId = params['ytsId'];
       this.freeId = params['freeId'];
       this.imdbId = params['imdbId'];
       this.movieTitle = params['title'];
+      this.startTime = params['time'];
     });
     const userLanguage = this.localStorageService.getItem("language");
-    console.log("userLanguage", userLanguage);
     const languages = (userLanguage != null && userLanguage.length > 0 && userLanguage != "en") ? ['en', userLanguage] : ['en'];
     this.movieService.downloadSubtitles(this.imdbId, languages).subscribe({
       next: (response) => {
@@ -111,10 +112,8 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
             this.subtitlesErrorMessage = this.subtitlesErrorMessage + sub.error + " (" + sub.lang + ")\n";
           }
         });
-        console.log("subtitlesReceived", subtitlesReceived);
         this.subtitles = subtitlesReceived;
         if (this.videoLoaded) {
-          console.log("this.subtitles get", this.subtitles)
           this._addSubtitles();
         }
       },
@@ -126,13 +125,8 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
     });
     this.getLoadingMovie();
     this.getMovieFileSize();
-    this.videoUrl = this.url + '/movies/movieStream/' + this.movieId + '/' + this.freeId;
+    this.videoUrl = this.url + '/movies/movieStream/' + this.movieId + '/' + this.freeId + '/' + this.startTime;
     this.subUrl = this.url + '/movies/testMovies';
-  }
-
-  addSubtitlesToVideo(subtitles: string) {
-    const videoElement = document.querySelector('video');
-    
   }
 
   ngAfterViewInit() {
@@ -142,24 +136,34 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   onVideoLoad() {
     console.log('Video metadata loaded');
     this.video = document.getElementById('videoPlayerOrigin') as HTMLVideoElement;
+    this.videoDurationSeconds = this.isMKV ? (this.durationData * 60) : this.video.duration;
+    if (this.startTime != null && this.startTime.length > 0) {
+      const time = parseFloat(this.startTime);
+      const videoTimeMax = this.maxProgressBar * this.videoDurationSeconds / 100;
+      if (time > 0 && time < this.videoDurationSeconds && time < videoTimeMax) {
+        this.video.currentTime = time;
+      }
+    }
     this.videoPlayButton = document.getElementById('videoPlayButton') as HTMLButtonElement;
     this.progressRange = document.getElementById('progressRange') as HTMLDivElement;
     this.progressBar = document.getElementById('progressBar') as HTMLDivElement;
+    this.mkvLoadingBar = document.getElementById('mkvLoadingBar') as HTMLDivElement;
     this.loadingBar = document.getElementById('loadingBar') as HTMLDivElement;
     this.value = this.video.volume * 100;
     console.log('Video metadata loaded downloadedValue', this.downloadedValue);
     if (this.downloadedValue > 0 && this.downloadedValue < 100) {
       this.loadingBar.style.width = this.downloadedValue + "%";
     }
+    if (this.isMKV) {
+      this.mkvLoadingBar.style.width = (this.video.duration / this.videoDurationSeconds * 100) + "%";
+    }
     this.videoLoaded = true;
     this.videoControls = document.getElementById('videoControls') as HTMLDivElement;
     this.videoControls.style.display = "block";
-    this.videoDuration = this._convertSecondsToTime(this.video.duration);
+    this.videoDuration = this._convertSecondsToTime(this.videoDurationSeconds);
     this.videoCurrentTime = this._convertSecondsToTime(this.video.currentTime);
-    this.bytesPerSeconds = this.totalSize / this.video.duration;
-
+    this.bytesPerSeconds = this.totalSize / this.videoDurationSeconds;
     this._addSubtitles();
-
   }
 
   _addSubtitles() {
@@ -169,7 +173,6 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
         if (sub.filePath != null && sub.filePath.length > 0) {
           this.movieService.getSubtitles(sub.filePath).subscribe(subtitles => {
             const blob = new Blob([subtitles], { type: 'webvtt' });
-            console.log("blob", blob)
             const subBlobUrl = URL.createObjectURL(blob);
             const track = document.createElement('track');
             track.kind = 'subtitles';
@@ -188,7 +191,6 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   changeSubtitles(newSub: {value: string, viewValue: string}) {
     console.log("changeSubtitles", newSub)
     if (newSub.value != this.currentSubtitles) {
-      console.log("change ok")
       const tracks = this.video.textTracks;
       for (let i = 0; i < tracks.length; i++) {
         const track = tracks[i];
@@ -210,7 +212,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
     if (!this.videoLoaded)
       return;
     if (!this.videoPlaying) {
-      const videoTimeMax = this.maxProgressBar * this.video.duration / 100;
+      const videoTimeMax = this.maxProgressBar * this.videoDurationSeconds / 100;
       if (this.video.currentTime >= videoTimeMax) {
         console.log("force pause togglevideo")
         return;
@@ -231,8 +233,8 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
     const clickPosition = (event as MouseEvent).clientX - this.progressRange.getBoundingClientRect().left;
     const progressRangeWidth = this.progressRange.getBoundingClientRect().width;
     const percentage = (clickPosition / progressRangeWidth) * 100;
-    const videoTimeSelected = (percentage * this.video.duration) / 100;
-    const videoTimeMax = this.maxProgressBar * this.video.duration / 100;
+    const videoTimeSelected = (percentage * this.videoDurationSeconds) / 100;
+    const videoTimeMax = this.maxProgressBar * this.videoDurationSeconds / 100;
     console.log("percentage = " + percentage + ", maxProgressBar = " + this.maxProgressBar + ", videoTimeSelected = " + videoTimeSelected + ", videoTimeMax = " + videoTimeMax + ", this.totalSize = " + this.totalSize);
     if ((videoTimeSelected + this.SECU_TIME) < videoTimeMax) {
       this.video.currentTime = videoTimeSelected;
@@ -242,8 +244,14 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   onTimeUpdate() {
     if (!this.videoLoaded)
       return;
-    const videoTimeMax = this.maxProgressBar * this.video.duration / 100;
+    const videoTimeMax = this.maxProgressBar * this.videoDurationSeconds / 100;
     if (this.video.currentTime > videoTimeMax) {
+      if (this.video.currentTime >= this.videoDurationSeconds) {
+        this.video.pause();
+        this.videoPlaying = false;
+        this.videoPlayButtonIcon = "play_arrow";
+        return ;
+      }
       this.video.currentTime = this.oldCurrentTime;
       console.log("force pause onTimeUpdate 1")
       this.video.pause();
@@ -260,7 +268,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
     }
     else {
       this.oldCurrentTime = this.video.currentTime;
-      const value = (this.video.currentTime / this.video.duration) * 100;
+      const value = (this.video.currentTime / this.videoDurationSeconds) * 100;
       this.progressBar.style.width = value + "%";
     }
     this.videoCurrentTime = this._convertSecondsToTime(this.video.currentTime);
@@ -269,6 +277,9 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
       this.video.pause();
       this.videoPlaying = false;
       this.videoPlayButtonIcon = "play_arrow";
+    }
+    if (this.isMKV) {
+      this.mkvLoadingBar.style.width = (this.video.duration / this.videoDurationSeconds * 100) + "%";
     }
   }
 
@@ -309,6 +320,8 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
             this.dialogService.openDialog(data);
             return;
           }
+          if (response.data.isMKV)
+            this.isMKV = true;
           this.progressValue = Math.floor(response.data.size * 100 / this.MIN_BYTES);
           this.totalSize = response.data.totalSize;
           // console.log("this.totalSize", this.totalSize)
@@ -343,6 +356,9 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
         this.maxProgressBar = value >= 100 ? 100 : value;
         if (this.loadingBar) {
           this.loadingBar.style.width = this.downloadedValue + "%";
+        }
+        if (this.isMKV) {
+          this.mkvLoadingBar.style.width = (this.video.duration / this.videoDurationSeconds * 100) + "%";
         }
         // console.log("getMovieFileSize this.totalSize = " + this.totalSize + ", response.data.size = " + response.data.size);
         if (((this.totalSize > 0 && response.data.size < this.totalSize) || response.data.size == 0 || this.totalSize == 0)

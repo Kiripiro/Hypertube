@@ -1,11 +1,22 @@
 require('dotenv').config();
 const fs = require('fs');
+const path = require('path');
+// const ffmpeg = require('fluent-ffmpeg')
+
+const ffmpegInstaller = require('@ffmpeg-installer/ffmpeg');
+const ffmpeg = require('fluent-ffmpeg');
+
+ffmpeg.setFfmpegPath(ffmpegInstaller.path);
+// console.log(ffmpegInstaller.path, ffmpegInstaller.version);
+
+module.exports = ffmpeg;
 const Torrent = require('./torrent');
 const MovieFile = require('./movieFile');
 const TorrentHelper = require('../helpers/torrent.helper');
 const axios = require('axios');
 const SubtitlesHelper = require('../helpers/subtitles.helper');
 const FreeTorrentScrapper = require('../helpers/freeTorrentScrapper.helper');
+const s = require('torrent-stream');
 
 const YTS_MOVIE_DETAUILS_URL = 'movie_details.json?movie_id=';
 
@@ -49,8 +60,9 @@ class StreamController {
                 const size = torrent.getDownloadedSize();
                 const totalSize = torrent.fileSize;
                 const error = !torrent.checkDownload();
+                const isMKV = torrent.isMKV ? torrent.isMKV : false;
                 console.log(blue + 'streamLauncher torrent exist and started. size: ' + size + ' totalSize: ' + totalSize + '' + reset);
-                return res.status(200).json({ data: { size: size, totalSize: totalSize, downloadError: error } });
+                return res.status(200).json({ data: { size: size, totalSize: totalSize, downloadError: error, isMKV: isMKV } });
             } else {
                 if (!torrent) {
                     console.log(blue + 'streamLauncher torrent not exist' + reset);
@@ -102,8 +114,9 @@ class StreamController {
                 }
                 const size = torrent.getDownloadedSize();
                 const totalSize = torrent.fileSize;
+                const isMKV = torrent.isMKV ? torrent.isMKV : false;
                 console.log(blue + 'streamLauncher torrent not exist and/or not started. size: ' + size + ' totalSize: ' + totalSize + reset);
-                return res.status(200).json({ data: { size: size, totalSize: totalSize } });
+                return res.status(200).json({ data: { size: size, totalSize: totalSize, isMKV: isMKV } });
             }
         } catch (error) {
             console.error('Error streamLauncher:', error);
@@ -111,11 +124,11 @@ class StreamController {
         }
     };
 
-    _sendRange(range, torrent, res) {
+    _sendRange(range, torrent, res, time) {
         if (!torrent.checkCanStream()) {
             console.log(red + 'sendRange torrent can\'t stream' + reset);
             setTimeout(() => {
-                this._sendRange(range, torrent, res);
+                this._sendRange(range, torrent, res, time);
             }, 5000);
         } else {
             const file = this.fileTab.find(it => it.fileName == torrent.torrentName);
@@ -123,76 +136,117 @@ class StreamController {
                 console.log("error file not found")
                 return;
             }
-            const filePath = file.filePath;
+            var filePath = file.filePath;
             const stat = fs.statSync(filePath)
             const fileSize = stat.size
             const expectedFileSize = file.expectedFileSize;
-
-            if (range) {
-                const parts = range.replace(/bytes=/, "").split("-")
-                const fileSizeSecuNormalized = 0.95;
-                var chunkSizeToSend = 100000;
-                var start = parseInt(parts[0], 10)
-                const startNormalized = start / fileSize;
-                if (startNormalized >= fileSizeSecuNormalized) {
-                    chunkSizeToSend = 10000;
+            const readStream = fs.createReadStream(filePath)
+            if (torrent.isMKV) {
+                var startTime = 0;
+                if (time > 0) {
+                    startTime = time;
                 }
-                if (start >= fileSize) {
-                    console.log(red + 'sendRange start > fileSize, start = ' + start + reset);
-                    var end = parts[1] ? parseInt(parts[1], 10) : start + chunkSizeToSend;
-                    if (end > file.expectedFileSize) {
-                        end = file.expectedFileSize - 1;
-                    }
-                    if (start > end) {
-                        start = end - 1;
-                    }
-                    const chunksize = ((end - start) > 0 ? (end - start) : -1) + 1
-                    const startData = fileSize - (chunksize * 4) - 1;
-                    const endData = start + chunksize;
-
-                    const readStream = fs.createReadStream(filePath, { startData, endData })
-
-                    const head = {
-                        'Content-Range': `bytes ${start}-${end}/${expectedFileSize}`,
-                        'Accept-Ranges': 'bytes',
-                        'Content-Length': chunksize,
-                        'Content-Type': 'video/mp4',
-                    }
-                    res.writeHead(206, head)
-                    readStream.pipe(res)
-                } else {
-
-                    var end = parts[1] ? parseInt(parts[1], 10) : start + chunkSizeToSend;
-                    if (end > fileSize) {
-                        end = fileSize - 1;
-                    }
-                    if (start > end) {
-                        console.log("AIE")
-                        console.log("start" + start + " end" + end + " fileSize" + fileSize);
-                        start = end - 1;
-                    }
-                    this.lastByteSent = end;
-                    const chunksize = ((end - start) > 0 ? (end - start) : -1) + 1
-
-                    const readStream = fs.createReadStream(filePath, { start, end })
-
-                    const head = {
-                        'Content-Range': `bytes ${start}-${end}/${expectedFileSize}`,
-                        'Accept-Ranges': 'bytes',
-                        'Content-Length': chunksize,
-                        'Content-Type': 'video/mp4',
-                    }
-                    res.writeHead(206, head)
-                    readStream.pipe(res)
-                }
+                console.log("startTime", startTime);
+                const headers = {
+                    'Content-Duration': "107",
+                  };
+                  res.writeHead(200, headers);
+                ffmpeg()
+                .input(readStream)
+                // .setStartTime(startTime)
+                .outputOptions([
+                    '-deadline realtime',
+                    '-preset ultrafast',
+                    '-start_number ${startTime}',
+                    '-movflags frag_keyframe+separate_moof+omit_tfhd_offset+empty_moov+faststart',
+                    '-g 52',
+                ])
+                .outputFormat('mp4')
+                .on('start', () => {
+                    console.log('start')
+                })
+                .on('progress', (progress) => {
+                    console.log(`progress: ${progress.timemark}`)
+                })
+                .on('end', () => {
+                    console.log('Finished processing')
+                    readStream.destroy()
+                })
+                .on('error', (err) => {
+                    console.log(`ERROR: ${err.message}`)
+                })
+                .pipe(res)
+                res.on('close', () => {
+                    console.log('res.on close')
+                    readStream.destroy()
+                })
             } else {
-                console.log(red + 'No range' + reset);
-                const head = {
-                    'Content-Length': fileSize,
-                    'Content-Type': 'video/mp4',
+                if (range) {
+                    const parts = range.replace(/bytes=/, "").split("-")
+                    const fileSizeSecuNormalized = 0.95;
+                    var chunkSizeToSend = 1000000;
+                    var start = parseInt(parts[0], 10)
+                    const startNormalized = start / fileSize;
+                    if (startNormalized >= fileSizeSecuNormalized) {
+                        chunkSizeToSend = 10000;
+                    }
+                    if (start >= fileSize) {
+                        console.log(red + 'sendRange start > fileSize, start = ' + start + reset);
+                        var end = parts[1] ? parseInt(parts[1], 10) : start + chunkSizeToSend;
+                        if (end > file.expectedFileSize) {
+                            end = file.expectedFileSize - 1;
+                        }
+                        if (start > end) {
+                            start = end - 1;
+                        }
+                        const chunksize = ((end - start) > 0 ? (end - start) : -1) + 1
+                        const startData = fileSize - (chunksize * 4) - 1;
+                        // const startData = 0; // TODO
+                        const endData = start + chunksize;
+    
+                        const readStream = fs.createReadStream(filePath, { startData, endData })
+    
+                        const head = {
+                            'Content-Range': `bytes ${start}-${end}/${expectedFileSize}`,
+                            'Accept-Ranges': 'bytes',
+                            'Content-Length': chunksize,
+                            'Content-Type': 'video/mp4',
+                        }
+                        res.writeHead(206, head)
+                        readStream.pipe(res)
+                    } else {
+                        console.log("else filePath", filePath)
+                        var end = parts[1] ? parseInt(parts[1], 10) : start + chunkSizeToSend;
+                        if (end > fileSize) {
+                            end = fileSize - 1;
+                        }
+                        if (start > end) {
+                            console.log("AIE")
+                            console.log("start" + start + " end" + end + " fileSize" + fileSize);
+                            start = end - 1;
+                        }
+                        this.lastByteSent = end;
+                        const chunksize = ((end - start) > 0 ? (end - start) : -1) + 1
+                        console.log("start = " + start + " end = " + end + " chunksize = " + chunksize)
+                        const readStream = fs.createReadStream(filePath, { start, end })
+                        const head = {
+                            'Content-Range': `bytes ${start}-${end}/${expectedFileSize}`,
+                            'Accept-Ranges': 'bytes',
+                            'Content-Length': chunksize,
+                            'Content-Type': 'video/mp4',
+                        }
+                        res.writeHead(206, head)
+                        readStream.pipe(res)
+                    }
+                } else {
+                    console.log(red + 'No range' + reset);
+                    const head = {
+                        'Content-Length': fileSize,
+                        'Content-Type': 'video/mp4',
+                    }
+                    res.writeHead(200, head)
+                    fs.createReadStream(filePath).pipe(res)
                 }
-                res.writeHead(200, head)
-                fs.createReadStream(filePath).pipe(res)
             }
         }
     }
@@ -201,6 +255,7 @@ class StreamController {
         try {
             const ytsId = req.params.ytsId;
             const freeId = req.params.freeId;
+            const time = req.params.time;
             if (ytsId > 0) {
                 var torrent = this.torrentTab.find(it => it.ytsId == ytsId);
             } else {
@@ -209,7 +264,7 @@ class StreamController {
             const file = this.fileTab.find(it => it.fileName == (torrent.torrentName ? torrent.torrentName : ""));
             if (torrent && file && file.checkExist()) {
                 const range = req.headers.range;
-                this._sendRange(range, torrent, res);
+                this._sendRange(range, torrent, res, time);
             } else {
                 console.error("getStream torrent or file not exist");
                 return res.status(500).json({ message: 'Internal Server Error' });
