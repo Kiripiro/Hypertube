@@ -32,8 +32,8 @@ export class MoviesService {
     return this.http.get<TorrentInfosResponse>(this.url + '/movies/torrentInfos/' + movieId, { withCredentials: true });
   }
 
-  getStream(movieId: Number, freeId: String): Observable<any> {
-    return this.http.get<any>(this.url + '/movies/movieStream/' + movieId + '/' + freeId, { withCredentials: true });
+  getStream(movieId: Number, freeId: String, startTime: string): Observable<any> {
+    return this.http.get<any>(this.url + '/movies/movieStream/' + movieId + '/' + freeId + '/' + startTime, { withCredentials: true });
   }
 
   addMovieHistory(imdbId: String, title: String): Observable<any> {

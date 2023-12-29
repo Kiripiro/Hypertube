@@ -349,7 +349,8 @@ export interface LoadingMovieResponse {
 	data: {
 		size: number,
 		totalSize: number,
-		downloadError: boolean
+		downloadError: boolean,
+		isMKV: boolean
 	}
 }
 
@@ -380,7 +381,8 @@ export interface MovieDetailsResponse {
 		language: string,
 		awards: string,
 		release_date: string,
-		poster: string
+		poster: string,
+		runtime: string,
 	}
 }
 
