@@ -350,7 +350,8 @@ export interface LoadingMovieResponse {
 		size: number,
 		totalSize: number,
 		downloadError: boolean,
-		isMKV: boolean
+		isMKV: boolean,
+		isWebm: boolean
 	}
 }
 
@@ -360,7 +361,8 @@ export interface StopLoadingMovieResponse {
 
 export interface MovieFileSizeResponse {
 	data: {
-		size: number
+		size: number,
+		duration: number
 	}
 }
 

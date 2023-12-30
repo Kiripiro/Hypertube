@@ -48,9 +48,6 @@ class StreamController {
             const ytsId = req.params.ytsId;
             const freeId = req.params.freeId;
             const imdbId = req.params.imdbId;
-            console.log("streamLauncher ytsId", ytsId);
-            console.log("streamLauncher freeId", freeId);
-            console.log("streamLauncher imdbId", imdbId);
             if (ytsId > 0) {
                 var torrent = this.torrentTab.find(it => it.ytsId == ytsId);
             } else {
@@ -61,15 +58,15 @@ class StreamController {
                 const totalSize = torrent.fileSize;
                 const error = !torrent.checkDownload();
                 const isMKV = torrent.isMKV ? torrent.isMKV : false;
+                const isWebm = torrent.isWebm ? torrent.isWebm : false;
                 console.log(blue + 'streamLauncher torrent exist and started. size: ' + size + ' totalSize: ' + totalSize + '' + reset);
-                return res.status(200).json({ data: { size: size, totalSize: totalSize, downloadError: error, isMKV: isMKV } });
+                return res.status(200).json({ data: { size: size, totalSize: totalSize, downloadError: error, isMKV: isMKV, isWebm: isWebm } });
             } else {
                 if (!torrent) {
                     console.log(blue + 'streamLauncher torrent not exist' + reset);
                     var sortedTorrents = [];
                     if (ytsId > 0) {
                         const ytsApiResponse = await axios.get(`${process.env.TORRENT_API}${YTS_MOVIE_DETAUILS_URL}${ytsId}`);
-                        console.log("ytsApiResponse", ytsApiResponse);
                         if (!ytsApiResponse || !ytsApiResponse.data || !ytsApiResponse.data.data || !ytsApiResponse.data.data.movie) {
                             console.error('Error streamLauncher with YTS API response');
                             return res.status(400).json({ error: 'Error with YTS API response' });
@@ -147,17 +144,17 @@ class StreamController {
                     startTime = time;
                 }
                 console.log("startTime", startTime);
-                const headers = {
-                    'Content-Duration': "107",
-                  };
-                  res.writeHead(200, headers);
+                const startTimeString = startTime.toString();
+                // const headers = {
+                //     'Content-Duration': "107",
+                //   };
+                //   res.writeHead(200, headers);
                 ffmpeg()
                 .input(readStream)
-                // .setStartTime(startTime)
                 .outputOptions([
+                    '-ss ' + startTime.toString(),
                     '-deadline realtime',
                     '-preset ultrafast',
-                    '-start_number ${startTime}',
                     '-movflags frag_keyframe+separate_moof+omit_tfhd_offset+empty_moov+faststart',
                     '-g 52',
                 ])
@@ -178,7 +175,7 @@ class StreamController {
                 .pipe(res)
                 res.on('close', () => {
                     console.log('res.on close')
-                    readStream.destroy()
+                    // readStream.destroy()
                 })
             } else {
                 if (range) {
@@ -215,19 +212,16 @@ class StreamController {
                         res.writeHead(206, head)
                         readStream.pipe(res)
                     } else {
-                        console.log("else filePath", filePath)
                         var end = parts[1] ? parseInt(parts[1], 10) : start + chunkSizeToSend;
                         if (end > fileSize) {
                             end = fileSize - 1;
                         }
                         if (start > end) {
-                            console.log("AIE")
                             console.log("start" + start + " end" + end + " fileSize" + fileSize);
                             start = end - 1;
                         }
                         this.lastByteSent = end;
                         const chunksize = ((end - start) > 0 ? (end - start) : -1) + 1
-                        console.log("start = " + start + " end = " + end + " chunksize = " + chunksize)
                         const readStream = fs.createReadStream(filePath, { start, end })
                         const head = {
                             'Content-Range': `bytes ${start}-${end}/${expectedFileSize}`,
@@ -286,7 +280,15 @@ class StreamController {
             }
             if (torrent) {
                 let size = torrent.getDownloadedSize();
-                return res.status(200).json({ data: { size: size } });
+                // if (torrent.isMKV) {
+                //     console.log("torrent.path", torrent.path)
+                //     ffmpeg.ffprobe(torrent.path, function(err, data) {
+                //         //console.dir(metadata); // all metadata
+                //         console.log("err", err)
+                //         console.log(data);
+                //     })
+                // }
+                return res.status(200).json({ data: { size: size, duration: 0 } });
             } else {
                 return res.status(200).json({ data: { size: 0 } });
             }
@@ -325,6 +327,8 @@ class StreamController {
             const imdbId = req.params.imdbId;
             const lang = req.params.lang;
             const tabLang = lang.split("-");
+            const time = req.params.time;
+            console.log('time', time);
             if (tabLang.length <= 0) {
                 return res.status(400).json({ message: 'Missing language parameter' });
             } else if (tabLang.length > 2) {
@@ -351,9 +355,23 @@ class StreamController {
                         retTab.push({
                             lang: tabLang[i],
                             filePath: null,
-                            error: "Subtitle not found"
+                            error: "Subtitles not found"
                         });
                     } else if (filePath != null && filePath != undefined && filePath.length > 0) {
+                        // if (time > 0) {
+                        //     const inputFile = "/app/subtitles/vtt/tt0093773-en.vtt";
+                        //     const outputFile = "/app/subtitles/vtt/tt0093773-en-forMKV.vtt";
+                        //     const timeOffset = 430;
+                        //     console.log("LETS GO")
+                        //     this.processVTT(inputFile, outputFile, timeOffset);
+                        // } else {
+                        //     const fileName = filePath.replace('/app/subtitles/vtt/', '');
+                        //     retTab.push({
+                        //         lang: tabLang[i],
+                        //         filePath: fileName,
+                        //         error: ""
+                        //     });
+                        // }
                         const fileName = filePath.replace('/app/subtitles/vtt/', '');
                         retTab.push({
                             lang: tabLang[i],
@@ -375,6 +393,71 @@ class StreamController {
             return res.status(500).json({ message: 'Internal Server Error' });
         }
     };
+
+    _customSubtitles() {
+        try {
+            
+        } catch (error) {
+            console.error('Error _customSubtitles:', error);
+            return "error";
+        }
+    };
+
+    // adjustTime(originalTime, offset) {
+    //     let parts = originalTime.split(':');
+    //     let seconds = parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseFloat(parts[2]) - offset;
+    //     let date = new Date(0);
+    //     date.setSeconds(seconds); // specify value for SECONDS here
+    //     let timeString = date.toISOString().substr(11, 12);
+    //     return timeString;
+    // }
+      
+    // processVTT(inputPath, outputPath, offsetSeconds) {
+    // fs.readFile(inputPath, 'utf8', function (err, data) {
+    //     if (err) {
+    //     console.error("Could not open file", err);
+    //     return;
+    //     }
+    
+    //     // Break down the file into segments
+    //     let segments = data.split('\r\n\r\n');
+    //     console.log("segments.length", segments.length);
+    //     let newSegments = segments.map(segment => {
+    //         // console.log("segment", segment);
+    //         let lines = segment.split('\n');
+    //         console.log("lines", lines);
+    //         if (lines.length >= 2 && lines[1].includes('-->')) {
+    //             // Adjust the timing
+    //             let times = lines[1].split(' --> ');
+    //             times[0] = this.adjustTime(times[0], offsetSeconds);
+    //             console.log("times[0]", times[0]);
+    //             times[1] = this.adjustTime(times[1], offsetSeconds);
+    //             console.log("times[0]", times[0]);
+    //             lines[1] = times.join(' --> ');
+    //         }
+    //         return lines.join('\n');
+    //     }).filter(segment => {
+    //         // Filter out segments that are before the offset time
+    //         if (segment.includes('-->')) {
+    //             let times = segment.split('\n')[1].split(' --> ');
+    //             let startTime = times[0].split(':');
+    //             let startSeconds = parseInt(startTime[0]) * 3600 + parseInt(startTime[1]) * 60 + parseFloat(startTime[2]);
+    //             return startSeconds >= 0;
+    //         }
+    //         return true;
+    //     });
+    
+    //     let newContent = newSegments.join('\n\n');
+    //     fs.writeFile(outputPath, newContent, function (err) {
+    //     if (err) {
+    //         console.error("Could not write file", err);
+    //     } else {
+    //         console.log("File was saved as", outputPath);
+    //     }
+    //     });
+    // });
+    // }
+
 
     // getTorrentInfos = async (req, res) => { // FOR TEST, TO DELETE
     //     try {

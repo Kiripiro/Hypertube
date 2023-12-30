@@ -3,7 +3,7 @@
 #detailsMainDiv {
     width: 100%;
     min-height: 100%;
-    background-color: $test_background;
+    background-color: $second_background;
     padding-top: 1rem;
 
     .loading {
@@ -35,7 +35,7 @@
                 margin-right: 20rem;
             }
             margin-bottom: 1rem;
-            background-color: $test_surface;
+            background-color: $second_surface2;
             border-radius: 20px;
             display: flex;
             flex-direction: column;
@@ -59,7 +59,7 @@
             img {
                 width: 300px;
                 border-radius: 10%;
-                border: 4px solid $test_surface;
+                border: 4px solid $second_surface2;
                 margin-bottom: 0.5rem;
             }
 
@@ -69,24 +69,24 @@
                 align-items: center;
 
                 h1 {
-                    color: $test_onSurface;
+                    color: $second_onSurface;
                     font-size: 2rem;
                     text-align: center;
                     margin-bottom: 0.5rem;
                 }
 
                 p {
-                    color: $test_onSurface;
+                    color: $second_onSurface;
                     margin-bottom: 0;
                 }
 
                 .rating {
                     padding: 1rem;
                     margin-top: 1rem;
-                    background-color: $test_surfaceAlt;
+                    background-color: $second_surfaceAlt;
                     border-radius: 15px;
                     p {
-                        color: $test_onSurfaceAlt;
+                        color: $second_onSurfaceAlt;
                         font-size: 1.5rem;
                         font-weight: 600;
                     }
@@ -126,7 +126,7 @@
 
             .plot {
                 text-align: justify;
-                color: $test_onSurface;
+                color: $second_onSurface;
             }
 
             p {
@@ -137,12 +137,12 @@
                 display: flex;
 
                 p:first-child {
-                    color: $test_onSurfaceSubtitle;
+                    color: $second_onSurfaceSubtitle;
                     margin-right: 0.3rem;
                 }
 
                 p {
-                    color: $test_onSurface;
+                    color: $second_onSurface;
                 }
             }
         }
