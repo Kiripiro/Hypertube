@@ -461,22 +461,22 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   }
 
   fullScreen() {
-    if (this.downloadedValue >= this.totalSize && this.totalSize > 0)
-      return;
-    this.video.controls = false;
-    if (!document.fullscreenElement) {
-      if (this.video.requestFullscreen) {
-        this.video.requestFullscreen();
-      } else if (this.video.mozRequestFullScreen) { /* Firefox */
-        this.video.mozRequestFullScreen();
-      } else if (this.video.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
-        this.video.webkitRequestFullscreen();
-      } else if (this.video.msRequestFullscreen) { /* IE/Edge */
-        this.video.msRequestFullscreen();
-      }
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
+    if (!this.isMKV && this.downloadedValue >= this.totalSize && this.totalSize > 0) {
+      this.video.controls = false;
+      if (!document.fullscreenElement) {
+        if (this.video.requestFullscreen) {
+          this.video.requestFullscreen();
+        } else if (this.video.mozRequestFullScreen) { /* Firefox */
+          this.video.mozRequestFullScreen();
+        } else if (this.video.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
+          this.video.webkitRequestFullscreen();
+        } else if (this.video.msRequestFullscreen) { /* IE/Edge */
+          this.video.msRequestFullscreen();
+        }
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
       }
     }
   }

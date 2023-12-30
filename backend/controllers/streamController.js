@@ -1,5 +1,6 @@
 require('dotenv').config();
 const fs = require('fs');
+const fsPromises = require('fs').promises;
 const path = require('path');
 // const ffmpeg = require('fluent-ffmpeg')
 
@@ -328,6 +329,7 @@ class StreamController {
             const lang = req.params.lang;
             const tabLang = lang.split("-");
             const time = req.params.time;
+            const userId = req.user.userId;
             console.log('time', time);
             if (tabLang.length <= 0) {
                 return res.status(400).json({ message: 'Missing language parameter' });
@@ -358,26 +360,32 @@ class StreamController {
                             error: "Subtitles not found"
                         });
                     } else if (filePath != null && filePath != undefined && filePath.length > 0) {
-                        // if (time > 0) {
-                        //     const inputFile = "/app/subtitles/vtt/tt0093773-en.vtt";
-                        //     const outputFile = "/app/subtitles/vtt/tt0093773-en-forMKV.vtt";
-                        //     const timeOffset = 430;
-                        //     console.log("LETS GO")
-                        //     this.processVTT(inputFile, outputFile, timeOffset);
-                        // } else {
-                        //     const fileName = filePath.replace('/app/subtitles/vtt/', '');
-                        //     retTab.push({
-                        //         lang: tabLang[i],
-                        //         filePath: fileName,
-                        //         error: ""
-                        //     });
-                        // }
-                        const fileName = filePath.replace('/app/subtitles/vtt/', '');
-                        retTab.push({
-                            lang: tabLang[i],
-                            filePath: fileName,
-                            error: ""
-                        });
+                        if (time > 0) {
+                            const fileName = filePath.replace('.vtt', '-forMKV-' + userId + '.vtt');
+                            const timeOffset = time;
+                            const ret = await this.processVTT(filePath, fileName, timeOffset, this._updateTime);
+                            if (ret == null || ret == undefined) {
+                                retTab.push({
+                                    lang: tabLang[i],
+                                    filePath: null,
+                                    error: "Error processing subtitles"
+                                });
+                            } else {
+                                const fileName = ret.replace('/app/subtitles/vtt/', '');
+                                retTab.push({
+                                    lang: tabLang[i],
+                                    filePath: fileName,
+                                    error: ""
+                                });
+                            }
+                        } else {
+                            const fileName = filePath.replace('/app/subtitles/vtt/', '');
+                            retTab.push({
+                                lang: tabLang[i],
+                                filePath: fileName,
+                                error: ""
+                            });
+                        }
                     } else {
                         retTab.push({
                             lang: tabLang[i],
@@ -394,70 +402,84 @@ class StreamController {
         }
     };
 
-    _customSubtitles() {
-        try {
-            
-        } catch (error) {
-            console.error('Error _customSubtitles:', error);
-            return "error";
+    _updateTime = (originalTime, offset) => {
+        let parts = originalTime.split(':');
+        let originalTimeSeconds = parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseFloat(parts[2]);
+        let seconds = originalTimeSeconds - offset;
+        if (seconds < 0) {
+            return "TOREMOVE_TOREMOVE";
         }
-    };
-
-    // adjustTime(originalTime, offset) {
-    //     let parts = originalTime.split(':');
-    //     let seconds = parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseFloat(parts[2]) - offset;
-    //     let date = new Date(0);
-    //     date.setSeconds(seconds); // specify value for SECONDS here
-    //     let timeString = date.toISOString().substr(11, 12);
-    //     return timeString;
-    // }
+        seconds = seconds.toFixed(3);
+        let hoursPat = Math.floor(seconds / 3600);
+        seconds -= hoursPat * 3600;
+        let minutesPat = Math.floor(seconds / 60);
+        let secondsPat = seconds - minutesPat * 60;
+        let [wholeSeconds, fractional] = String(secondsPat).split(".");
+        if (fractional && fractional.length > 0) {
+            if (fractional.length == 1) {
+                fractional = fractional + "00";
+            } else if (fractional.length == 2) {
+                fractional = fractional + "0";
+            } else {
+                fractional = fractional.substring(0, 3)
+            }
+        } else {
+            fractional = "000";
+        }
+        if(fractional.length === 1) {
+            fractional = fractional + "0";
+        }
+        let hoursStr = hoursPat.toString().padStart(2, '0');
+        let minutesStr = minutesPat.toString().padStart(2, '0');
+        let secondsStr = wholeSeconds.toString().padStart(2, '0');
+        const timeString = `${hoursStr}:${minutesStr}:${secondsStr}.${fractional}`;
+        return timeString;
+    }
       
-    // processVTT(inputPath, outputPath, offsetSeconds) {
-    // fs.readFile(inputPath, 'utf8', function (err, data) {
-    //     if (err) {
-    //     console.error("Could not open file", err);
-    //     return;
-    //     }
-    
-    //     // Break down the file into segments
-    //     let segments = data.split('\r\n\r\n');
-    //     console.log("segments.length", segments.length);
-    //     let newSegments = segments.map(segment => {
-    //         // console.log("segment", segment);
-    //         let lines = segment.split('\n');
-    //         console.log("lines", lines);
-    //         if (lines.length >= 2 && lines[1].includes('-->')) {
-    //             // Adjust the timing
-    //             let times = lines[1].split(' --> ');
-    //             times[0] = this.adjustTime(times[0], offsetSeconds);
-    //             console.log("times[0]", times[0]);
-    //             times[1] = this.adjustTime(times[1], offsetSeconds);
-    //             console.log("times[0]", times[0]);
-    //             lines[1] = times.join(' --> ');
-    //         }
-    //         return lines.join('\n');
-    //     }).filter(segment => {
-    //         // Filter out segments that are before the offset time
-    //         if (segment.includes('-->')) {
-    //             let times = segment.split('\n')[1].split(' --> ');
-    //             let startTime = times[0].split(':');
-    //             let startSeconds = parseInt(startTime[0]) * 3600 + parseInt(startTime[1]) * 60 + parseFloat(startTime[2]);
-    //             return startSeconds >= 0;
-    //         }
-    //         return true;
-    //     });
-    
-    //     let newContent = newSegments.join('\n\n');
-    //     fs.writeFile(outputPath, newContent, function (err) {
-    //     if (err) {
-    //         console.error("Could not write file", err);
-    //     } else {
-    //         console.log("File was saved as", outputPath);
-    //     }
-    //     });
-    // });
-    // }
+    async processVTT(inputPath, outputPath, offsetSeconds, _updateTime) {
+        try {
+            const data = await fsPromises.readFile(inputPath, 'utf8')
+            if (data == null || data == undefined || data.length <= 0) {
+                return null;
+            }
+            let segments = data.split('\r\n\r\n');
+            let newSegments = segments.map(segment => {
+                let lines = segment.split('\n');
+                if (lines.length >= 2 && lines[0].includes('-->')) {
+                    let times = lines[0].split(' --> ');
+                    const time0 = _updateTime(times[0], offsetSeconds);
+                    if (time0 == "TOREMOVE_TOREMOVE") {
+                        return "TOREMOVE_TOREMOVE";
+                    } else {
+                        times[0] = time0;
+                    }
+                    const time1 = _updateTime(times[1], offsetSeconds);
+                    if (time1 == "TOREMOVE_TOREMOVE") {
+                        return "TOREMOVE_TOREMOVE";
+                    } else {
+                        times[1] = time1;
+                    }
+                    lines[0] = times.join(' --> ');
+                }
+                return lines.join('\n');
+            }).filter(segment => {
+                if (segment.includes('TOREMOVE_TOREMOVE')) {
+                    return false;
+                }
+                return true;
+            });
+            console.log("newSegments.length", newSegments.length);
 
+            let newContent = newSegments.join('\n\n');
+            await fsPromises.writeFile(outputPath, newContent);
+            console.log("File was saved as", outputPath);
+            console.log("ret 1", outputPath);
+            return outputPath;
+        } catch (err) {
+            console.error("An error occurred:", err);
+            return null;
+        }
+    }
 
     // getTorrentInfos = async (req, res) => { // FOR TEST, TO DELETE
     //     try {
