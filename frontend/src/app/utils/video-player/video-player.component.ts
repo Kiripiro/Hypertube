@@ -22,6 +22,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   MIN_BYTES = 150000000;
   SECU_BYTES = 100000000;
   SECU_TIME = 0;
+  SECU_TIME_CONVERTED = 120;
 
   movieId = 0;
   freeId = "";
@@ -29,11 +30,13 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   movieTitle= "";
   loaded = false;
   videoLoaded = false;
+  error = false;
   progressValue = 0;
   totalSize = 0;
   downloadedValue = 0;
   isMKV = false;
-  startTime = "";
+  isWebm = false;
+  sourceType = "video/mp4";
 
   imdb_id = "";
 
@@ -47,7 +50,6 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   videoPlayButtonIcon = "play_arrow";
   progressRange: any;
   progressBar: any;
-  mkvLoadingBar: any;
   loadingBar: any;
   videoControls: any;
 
@@ -70,6 +72,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   videoCurrentTime = "";
   videoDuration = "";
   videoDurationSeconds = 0;
+  timeExpected = 0;
 
   subUrl: SafeResourceUrl | undefined;
 
@@ -97,11 +100,38 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
       this.freeId = params['freeId'];
       this.imdbId = params['imdbId'];
       this.movieTitle = params['title'];
-      this.startTime = params['time'];
+      const timeConverted = this.movieService._convertTime(params['time'] ? params['time'] : "0");
+      if (timeConverted == -1) {
+        this.error = true;
+        const data = {
+          title: 'Time parameter error',
+          text: '',
+          text_yes_button: 'Ok',
+          yes_callback: () => { },
+          reload: false,
+        };
+        this.dialogService.openDialog(data);
+      } else {
+        if (timeConverted > this.durationData * 60) {
+          this.error = true;
+          const data = {
+            title: 'Time parameter error',
+            text: '',
+            text_yes_button: 'Ok',
+            yes_callback: () => { },
+            reload: false,
+          };
+          this.dialogService.openDialog(data);
+        } else if (timeConverted > ((this.durationData * 60) - this.SECU_TIME_CONVERTED)) {
+          this.timeExpected = (this.durationData * 60) - this.SECU_TIME_CONVERTED;
+        } else {
+          this.timeExpected = timeConverted;
+        }
+      }
     });
     const userLanguage = this.localStorageService.getItem("language");
     const languages = (userLanguage != null && userLanguage.length > 0 && userLanguage != "en") ? ['en', userLanguage] : ['en'];
-    this.movieService.downloadSubtitles(this.imdbId, languages).subscribe({
+    this.movieService.downloadSubtitles(this.imdbId, languages, this.timeExpected).subscribe({
       next: (response) => {
         console.log("downloadSubtitles", response);
         const subtitlesReceived = response.subtitles;
@@ -125,7 +155,10 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
     });
     this.getLoadingMovie();
     this.getMovieFileSize();
-    this.videoUrl = this.url + '/movies/movieStream/' + this.movieId + '/' + this.freeId + '/' + this.startTime;
+    if (this.freeId == null || this.freeId == undefined || this.freeId == "undefined") {
+      this.freeId = "tt0";
+    }
+    this.videoUrl = this.url + '/movies/movieStream/' + this.movieId + '/' + this.freeId + '/' + this.timeExpected;
     this.subUrl = this.url + '/movies/testMovies';
   }
 
@@ -137,31 +170,33 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
     console.log('Video metadata loaded');
     this.video = document.getElementById('videoPlayerOrigin') as HTMLVideoElement;
     this.videoDurationSeconds = this.isMKV ? (this.durationData * 60) : this.video.duration;
-    if (this.startTime != null && this.startTime.length > 0) {
-      const time = parseFloat(this.startTime);
-      const videoTimeMax = this.maxProgressBar * this.videoDurationSeconds / 100;
-      if (time > 0 && time < this.videoDurationSeconds && time < videoTimeMax) {
-        this.video.currentTime = time;
-      }
-    }
+    this.video.disablePictureInPicture = true;
     this.videoPlayButton = document.getElementById('videoPlayButton') as HTMLButtonElement;
     this.progressRange = document.getElementById('progressRange') as HTMLDivElement;
     this.progressBar = document.getElementById('progressBar') as HTMLDivElement;
-    this.mkvLoadingBar = document.getElementById('mkvLoadingBar') as HTMLDivElement;
+    if (this.isMKV) {
+      const value = ((this.timeExpected + this.video.currentTime) / this.videoDurationSeconds) * 100;
+      this.progressBar.style.width = value + "%";
+    } else {
+      const value = (this.video.currentTime / this.videoDurationSeconds) * 100;
+      this.progressBar.style.width = value + "%";
+    }
     this.loadingBar = document.getElementById('loadingBar') as HTMLDivElement;
     this.value = this.video.volume * 100;
     console.log('Video metadata loaded downloadedValue', this.downloadedValue);
     if (this.downloadedValue > 0 && this.downloadedValue < 100) {
       this.loadingBar.style.width = this.downloadedValue + "%";
     }
-    if (this.isMKV) {
-      this.mkvLoadingBar.style.width = (this.video.duration / this.videoDurationSeconds * 100) + "%";
-    }
     this.videoLoaded = true;
     this.videoControls = document.getElementById('videoControls') as HTMLDivElement;
     this.videoControls.style.display = "block";
     this.videoDuration = this._convertSecondsToTime(this.videoDurationSeconds);
-    this.videoCurrentTime = this._convertSecondsToTime(this.video.currentTime);
+    if (this.isMKV) {
+      console.log("this.timeExpected videoload", this.timeExpected)
+      this.videoCurrentTime = this._convertSecondsToTime(this.timeExpected + this.video.currentTime);
+    } else {
+      this.videoCurrentTime = this._convertSecondsToTime(this.video.currentTime);
+    }
     this.bytesPerSeconds = this.totalSize / this.videoDurationSeconds;
     this._addSubtitles();
   }
@@ -217,6 +252,9 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
         console.log("force pause togglevideo")
         return;
       }
+      if (this.isMKV && this.video.currentTime >= this.video.duration) {
+        return ;
+      }
       this.video.play();
       this.videoPlaying = true;
       this.videoPlayButtonIcon = "pause";
@@ -237,14 +275,33 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
     const videoTimeMax = this.maxProgressBar * this.videoDurationSeconds / 100;
     console.log("percentage = " + percentage + ", maxProgressBar = " + this.maxProgressBar + ", videoTimeSelected = " + videoTimeSelected + ", videoTimeMax = " + videoTimeMax + ", this.totalSize = " + this.totalSize);
     if ((videoTimeSelected + this.SECU_TIME) < videoTimeMax) {
-      this.video.currentTime = videoTimeSelected;
+      console.log("this.video.currentTime = " + this.video.currentTime + ", videoTimeSelected = " + videoTimeSelected + ", videoTimeMax = " + videoTimeMax + ", this.video.duration = " + this.video.duration)
+      if (this.isMKV) {
+        this._realoadWithTime(Math.floor(videoTimeSelected));
+      } else {
+        this.video.currentTime = videoTimeSelected;
+      }
     }
+  }
+
+  _realoadWithTime(time: number) {
+    console.log("_realoadWithTime", time);
+    this.router.navigate(['stream/' + this.movieId + '/' + this.imdbId + '/' + this.movieTitle + '/' + this.freeId + '/' + time]).then(() => {
+      window.location.reload();
+    });
   }
 
   onTimeUpdate() {
     if (!this.videoLoaded)
       return;
     const videoTimeMax = this.maxProgressBar * this.videoDurationSeconds / 100;
+    // console.log("this.video.currentTime = " + this.video.currentTime + ", videoTimeMax = " + videoTimeMax + ", this.video.duration = " + this.video.duration)
+    if (this.isMKV && this.video.currentTime >= this.video.duration) {
+      this.video.pause();
+      this.videoPlaying = false;
+      this.videoPlayButtonIcon = "play_arrow";
+      return ;
+    }
     if (this.video.currentTime > videoTimeMax) {
       if (this.video.currentTime >= this.videoDurationSeconds) {
         this.video.pause();
@@ -259,7 +316,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
       this.videoPlayButtonIcon = "play_arrow";
       const data = {
         title: 'Download error',
-        text: 'There is an issue with the download. This may be due to an internet connection problem.',
+        text: 'There is an issue with the download. This may be due to an internet connection problem. Wait or reload the page.',
         text_yes_button: 'Ok',
         yes_callback: () => { },
         reload: false,
@@ -268,30 +325,36 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
     }
     else {
       this.oldCurrentTime = this.video.currentTime;
-      const value = (this.video.currentTime / this.videoDurationSeconds) * 100;
-      this.progressBar.style.width = value + "%";
+      if (this.isMKV) {
+        const value = ((this.timeExpected + this.video.currentTime) / this.videoDurationSeconds) * 100;
+        this.progressBar.style.width = value + "%";
+      } else {
+        const value = (this.video.currentTime / this.videoDurationSeconds) * 100;
+        this.progressBar.style.width = value + "%";
+      }
     }
-    this.videoCurrentTime = this._convertSecondsToTime(this.video.currentTime);
+    if (this.isMKV) {
+      this.videoCurrentTime = this._convertSecondsToTime(this.timeExpected + this.video.currentTime);
+    } else {
+      this.videoCurrentTime = this._convertSecondsToTime(this.video.currentTime);
+    }
     if (this.videoPlaying && this.video.currentTime >= videoTimeMax) {
       console.log("force pause onTimeUpdate 2")
       this.video.pause();
       this.videoPlaying = false;
       this.videoPlayButtonIcon = "play_arrow";
     }
-    if (this.isMKV) {
-      this.mkvLoadingBar.style.width = (this.video.duration / this.videoDurationSeconds * 100) + "%";
-    }
   }
 
   ngOnDestroy(): void {
-    this.movieService.stopLoadingMovie(this.movieId, this.freeId).subscribe({
-      next: (response) => {
-        console.log("stopLoadingMovie", response.message);
-      },
-      error: (error) => {
-        console.log(error);
-      }
-    });
+    // this.movieService.stopLoadingMovie(this.movieId, this.freeId).subscribe({
+    //   next: (response) => {
+    //     console.log("stopLoadingMovie", response.message);
+    //   },
+    //   error: (error) => {
+    //     console.log(error);
+    //   }
+    // });
     console.log('ngOnDestroy');
     this.movieService.addMovieHistory(this.imdbId, this.movieTitle).subscribe({
       next: (response) => {
@@ -320,8 +383,13 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
             this.dialogService.openDialog(data);
             return;
           }
-          if (response.data.isMKV)
+          if (response.data.isMKV) {
             this.isMKV = true;
+          }
+          if (response.data.isWebm) {
+            this.isWebm = true;
+            this.sourceType = "video/webm";
+          }
           this.progressValue = Math.floor(response.data.size * 100 / this.MIN_BYTES);
           this.totalSize = response.data.totalSize;
           // console.log("this.totalSize", this.totalSize)
@@ -338,7 +406,14 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
           }
         },
         error: (error) => {
-          console.log(error);
+          const data = {
+            title: 'Stream error',
+            text: error.error.message,
+            text_yes_button: 'Ok',
+            yes_callback: () => { },
+            reload: false,
+          };
+          this.dialogService.openDialog(data);
         }
       });
     }
@@ -347,6 +422,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   getMovieFileSize() {
     this.movieService.getMovieFileSize(this.movieId, this.freeId).subscribe({
       next: (response) => {
+        // console.log("getMovieFileSize", response.data);
         // console.log("getMovieFileSize size = " + response.data.size + ", totalSize = " + this.totalSize);
         const sizeNormalized = (response.data.size - this.SECU_BYTES) / this.totalSize;
         const value = (this.totalSize <= 0) ? 0 : ((response.data.size >= this.totalSize) ? 100 : (sizeNormalized * 100))
@@ -356,9 +432,6 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
         this.maxProgressBar = value >= 100 ? 100 : value;
         if (this.loadingBar) {
           this.loadingBar.style.width = this.downloadedValue + "%";
-        }
-        if (this.isMKV) {
-          this.mkvLoadingBar.style.width = (this.video.duration / this.videoDurationSeconds * 100) + "%";
         }
         // console.log("getMovieFileSize this.totalSize = " + this.totalSize + ", response.data.size = " + response.data.size);
         if (((this.totalSize > 0 && response.data.size < this.totalSize) || response.data.size == 0 || this.totalSize == 0)

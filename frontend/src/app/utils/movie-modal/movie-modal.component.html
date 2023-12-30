@@ -1,36 +1,42 @@
 <div class="movie-modal">
-    <div class="movie-modal-content">
+    <div class="movie-modal-content" *ngIf="!loading && !error">
         <div class="movie-modal-header">
             <div class="movie-modal-header-commentsOpened" *ngIf="showComments">
                 <button mat-icon-button (click)="showCommentsToggle()" class="close-button">
                     <mat-icon aria-label="Close dialog">arrow_back</mat-icon>
                 </button>
-                <h2 mat-dialog-title>{{ data.title }}</h2>
+                <h2 mat-dialog-title>{{data.title}}</h2>
             </div>
-            <h2 *ngIf="!showComments" mat-dialog-title>{{ data.title }}</h2>
+            <div class="leftPart"></div>
             <button mat-icon-button mat-dialog-close class="close-button">
                 <mat-icon aria-label="Close dialog">close</mat-icon>
             </button>
         </div>
         <div *ngIf="!showComments" mat-dialog-content>
-            <img [src]="data.poster_path" alt="film image" class="modal-image">
-            <div class="movie-details">
-                <div class="basic-details">
-                    <p><strong>Director:</strong> {{ data.director || 'N/A' }}</p>
-                    <p><strong>Writer:</strong> {{ data.writer || 'N/A' }}</p>
-                    <p><strong>Actors:</strong> {{ data.actors || 'N/A' }}</p>
-                    <p><strong>Genre:</strong> {{ data.genre || 'N/A' }}</p>
-                    <p><strong>Language:</strong> {{ data.language }}</p>
+            <div class="movieInfosModal">
+                <div class="primaryInfosModal">
+                    <img [src]="data.poster_path" alt="film image" class="modal-image">
+                    <div class="basic-details">
+                        <p class="movieTitle">{{data.title}}</p>
+                        <p><strong>Director:</strong> {{ data.director || 'N/A' }}</p>
+                        <p><strong>Writer:</strong> {{ data.writer || 'N/A' }}</p>
+                        <p><strong>Actors:</strong> {{ data.actors || 'N/A' }}</p>
+                        <p><strong>Genre:</strong> {{ data.genre || 'N/A' }}</p>
+                        <p><strong>Language:</strong> {{ data.language }}</p>
+                        <p><strong>Release Date:</strong> {{ data.release_date }}</p>
+                        <p *ngIf="data.awards"><strong>Awards:</strong> {{ data.awards }}</p>
+                        <p><strong>IMDb ID:</strong> <a [href]="'https://www.imdb.com/title/' + data.imdb_id" target="_blank">
+                            {{ data.imdb_id }}</a></p>
+                        <div class="ratingModal">
+                            <p>{{data.imdb_rating}}/10</p>
+                        </div>
+                    </div>
                 </div>
-
-                <p><strong>Plot:</strong> {{ data.plot || 'N/A' }}</p>
-                <p *ngIf="data.awards"><strong>Awards:</strong> {{ data.awards }}</p>
-                <p><strong>Release Date:</strong> {{ data.release_date }}</p>
-                <p><strong>IMDb ID:</strong> <a [href]="'https://www.imdb.com/title/' + data.imdb_id" target="_blank">
-                        {{ data.imdb_id }}</a></p>
-                <p *ngIf="data.imdb_rating"><strong>IMDb Rating:</strong> {{ data.imdb_rating }} / 10</p>
-                <button mat-button (click)="close()"
-                    [routerLink]="['stream/' + ytsId + '/' + data.imdb_id + '/' + data.title + '/' + freeMovieId + '/' + 0]">Watch</button>
+                <div class="movie-details">
+                    <p>{{ data.plot || 'N/A' }}</p>
+                    <button class="watchMovieButtonModal" mat-button (click)="close()"
+                        [routerLink]="['stream/' + ytsId + '/' + data.imdb_id + '/' + data.title + '/' + freeMovieId + '/0']">Watch</button>
+                </div>
             </div>
         </div>
         <div *ngIf="showComments" mat-dialog-content>
@@ -88,4 +94,10 @@
         <div *ngIf="!showComments" mat-dialog-actions align="end">
             <button mat-raised-button class="movie-modal-button" (click)="showCommentsToggle()">Show comments</button>
         </div>
+    </div>
+    <div class="waitModal" *ngIf="loading && !error">
+        <p>Wait</p>
+    </div>
+    <div class="errorModal" *ngIf="error">
+        <p>Error</p>
     </div>

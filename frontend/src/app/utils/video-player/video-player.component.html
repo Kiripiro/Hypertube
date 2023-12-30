@@ -11,7 +11,7 @@
             {{this.progressValue}}%
         </p>
     </div>
-    <div class="detailsMovie" *ngIf="loaded">
+    <div class="detailsMovie" *ngIf="loaded && !error">
         <div class="video-container">
             <div class="progressVideoLoading" *ngIf="!videoLoaded">
                 <mat-progress-spinner
@@ -23,15 +23,15 @@
             (timeupdate)="onTimeUpdate()"
             (loadedmetadata)="onVideoLoad()"
             preload="auto"
-            width="100%">
-                <source [src]="videoUrl" type="video/mp4">
+            width="100%"
+            disablePictureInPicture>
+                <source [src]="videoUrl" [type]="sourceType">
                 Your browser does not support the video tag.
             </video>
             <div id="videoControls">
                 <div class="topControl">
                     <div id="progressRange" (click)="changeSeekBar($event)" title="Seek">
                         <div id="loadingBar"></div>
-                        <div id="mkvLoadingBar"></div>
                         <div id="progressBar"></div>
                     </div>
                 </div>
@@ -76,6 +76,11 @@
         <div class="subtitlesError" *ngIf="subtitlesError">
             <p>{{subtitlesErrorMessage}}</p>
         </div>
+    </div>
+    <div class="detailsWait" *ngIf="error">
+        <p>
+            Error
+        </p>
     </div>
 </div>
 

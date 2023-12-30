@@ -5,6 +5,7 @@ import { CommentsService } from 'src/app/services/comments.service';
 import { Comment } from 'src/app/models/models';
 import { LocalStorageService } from 'src/app/services/local-storage.service';
 import { MoviesService } from 'src/app/services/movie.service';
+import { HomeService } from 'src/app/services/home.service';
 
 @Component({
   selector: 'app-film-modal',
@@ -13,7 +14,9 @@ import { MoviesService } from 'src/app/services/movie.service';
 })
 export class MovieModalComponent {
   showComments = false;
-  commentForm: FormGroup;
+  commentForm: FormGroup = this.formBuilder.group({
+    comment: ['', [Validators.required, Validators.minLength(1), Validators.maxLength(500)]],
+  });
   comments: Comment[] = [];
   replying: boolean = false;
   editing: boolean = false;
@@ -21,34 +24,64 @@ export class MovieModalComponent {
   id: number = this.localStorageService.getItem('id') || null;
   ytsId: number = 0;
   freeMovieId: string = "undefined";
+  data: any;
+  loading = true;
+  error = false;
 
   constructor(
     public dialogRef: MatDialogRef<MovieModalComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any,
+    @Inject(MAT_DIALOG_DATA) public dataReceived: any,
     private formBuilder: FormBuilder,
     private commentsService: CommentsService,
     private movieService: MoviesService,
-    private localStorageService: LocalStorageService
+    private localStorageService: LocalStorageService,
+    private homeService: HomeService,
   ) {
-    if (data.yts_id) {
-      this.ytsId = data.yts_id;
-    } else {
-      this.freeMovieId = data.free_movie_id ? data.free_movie_id : "";
-    }
-    console.log("data", data);
-    this.commentsService.getComments(this.data.imdb_id).subscribe({
+    this.homeService.getMovieDetails(dataReceived.imdb_id).subscribe({
       next: (response: any) => {
-        if (response && response.comments && Array.isArray(response.comments)) {
-          this.comments = response.comments;
+        const movie = response.movie;
+        const dataReceivedResponse = {
+          id: dataReceived.id,
+          title: dataReceived.title,
+          director: dataReceived.director || movie.director,
+          release_date: dataReceived.release_date || movie.release_date,
+          writer: dataReceived.writer || movie.writer,
+          actors: dataReceived.actors || movie.actors,
+          genre: dataReceived.genre,
+          language: dataReceived.language || movie.language,
+          plot: movie.plot ? movie.plot : dataReceived.plot,
+          awards: dataReceived.awards || movie.awards,
+          poster_path: this.dataReceived.poster_path || movie.poster_path,
+          imdb_id: dataReceived.imdb_id,
+          imdb_rating: dataReceived.imdb_rating,
+          yts_id: dataReceived.yts_id,
+          free_movie_id: dataReceived.free_movie_id
+        };
+        this.data = dataReceivedResponse;
+        if (this.data.yts_id) {
+          this.ytsId = this.data.yts_id;
         } else {
-          console.error('Invalid response format:', response);
+          this.freeMovieId = this.data.free_movie_id ? this.data.free_movie_id : "";
         }
-      }, error: (error) => {
+        console.log("data", this.data);
+        this.loading = false;
+        this.commentsService.getComments(this.data.imdb_id).subscribe({
+          next: (response: any) => {
+            if (response && response.comments && Array.isArray(response.comments)) {
+              this.comments = response.comments;
+            } else {
+              console.error('Invalid response format:', response);
+            }
+          }, error: (error) => {
+            console.log(error);
+          }
+        });
+        
+      },
+      error: (error) => {
         console.log(error);
+        this.error = true;
       }
-    });
-    this.commentForm = this.formBuilder.group({
-      comment: ['', [Validators.required, Validators.minLength(1), Validators.maxLength(500)]],
     });
     // this.movieService.getTorrentInfos(data.yts_id).subscribe({
     //   next: (response: any) => {

@@ -36,6 +36,7 @@ class Torrent {
     countBeforeError;
     lastFileSize;
     isMKV;
+    isWebm;
 
     constructor(ytsId, freeId, imdbId, sortedTorrents) {
         this.ytsId = ytsId;
@@ -52,11 +53,12 @@ class Torrent {
         this.countBeforeError = 0;
         this.lastFileSize = 0;
         this.isMKV = false;
+        this.isWebm = false;
     }
 
     checkDownload() {
         const currentSize = this.getDownloadedSize();
-        console.log("currentSize = " + currentSize + ", lastFileSize = " + this.lastFileSize + ", size = " + this.size);
+        console.log("currentSize = " + currentSize + ", lastFileSize = " + this.lastFileSize);
         if (currentSize == this.lastFileSize) {
             console.log("this.countBeforeError", this.countBeforeError)
             if (this.downloadStarted) {
@@ -142,10 +144,13 @@ class Torrent {
             var checkAcceptedFiles = false;
             this.engine.files.forEach(async (file) => {
                 console.log(green + 'TORRENT ready file ' + file.name + ', path: ' + file.path + reset);
-                if (path.extname(file.name) == '.mp4' || path.extname(file.name) == '.mkv') { 
+                if (path.extname(file.name) == '.mp4' || path.extname(file.name) == '.webm' || path.extname(file.name) == '.mkv') { 
                 // if (ACCEPTED_FILES.includes(path.extname(file.name))) { // TODO
                     if (path.extname(file.name) == '.mkv') {
                         this.isMKV = true;
+                    }
+                    if (path.extname(file.name) == '.webm') {
+                        this.isWebm = true;
                     }
                     checkAcceptedFiles = true;
                     console.log(green + 'TORRENT ready file accepted ' + file.name + ', path: ' + file.path + reset);

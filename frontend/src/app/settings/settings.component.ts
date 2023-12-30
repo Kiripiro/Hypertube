@@ -254,7 +254,7 @@ export class SettingsComponent implements OnInit {
 
     this.settingsService.updateUser(updatedFields, this.file).subscribe({
       next: (response) => {
-        console.log(response);
+        console.log("response", response)
         if (response.message === "User updated") {
           this.localStorageService.setMultipleItems(
             { key: localStorageName.username, value: response.user.username || "" },

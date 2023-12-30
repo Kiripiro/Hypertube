@@ -20,6 +20,17 @@ $test_surfaceAlt: #F37614;
 $test_onSurfaceAlt: #FBF9F8;
 $test_mkvLoadingBar: #CAE9FF;
 
+//second
+$second_background: #151419;
+$second_surface: #1B1A1F;
+$second_onSurface: #FCFCFC;
+$second_surface2: #272727;
+$second_onSurfaceSubtitle: #737680;
+$second_surfaceAlt: #F46E0F;
+$second_surfaceAltDark: rgba(189, 84, 9, 0.815);
+$second_surfaceLogOut: #4d4040;
+$second_onSurfaceAlt: #FBF9F8;
+$second_mkvLoadingBar: #CAE9FF;
 
 app-root {
     width: 100vw;
@@ -42,7 +53,7 @@ app-root {
     height: auto;
     width: 90vw;
     border-radius: 20px;
-    background-color: $primary;
+    background-color: $second_background;
     padding: 20px;
     margin: 20px;
 

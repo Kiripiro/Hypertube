@@ -406,6 +406,7 @@ class UserController {
                 "avatar": user.avatar,
                 "loginApi": user.loginApi,
                 "email_checked": user.email_checked,
+                "language": user.language
             };
             return res.status(200).json({ message: 'User updated', user: userReturn });
         } catch (error) {

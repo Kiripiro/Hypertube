@@ -3,6 +3,7 @@ const moviesRouter = express.Router();
 const auth = require('../middlewares/auth');
 const MoviesController = require('../controllers/moviesController');
 const StreamController = require('../controllers/streamController');
+const { validateMovieDetails, validateMovieStream, validateMovieLoading, validateMovieStopLoading, validateAddMovieHistory, validateMovieDownloadSubtitles, validateMovieFileSize } = require('../middlewares/moviesMiddleware');
 
 moviesRouter.get('/fetchYTSMovies', auth, async (req, res) => {
     try {
@@ -12,7 +13,7 @@ moviesRouter.get('/fetchYTSMovies', auth, async (req, res) => {
     }
 });
 
-moviesRouter.get('/fetchMovieDetails/:imdb_id', auth, async (req, res) => {
+moviesRouter.get('/fetchMovieDetails/:imdb_id', validateMovieDetails, auth, async (req, res) => {
     try {
         await MoviesController.fetchMovieDetails(req, res);
     } catch (error) {
@@ -20,7 +21,7 @@ moviesRouter.get('/fetchMovieDetails/:imdb_id', auth, async (req, res) => {
     }
 });
 
-moviesRouter.get('/movieStream/:ytsId/:freeId/:time', auth, async (req, res) => {
+moviesRouter.get('/movieStream/:ytsId/:freeId/:time', validateMovieStream, auth, async (req, res) => {
     try {
         await StreamController.getStream(req, res);
     } catch (error) {
@@ -28,7 +29,7 @@ moviesRouter.get('/movieStream/:ytsId/:freeId/:time', auth, async (req, res) => 
     }
 });
 
-moviesRouter.get('/movieLoading/:ytsId/:freeId/:imdbId', auth, async (req, res) => {
+moviesRouter.get('/movieLoading/:ytsId/:freeId/:imdbId', validateMovieLoading, auth, async (req, res) => {
     try {
         await StreamController.streamLauncher(req, res);
     } catch (error) {
@@ -36,7 +37,7 @@ moviesRouter.get('/movieLoading/:ytsId/:freeId/:imdbId', auth, async (req, res) 
     }
 });
 
-moviesRouter.get('/stopMovieLoading/:ytsId/:freeId', auth, async (req, res) => {
+moviesRouter.get('/stopMovieLoading/:ytsId/:freeId', validateMovieStopLoading, auth, async (req, res) => {
     try {
         await StreamController.stopStream(req, res);
     } catch (error) {
@@ -44,7 +45,7 @@ moviesRouter.get('/stopMovieLoading/:ytsId/:freeId', auth, async (req, res) => {
     }
 });
 
-moviesRouter.get('/fileSize/:ytsId/:freeId', auth, async (req, res) => {
+moviesRouter.get('/fileSize/:ytsId/:freeId', validateMovieFileSize, auth, async (req, res) => {
     try {
         await StreamController.getFileSize(req, res);
     } catch (error) {
@@ -52,7 +53,7 @@ moviesRouter.get('/fileSize/:ytsId/:freeId', auth, async (req, res) => {
     }
 });
 
-moviesRouter.post('/addMovieHistory', auth, async (req, res) => {
+moviesRouter.post('/addMovieHistory', validateAddMovieHistory, auth, async (req, res) => {
     try {
         await MoviesController.addMovieHistory(req, res);
     } catch (error) {
@@ -60,7 +61,7 @@ moviesRouter.post('/addMovieHistory', auth, async (req, res) => {
     }
 });
 
-moviesRouter.get('/downloadSubtitles/:imdbId/:lang', auth, async (req, res) => {
+moviesRouter.get('/downloadSubtitles/:imdbId/:lang/:time', validateMovieDownloadSubtitles, auth, async (req, res) => {
     try {
         await StreamController.downloadSubtitles(req, res);
     } catch (error) {

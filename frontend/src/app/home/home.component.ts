@@ -151,37 +151,28 @@ export class HomeComponent implements OnInit {
   openFilmModal(film: any): void {
     if (this.isModalOpen) return;
     this.isModalOpen = true;
-
-    this.homeService.getMovieDetails(film.imdb_id).subscribe({
-      next: (response: any) => {
-        const movie = response.movie;
-        const data = {
-          id: film.id,
-          title: film.title,
-          director: film.director || movie.director,
-          release_date: film.release_date || movie.release_date,
-          writer: film.writer || movie.writer,
-          actors: film.actors || movie.actors,
-          genre: film.genre,
-          language: film.language || movie.language,
-          plot: movie.plot ? movie.plot : film.plot,
-          awards: film.awards || movie.awards,
-          poster_path: this.films.find((f: any) => f.imdb_id === film.imdb_id)?.poster_path || null,
-          imdb_id: film.imdb_id,
-          imdb_rating: film.imdb_rating,
-          yts_id: film.yts_id,
-          free_movie_id: film.free_movie_id
-        };
-        this.dialog.open(MovieModalComponent, {
-          data: {
-            ...data,
-          },
-        });
-        this.isModalOpen = false;
+    const data = {
+      id: film.id,
+      title: film.title,
+      director: film.director,
+      release_date: film.release_date,
+      writer: film.writer,
+      actors: film.actors,
+      genre: film.genre,
+      language: film.language,
+      plot: film.plot,
+      awards: film.awards,
+      poster_path: this.films.find((f: any) => f.imdb_id === film.imdb_id)?.poster_path || null,
+      imdb_id: film.imdb_id,
+      imdb_rating: film.imdb_rating,
+      yts_id: film.yts_id,
+      free_movie_id: film.free_movie_id
+    };
+    this.dialog.open(MovieModalComponent, {
+      data: {
+        ...data,
       },
-      error: (error) => {
-        console.log(error);
-      }
     });
+    this.isModalOpen = false;
   }
 }

@@ -1,24 +1,102 @@
 @import "../../app.component.scss";
 
 .movie-modal {
-    background-color: $primary;
+    background-color: $second_surface;
     width: 80vw;
-    color: $onPrimary;
+    color: $second_onSurface;
 
     h2 {
-        color: $onPrimary;
-        font-size: 1.5rem;
-        font-weight: bolder;
+        color: $second_onSurface;
+        font-size: 2rem;
+        font-weight: 400;
         max-width: 90%;
+        width: 90%;
+        margin-bottom: 0;
+        text-align: center;
     }
 
     .movie-modal-content {
         padding: 20px;
 
+        .movieInfosModal {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+
+            .primaryInfosModal {
+                width: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                img {
+                    width: 300px;
+                    border-radius: 10%;
+                    border: 4px solid $second_surface2;
+                    margin-bottom: 0.5rem;
+                }
+
+                .basic-details {
+                    margin-left: 2rem;
+
+                    .movieTitle {
+                        color: $second_onSurface;
+                        font-size: 2rem;
+                        font-weight: 400;
+                        margin-bottom: 1rem;
+                    }
+
+                    .ratingModal {
+                        padding: 1rem;
+                        margin-top: 1rem;
+                        background-color: $second_surfaceAlt;
+                        border-radius: 15px;
+                        width: fit-content;
+
+                        p {
+                            color: $second_onSurfaceAlt;
+                            font-size: 1.5rem;
+                            font-weight: 600;
+                            margin-bottom: 0;
+                        }
+                    }
+                }
+            }
+
+            .movie-details {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                margin-top: 2rem;
+
+                .watchMovieButtonModal {
+                    background-color: $second_surfaceAlt;
+                    color: $second_onSurface;
+                    border: none;
+                    border-radius: 5px;
+                    padding: 10px;
+                    font-size: 1rem;
+                    font-weight: 500;
+                    cursor: pointer;
+                    transition: transform 0.3s ease;
+                    margin-top: 1rem;
+
+                    &:hover {
+                        transform: scale(1.4);
+                    }
+                
+                }
+            }
+        }
+
         .movie-modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            width: 100%;
 
             .movie-modal-header-commentsOpened {
                 display: flex;
@@ -32,8 +110,8 @@
             }
 
             .close-button {
-                background-color: $surface;
-                color: $onPrimary;
+                background-color: $second_surfaceAlt;
+                color: $second_onSurfaceAlt;
                 border: none;
                 // border-radius: 50px;
                 cursor: pointer;
@@ -46,11 +124,11 @@
         }
 
         p {
-            color: $onPrimary;
+            color: $second_onSurface;
         }
 
         a {
-            color: $surface;
+            color: $second_surfaceAlt;
             text-decoration: none;
             transition: transform 0.3s ease;
 
@@ -66,8 +144,8 @@
         }
 
         .movie-modal-button {
-            background-color: $surface;
-            color: $onPrimary;
+            background-color: $second_surfaceAlt;
+            color: $second_onSurface;
             border: none;
             border-radius: 5px;
             padding: 10px;
