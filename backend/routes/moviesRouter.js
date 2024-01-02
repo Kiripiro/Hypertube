@@ -3,13 +3,14 @@ const moviesRouter = express.Router();
 const auth = require('../middlewares/auth');
 const MoviesController = require('../controllers/moviesController');
 const StreamController = require('../controllers/streamController');
+const cors = require('cors');
 const { validateMovieDetails, validateMovieStream, validateMovieLoading, validateMovieStopLoading, validateAddMovieHistory, validateMovieDownloadSubtitles, validateMovieFileSize } = require('../middlewares/moviesMiddleware');
 
 moviesRouter.get('/fetchYTSMovies', auth, async (req, res) => {
     try {
         await MoviesController.fetchYTSMovies(req, res);
     } catch (error) {
-        console.error(error);
+        console.log("test")
     }
 });
 

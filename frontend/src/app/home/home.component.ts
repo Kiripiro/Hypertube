@@ -103,10 +103,14 @@ export class HomeComponent implements OnInit {
   }
 
   loadMovies() {
+    console.log("loadMovies");
+    this.loading = true;
     this.homeService.getMovies(this.params).subscribe({
       next: (response) => {
         this.films = response.movies;
         this.hasMore = response.hasMore;
+        console.log("loadMovies 2")
+        this.loading = false;
       },
       error: (error) => {
         console.log(error);
@@ -115,6 +119,7 @@ export class HomeComponent implements OnInit {
   }
 
   loadData() {
+    console.log("loadData");
     if (this.hasMore) {
       this.params = {
         ...this.params,

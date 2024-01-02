@@ -34,13 +34,13 @@ export class HomeService {
           httpParams = httpParams.set(key, params[key as keyof getMoviesParams]);
         }
       }
-      return this.http.get<any>(this.url + '/movies/fetchYTSMovies', { params: httpParams, withCredentials: true });
+      return this.http.get<any>(this.url + '/movie/fetchYTSMovies', { params: httpParams, withCredentials: true });
     }
-    return this.http.get<any>(this.url + '/movies/fetchYTSMovies', { withCredentials: true });
+    return this.http.get<any>(this.url + '/movie/fetchYTSMovies', { withCredentials: true });
   }
 
 
   getMovieDetails(imdb_id: string): Observable<any> {
-    return this.http.get<any>(this.url + '/movies/fetchMovieDetails/' + imdb_id, { withCredentials: true });
+    return this.http.get<any>(this.url + '/movie/fetchMovieDetails/' + imdb_id, { withCredentials: true });
   }
 }

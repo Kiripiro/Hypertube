@@ -10,7 +10,7 @@ import { Comment } from '../models/models';
     providedIn: 'root'
 })
 export class CommentsService {
-    private apiUrl = environment.backendUrl + '/comments';
+    private apiUrl = environment.backendUrl + '/comment';
 
     constructor(
         private http: HttpClient,

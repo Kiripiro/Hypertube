@@ -158,8 +158,8 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
     if (this.freeId == null || this.freeId == undefined || this.freeId == "undefined") {
       this.freeId = "tt0";
     }
-    this.videoUrl = this.url + '/movies/movieStream/' + this.movieId + '/' + this.freeId + '/' + this.timeExpected;
-    this.subUrl = this.url + '/movies/testMovies';
+    this.videoUrl = this.url + '/movie/movieStream/' + this.movieId + '/' + this.freeId + '/' + this.timeExpected;
+    this.subUrl = this.url + '/movie/testMovies';
   }
 
   ngAfterViewInit() {

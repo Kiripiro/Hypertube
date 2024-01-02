@@ -7,14 +7,13 @@
         <div class="mainDivProfil" id="mainDivPersonnal">
             <p id="infos">{{userInfos.firstName}} {{userInfos.lastName}} - {{userInfos.username}}</p>
         </div>
-        <div class="movieHistory">
+        <div class="movieHistory" *ngIf="movieHistory.length > 0">
             <p class="title">Movies seen</p>
             <ul>
                 @for (movie of movieHistory; track movie) {
                 <li>{{movie}}</li>
                 }
             </ul>
-            <button mat-raised-button color="primary" (click)="test()">Test</button>
         </div>
     </div>
     <div class="errorCard" *ngIf="error">

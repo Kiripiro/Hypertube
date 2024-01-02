@@ -9,9 +9,17 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    background-color: $primary;
+    justify-content: center;
+    background-color: $second_surface2;
     margin-top: 1rem;
     margin-bottom: 1rem;
+
+    .title {
+        font-size: 3rem;
+        font-weight: 500;
+        margin-top: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
 
     p {
         margin-top: 1rem;
@@ -20,18 +28,18 @@
         align-items: center;
         font-size: 2.5rem;
         font-weight: 500;
-        color: $onPrimary;
+        color: $second_onSurface;
         margin-bottom: 20px;
     }
 
     .avatarDiv {
+        display: flex;
+        justify-content: center;
         margin-top: 20px;
-        height: 60vh;
-        width: 45vw;
 
         img {
-            height: 100%;
-            width: 100%;
+            height: 400px;
+            width: 400px;
             border-radius: 20px;
             object-fit: cover;
         }
@@ -50,8 +58,8 @@
             padding: 1rem;
             border-radius: 15px;
             width: auto;
-            background-color: $surface;
-            color: $onPrimary;
+            background-color: $second_surfaceAlt;
+            color: $second_onSurfaceAlt;
             text-align: center;
             margin: 1rem 0;
         }
@@ -63,6 +71,24 @@
             padding: 0.5rem 1rem;
         }
     }
+
+    .movieHistory {
+
+        .title {
+            font-size: 2rem;
+            font-weight: 400;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        ul {
+            font-size: 1.2rem;
+            font-weight: 400;
+            color: $second_onSurface;
+            // margin-top: 1.5rem;
+            // margin-bottom: 0.5rem;
+        }
+    }
 }
 
 .errorCard {
@@ -72,7 +98,7 @@
     padding: 2rem;
     box-shadow: 5px 5px 15px rgba(70, 70, 70, 0.12), -1px -1px 50px rgba(70, 70, 70, 0.12);
     margin-top: 2rem;
-    background-color: $primary;
+    background-color: $second_surface2;
     display: flex;
 
     p {
@@ -94,7 +120,7 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    background-color: $primary;
+    background-color: $second_surface2;
     margin-top: 2rem;
 
     p {

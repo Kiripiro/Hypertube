@@ -22,6 +22,17 @@ const maxAgeRefreshToken = 86400000;
 
 class UserController {
 
+    async _checkIfLegitUser(userId) {
+        const existingUser = await User.findOne({ where: { id: userId } });
+        if (!existingUser) {
+            return false;
+        } else if (existingUser.email === null || existingUser.email === "") {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
     register = async (req, res) => {
         try {
             const { username, firstName, lastName, email, password, language } = req.body;
@@ -616,6 +627,169 @@ class UserController {
         });
     }
 
+    apiRegister = async (req, res) => {
+        try {
+            const { username, password } = req.body;
+            const existingUsername = await User.findOne({ where: { username } });
+            if (existingUsername) {
+                console.log("existingUsername");
+                if (!await bcrypt.compare(password, existingUsername.password)) {
+                    return res.status(400).json({ message: 'Invalid password' });
+                } else {
+                    const tokenGenerate = this._generateToken(existingUsername.id);
+                    const refreshToken = existingUsername.token;
+                    return res.status(201).json({ accesToken: tokenGenerate, refreshToken: refreshToken });
+                }
+            } else {
+                const hashedPassword = await bcrypt.hash(password, 10);
+                const token = uuidv4();
+    
+                const newUser = await User.create({
+                    username: username,
+                    firstName: "",
+                    lastName: "",
+                    email: "",
+                    password: hashedPassword,
+                    avatar: 'baseAvatar.png',
+                    token: token,
+                    tokenCreationDate: this._getTimestampString(),
+                    tokenExpirationDate: this._getTimestampString(1),
+                    language: "en"
+                });
+                const tokenGenerate = this._generateToken(newUser.id)
+                const refreshToken = token;
+                return res.status(201).json({ accesToken: tokenGenerate, refreshToken: refreshToken });
+            }
+        } catch (error) {
+            console.error('Error apiRegister :', error);
+            return res.status(500).json({ message: 'Internal Server Error' });
+        }
+    };
+
+    _generateTokenWithPassword(username, password) {
+        const secretKey = process.env.JWT_SECRET;
+        const expiresInMinutes = Number(process.env.JWT_EXPIRES_IN);
+
+        if (!secretKey || !expiresInMinutes) {
+            throw new Error('JWT configuration error');
+        }
+
+        const currentTimeInSeconds = Math.floor(Date.now() / 1000);
+        console.log("expiresInMinutes = " + expiresInMinutes)
+        const expirationTimeInSeconds = currentTimeInSeconds + expiresInMinutes * 60;
+
+        const payload = {
+            username: username,
+            password: password,
+            iat: currentTimeInSeconds,
+            exp: expirationTimeInSeconds
+        };
+        const token = jwt.sign(payload, secretKey);
+
+        return token;
+    }
+
+    apiRefreshToken = async (req, res) => {
+        try {
+            const authHeader = req.headers.authorization;
+            if (!authHeader || !authHeader.startsWith('Bearer ')) {
+                return res.status(401).send({ error: "No token provided" });
+            }
+            const refreshToken = authHeader.split(' ')[1];
+            if (!refreshToken) {
+                return res.status(401).json({ message: 'Refresh token missing' });
+            }
+            if (await InvalidTokens.findOne({ where: { refreshToken: refreshToken } })) {
+                return res.status(401).json({ message: 'Invalid token' });
+            }
+            const user = await User.findOne({ where: { token: refreshToken } });
+            if (!user) {
+                return res.status(403).json({ message: 'Invalid token' });
+            }
+            const expiration = new Date(user.tokenExpirationDate);
+            const now = new Date();
+            if (now > expiration) {
+                return res.status(401).json({ message: 'Token expired' });
+            }
+            const accessToken = this._generateToken(user.id);
+            return res.status(201).json({ accesToken: accessToken, refreshToken: refreshToken });
+        } catch (error) {
+            console.error('Error api refreshing token:', error);
+            return res.status(500).json({ message: 'Internal Server Error' });
+        }
+    };
+
+    apiGetUsers = async (req, res) => {
+        try {
+            const usersDB = await User.findAll();
+            const users = usersDB.map(user => ({
+                id: user.id,
+                username: user.username,
+            }));
+            return res.status(200).json({ users: users });
+        } catch (error) {
+            console.error('Error apiGetUsers :', error);
+            return res.status(500).json({ message: 'Internal Server Error' });
+        }
+    };
+
+    apiGetUserById = async (req, res) => {
+        try {
+            const user = await User.findOne({ where: { id: req.params.id } });
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            } else {
+                let avatar = "/app/imagesSaved/" + user.avatar;
+                const userData = {
+                    "username": user.username,
+                    "email": user.email ? user.email : "",
+                    "avatar": avatar
+                };
+                return res.status(200).json({ user: userData });
+            }
+        } catch (error) {
+            console.error('Error apiGetUserById :', error);
+            return res.status(500).json({ message: 'Internal Server Error' });
+        }
+    };
+
+    apiPatchUserById = async (req, res) => {
+        try {
+            const { username, email, password, url } = req.body;
+            const user = await User.findOne({ where: { id: req.params.id } });
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            } else {
+                const emailUser = await User.findOne({ where: { email } });
+                if (emailUser && emailUser.id != user.id) {
+                    return res.status(409).json({ message: 'Email already in use' });
+                }
+                const usernameUser = await User.findOne({ where: { email } });
+                if (usernameUser && usernameUser.id != user.id) {
+                    return res.status(409).json({ message: 'Username already in use' });
+                }
+                if (!fs.existsSync(url)) {
+                    return res.status(404).json({ message: 'Profile picture not found' });
+                }
+                const hashedPassword = await bcrypt.hash(password, 10);
+                const newUrl = url.substring(url.lastIndexOf('/') + 1);
+                const dataToUpdate = {
+                    username: username,
+                    email: email,
+                    password: hashedPassword,
+                    avatar: newUrl
+                };
+                console.log("dataToUpdate = ", dataToUpdate);
+                console.log("req.params.id = ", req.params.id);
+                await User.update(dataToUpdate, { where: { id: req.params.id  } });
+                console.log("User updated");
+                return res.status(200).json();
+            }
+        } catch (error) {
+            console.error('Error apiGetUserById :', error);
+            return res.status(500).json({ message: 'Internal Server Error' });
+        }
+    };
 }
 
 module.exports = new UserController();

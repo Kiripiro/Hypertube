@@ -30,7 +30,7 @@
                 </mat-select>
             </mat-form-field>
         </div>
-        <div class="filmListFilter">
+        <!-- <div class="filmListFilter">
             <mat-form-field>
                 <mat-label>Quality</mat-label>
                 <mat-select [(value)]="quality" (selectionChange)="sortFilms()">
@@ -41,7 +41,7 @@
                     <mat-option value="3D">3D</mat-option>
                 </mat-select>
             </mat-form-field>
-        </div>
+        </div> -->
         <div class="filmListFilter">
             <mat-form-field>
                 <mat-label>Imdb Rating</mat-label>
@@ -60,7 +60,7 @@
         </div>
         <button mat-raised-button class="reset-button" (click)="resetParams()">Reset</button>
     </div>
-    <div class="centerDiv" *ngIf="!notConnected" infinite-scroll [infiniteScrollDistance]="scrollDistance"
+    <div class="centerDiv" *ngIf="!notConnected && !loading" infinite-scroll [infiniteScrollDistance]="scrollDistance"
         [infiniteScrollUpDistance]="scrollUpDistance" (scrolled)="loadData()">
         <div class="filmList">
             <div class="film" *ngFor="let film of films" (click)="openFilmModal(film)">
@@ -72,6 +72,12 @@
                     <span>{{film.release_date}}</span>
                 </div>
             </div>
+        </div>
+    </div>
+    <div class="centerDiv" *ngIf="!notConnected && loading">
+        <div class="loadingCard">
+            <p>Loading</p>
+            <mat-progress-bar mode="query"></mat-progress-bar>
         </div>
     </div>
 

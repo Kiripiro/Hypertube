@@ -1,4 +1,5 @@
 const { Comments, Movies, User } = require("../models");
+const axios = require('axios');
 class CommentsController {
     // Add your controller methods here
     addComment = async (req, res) => {
@@ -79,6 +80,153 @@ class CommentsController {
                 return res.status(400).json({ error: "Comment could not be deleted" });
             }
             return res.status(200).json({ message: "Comment deleted", comment: commentId });
+        } catch (error) {
+            return res.status(500).json({ error: error.message });
+        }
+    }
+
+    apiGetLatestComments = async (req, res) => {
+        try {
+            const comments = await Comments.findAll({
+                limit: 10,
+                order: [['createdAt', 'DESC']],
+                include: [
+                    {
+                        model: Comments,
+                        as: "children",
+                        include: [
+                            {
+                                model: Comments,
+                                as: "children",
+                            },
+                        ],
+                    },
+                ],
+            });
+            let commentTab = [];
+            for (const comment of comments) {
+                const commentData = {
+                    id: comment.dataValues.id,
+                    author_username: comment.dataValues.author_username,
+                    text: comment.dataValues.text,
+                    imdb_id: comment.dataValues.imdb_id,
+                    createdAt: comment.dataValues.createdAt,
+                    updatedAt: comment.dataValues.updatedAt
+                };
+                commentTab.push(commentData);
+            }
+            return res.status(200).json({ comments: commentTab });
+        } catch (error) {
+            return res.status(500).json({ error: error.message });
+        }
+    }
+
+    apiGetCommentById = async (req, res) => {
+        try {
+            const id = req.params.id;
+            const comment = await Comments.findOne({ where: { id: id } });
+            const commentData = {
+                id: comment.dataValues.id,
+                author_username: comment.dataValues.author_username,
+                text: comment.dataValues.text,
+                imdb_id: comment.dataValues.imdb_id,
+                createdAt: comment.dataValues.createdAt,
+                updatedAt: comment.dataValues.updatedAt
+            };
+            return res.status(200).json({ comment: commentData });
+        } catch (error) {
+            return res.status(500).json({ error: error.message });
+        }
+    }
+
+    apiPatchCommentById = async (req, res) => {
+        try {
+            const id = req.params.id;
+            const { comment, username } = req.body;
+            const commentCheck = await Comments.findOne({ where: { id: id } });
+            if (!commentCheck) {
+                return res.status(404).json({ message: 'Comment not found' });
+            }
+            const user = await User.findOne({ where: { username: username } });
+            if (!user) {
+                return res.status(404).json({ message: 'Username doesn\'t exist' });
+            }
+            const updatedComment = await Comments.update({ author_username: username, text: comment }, { where: { id: id } });
+            return res.status(200).json();
+        } catch (error) {
+            return res.status(500).json({ error: error.message });
+        }
+    }
+
+    apiDeleteCommentById = async (req, res) => {
+        try {
+            const id = req.params.id;
+            const commentCheck = await Comments.findOne({ where: { id: id } });
+            if (!commentCheck) {
+                return res.status(404).json({ message: 'Comment not found' });
+            }
+            const deletedComment = await Comments.destroy({ where: { id: id } });
+            if (!deletedComment) {
+                return res.status(400).json({ error: "Comment could not be deleted" });
+            }
+            return res.status(200).json();
+        } catch (error) {
+            return res.status(500).json({ error: error.message });
+        }
+    }
+
+    apiPostComment = async (req, res) => {
+        try {
+            const { comment, movie_id } = req.body;
+            const userId = req.user.userId
+            const user = await User.findOne({ where: { id: userId } });
+            if (!user) {
+                return res.status(400).json({ error: "User not found" });
+            }
+            const omdbApiUrl = 'http://www.omdbapi.com/';
+            const omdbResponse = await axios.get(`${omdbApiUrl}?i=${movie_id}&apikey=${process.env.OMDB_API_KEY}`);
+            if (omdbResponse.data.Response === "False" || omdbResponse.data.Response === false || omdbResponse.data.error) {
+                return res.status(400).json({ error: "Movie not found" });
+            }
+            const commentCreated = await Comments.create({
+                author_id: user.id,
+                author_username: user.username,
+                text: comment,
+                imdb_id: movie_id,
+                parent_id: null });
+            if (!comment) {
+                return res.status(400).json({ error: "Comment could not be added" });
+            }
+            return res.status(200).json();
+        } catch (error) {
+            return res.status(500).json({ error: error.message });
+        }
+    }
+
+    apiPostCommentByMoviesRoute = async (req, res) => {
+        try {
+            const comment = req.body.comment;
+            const movie_id = req.params.movie_id;
+            const userId = req.user.userId
+            const user = await User.findOne({ where: { id: userId } });
+            if (!user) {
+                return res.status(400).json({ error: "User not found" });
+            }
+            const omdbApiUrl = 'http://www.omdbapi.com/';
+            const omdbResponse = await axios.get(`${omdbApiUrl}?i=${movie_id}&apikey=${process.env.OMDB_API_KEY}`);
+            if (omdbResponse.data.Response === "False" || omdbResponse.data.Response === false || omdbResponse.data.error) {
+                return res.status(400).json({ error: "Movie not found" });
+            }
+            const commentCreated = await Comments.create({
+                author_id: user.id,
+                author_username: user.username,
+                text: comment,
+                imdb_id: movie_id,
+                parent_id: null });
+            if (!comment) {
+                return res.status(400).json({ error: "Comment could not be added" });
+            }
+            return res.status(200).json();
         } catch (error) {
             return res.status(500).json({ error: error.message });
         }

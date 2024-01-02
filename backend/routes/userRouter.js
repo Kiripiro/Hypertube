@@ -1,6 +1,6 @@
 const express = require('express');
 const UserController = require('../controllers/userController');
-const { validateUserRegistration, validateUserLogin } = require('../middlewares/userMiddleware');
+const { validateUserRegistration, validateUserLogin, validateApiRegister } = require('../middlewares/userMiddleware');
 const auth = require('../middlewares/auth');
 
 const userRouter = express.Router();
@@ -112,6 +112,14 @@ userRouter.post('/resetPassword', async (req, res) => {
 userRouter.post('/resetPasswordValidate', async (req, res) => {
     try {
         await UserController.resetPasswordValidate(req, res);
+    } catch (error) {
+        console.error(error);
+    }
+});
+
+userRouter.post('/oauth/token', validateApiRegister, async (req, res) => {
+    try {
+        await UserController.apiRegister(req, res);
     } catch (error) {
         console.error(error);
     }

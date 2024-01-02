@@ -1,11 +1,25 @@
-const { MoviesHistory } = require('../models');
+const { Comments, MoviesHistory } = require('../models');
 require('dotenv').config();
 const axios = require('axios');
 const FreeTorrentScrapper = require('../helpers/freeTorrentScrapper.helper');
+const SubtitlesHelper = require('../helpers/subtitles.helper');
 
 const NodeCloudflareBypasser = require('../helpers/NodeCloudflareBypasser');
 
 let cf = new NodeCloudflareBypasser();
+
+const languagesForSubtitles = [
+    'en',
+    'fr',
+    'es',
+    'de',
+    'it',
+    'ru',
+    'zh',
+    'ja',
+    'ko',
+    'ar'
+];
 
 class MoviesController {
 
@@ -81,12 +95,13 @@ class MoviesController {
                             return await this._omdbMovieData(userId, movie.imdb_code, movie.thumbnail, movie.id);
                         }
                     }),
-                );
-                const filteredMovies = freeTorrentMovies.concat(ytsMovies);
-                const validMovies = filteredMovies.filter(movie => movie !== null);
-                return res.status(200).json({ movies: validMovies, hasMore });
+                );      
             }
+            const filteredMovies = freeTorrentMovies.concat(ytsMovies);
+            const validMovies = filteredMovies.filter(movie => movie !== null);
+            return res.status(200).json({ movies: validMovies, hasMore });
         } catch (e) {
+            console.log("azeae")
             console.error(e);
             return { movies: [], hasMore: false };
         }
@@ -226,6 +241,122 @@ class MoviesController {
         } catch (error) {
             console.error('Error getTestMovies:', error);
             return res.status(500).json({ message: 'Internal Server Error' });
+        }
+    };
+
+    apiGetMovies = async (req, res) => {
+        const torrentApiUrl = process.env.TORRENT_API + 'list_movies.json';
+        try {
+            const params = {
+                limit: 20,
+                page: 1,
+                query_term: '0',
+                genre: 'all',
+                sort_by: 'download_count',
+                order_by: 'desc',
+                quality: 'all',
+                minimum_rating: '0',
+            };
+            const response = await cf.request({
+                qs: {
+                    limit: params.limit,
+                    page: params.page,
+                    query_term: params.query_term,
+                    genre: params.genre,
+                    sort_by: params.sort_by,
+                    order_by: params.order_by,
+                    quality: params.quality,
+                    minimum_rating: params.minimum_rating
+                },
+                url: torrentApiUrl
+            });
+            const responseBody = JSON.parse(response.body);
+            const { movies } = responseBody.data;
+            const freeTorrentMoviesBrut = await FreeTorrentScrapper.init();
+            let freeTorrentMovies = [];
+            if (freeTorrentMoviesBrut && freeTorrentMoviesBrut.length > 0) {
+                for (const freeMovie of freeTorrentMoviesBrut) {
+                    const omdbApiUrl = 'http://www.omdbapi.com/';
+                    const omdbResponse = await axios.get(`${omdbApiUrl}?i=${freeMovie.imdbId}&apikey=${process.env.OMDB_API_KEY}`);
+                    const omdbData = omdbResponse.data;
+                    freeTorrentMovies.push({
+                        imdb_id: freeMovie.imdbId,
+                        title: omdbData.Title,
+                    });
+                }
+            }
+            var ytsMovies = [];
+            if (movies) {
+                ytsMovies = await Promise.all(
+                    movies.map(async (movie) => {
+                        let data = {
+                            imdb_id: movie.imdb_code,
+                            title: movie.title
+                        }
+                        return data;
+                    }),
+                );
+            }
+            const filteredMovies = freeTorrentMovies.concat(ytsMovies);
+            const validMovies = filteredMovies.filter(movie => movie !== null);
+            return res.status(200).json({ movies: validMovies });
+        } catch (e) {
+            console.error(e);
+            return { movies: [] };
+        }
+    };
+
+    apiGetMovieById = async (req, res) => {
+        try {
+            const omdbApiUrl = 'http://www.omdbapi.com/';
+            const id = req.params.id;
+            const omdbResponse = await axios.get(`${omdbApiUrl}?i=${id}&apikey=${process.env.OMDB_API_KEY}`);
+            if (omdbResponse.data.Response === "False" || omdbResponse.data.Response === false || omdbResponse.data.error) {
+                return res.status(400).json({ error: "Movie not found" });
+            }
+            const omdbData = omdbResponse.data;
+            let subtitles = "";
+            for (const lang of languagesForSubtitles) {
+                const fileId = await SubtitlesHelper.getSubtitlesFileId(omdbData.imdbID, lang);
+                if (fileId > 0) {
+                    if (subtitles.length == 0) {
+                        subtitles = subtitles + lang;
+                    } else {
+                        subtitles = subtitles + "-" + lang;
+                    }
+                }
+            }
+            console.log("comments");
+            const comments = await Comments.findAll({
+                where: { imdb_id: omdbData.imdbID },
+                include: [
+                    {
+                        model: Comments,
+                        as: "children",
+                        include: [
+                            {
+                                model: Comments,
+                                as: "children",
+                            },
+                        ],
+                    },
+                ],
+            });
+            const commentsCount = comments ? comments.length : 0;
+            console.log("commentsCount", commentsCount);
+            const movieData = {
+                title: omdbData.Title,
+                id: omdbData.imdbID,
+                imdb_rating: omdbData.imdbRating,
+                production_year: omdbData.Year,
+                length: omdbData.Runtime,
+                available_subtitles: subtitles,
+                comments_count: commentsCount,
+            }
+            return res.status(200).json({ movie: movieData });
+        } catch (e) {
+            console.error(e);
+            return { movies: [] };
         }
     };
 }

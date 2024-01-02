@@ -131,6 +131,41 @@ const validateMovieDownloadSubtitles = [
     },
 ];
 
+const validateApiMovieById = [
+    param('id')
+        .trim()
+        .notEmpty().withMessage('ID is required')
+        .matches(/tt[0-9]+/).withMessage('Invalid ID format'),
+
+    (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+        next();
+    },
+];
+
+const validateApiPostCommentByMoviesRoute = [
+    param('movie_id')
+        .trim()
+        .notEmpty().withMessage('movie_id is required')
+        .matches(/tt[0-9]+/).withMessage('Invalid movie_id format'),
+    body('comment')
+        .trim()
+        .notEmpty().withMessage('Comment is required')
+        .isLength({ min: 3, max: 240 }).withMessage('Comment must be between 3 and 240 characters')
+        .matches(/^[a-zA-Z0-9 .,!?'-]*$/).withMessage('Comment contains invalid characters'),
+
+    (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+        next();
+    },
+];
+
 module.exports = {
     validateMovieDetails,
     validateMovieStream,
@@ -139,5 +174,7 @@ module.exports = {
     validateMovieStopLoading,
     validateMovieFileSize,
     validateAddMovieHistory,
-    validateMovieDownloadSubtitles
+    validateMovieDownloadSubtitles,
+    validateApiMovieById,
+    validateApiPostCommentByMoviesRoute
 };
