@@ -68,7 +68,7 @@
         </div>
         <div class="comments detailsCard">
         <h3>Comments</h3>
-        <div *ngIf="!comments.length">No comments yet</div>
+        <label *ngIf="!comments.length">No comments yet</label>
         <ng-container *ngFor="let comment of comments">
             <div class="comment" *ngIf="!comment.parent_id">
                 <div class="comment-header">

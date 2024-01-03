@@ -31,17 +31,18 @@
     .loginInputDiv {
         width: 100%;
         display: flex;
-        flex-direction: row;
-        justify-content: space-around;
         align-items: center;
+        flex-direction: column;
     }
 }
 
 .loginButtonDiv {
     width: 100%;
     display: flex;
+    flex-direction: column;
     justify-content: space-around;
     align-items: center;
+    gap: 10px;
 
     .submit {
         font-size: 1.5rem;
@@ -62,5 +63,9 @@
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
-    margin-top: 2vh;
+    gap: 10px;
+
+    .button42 {
+        color: $surfaceAlt;
+    }
 }

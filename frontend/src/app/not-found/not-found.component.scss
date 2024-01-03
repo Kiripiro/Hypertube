@@ -1,15 +1,4 @@
-$background: #FAFAFA;
-$primary: #FDBABA;
-$surface: #3E2266;
-$surfaceAlt: #6DB1BF;
-$surfaceAltDark: #2e7280;
-$onPrimary: #3E2266;
-$onSurface: white;
-$onPrimaryAlt: #6DB1BF;
-$greyInfos: #9a9fa3;
-$greyInfosDark: #333435;
-$error: red;
-
+@import '../app.component.scss';
 
 .container {
     display: flex;

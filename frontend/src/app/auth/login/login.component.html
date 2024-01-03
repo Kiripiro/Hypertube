@@ -1,11 +1,6 @@
 <div class="centerDiv">
     <div class="formCard">
         <p class="title">Log in</p>
-        <div class="apiButtonDiv">
-            <button (click)="login42()">Sign In with 42</button>
-            <app-google-button></app-google-button>
-        </div>
-        <span class="or">or</span>
         <div class="login">
             <form (ngSubmit)="onSubmit()" [formGroup]="loginForm">
                 <div class="loginInputDiv">
@@ -25,5 +20,13 @@
                 </div>
             </form>
         </div>
+        <span class="or">or</span>
+        <div class="apiButtonDiv">
+            <button mat-raised-button clas="button42" (click)="login42()">
+                Sign In with 42
+            </button>
+            <app-google-button></app-google-button>
+        </div>
+        
     </div>
 </div>

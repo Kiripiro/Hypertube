@@ -3,7 +3,7 @@ const moviesRouter = express.Router();
 const auth = require('../middlewares/auth/auth');
 const MoviesController = require('../controllers/moviesController');
 const StreamController = require('../controllers/streamController');
-const { validateMovieDetails, validateMovieStream, validateMovieLoading, validateMovieStopLoading, validateAddMovieHistory, validateMovieDownloadSubtitles, validateMovieFileSize } = require('../middlewares/moviesMiddleware');
+const { validateMovieDetails, validateMovieStream, validateMovieLoading, validateMovieStopLoading, validateAddMovieHistory, validateMovieDownloadSubtitles, validateMovieFileSize } = require('../middlewares/validation/movieMiddleware');
 const movieMiddleware = require('../middlewares/validation/movieMiddleware');
 
 moviesRouter.get('/fetchYTSMovies', auth, movieMiddleware.fetchYTSMovies, async (req, res) => {

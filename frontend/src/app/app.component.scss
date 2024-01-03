@@ -93,9 +93,8 @@ app-root {
         padding-bottom: 0px;
         background-color: $primaryAlt;
         margin-bottom: 10px;
-        word-wrap: break-word;
-        overflow-wrap: break-word;
-        word-break: break-all;
+        word-break: auto-phrase;
+        overflow-x: auto;
 
         .comment-header {
             display: flex;

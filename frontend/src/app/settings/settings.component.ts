@@ -77,7 +77,7 @@ export class SettingsComponent implements OnInit {
       text_yes_button: "Yes",
       text_no_button: "No",
       yes_callback: () => {
-        this.settingsService.deleteUser().subscribe({
+        this.settingsService.deleteUser(this.id).subscribe({
           next: (response) => {
             if (response.message === "User deleted") {
               this.router.navigate(['auth/login']);
@@ -267,7 +267,7 @@ export class SettingsComponent implements OnInit {
             text: 'Your profile has been updated.',
             text_yes_button: 'Ok',
             yes_callback: () => { },
-            reload: false,
+            reload: true,
           };
           this.dialogService.openDialog(data);
           this.file = "";

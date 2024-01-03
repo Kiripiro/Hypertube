@@ -143,8 +143,8 @@ const validateSettingsUpdateInfos = [
 
 const validateDeleteUser = [
     body('userId')
-        .trim()
-        .notEmpty().withMessage('User ID is required rahrah'),
+        .isInt()
+        .notEmpty().withMessage('User ID is required'),
 
     (req, res, next) => {
         const errors = validationResult(req);

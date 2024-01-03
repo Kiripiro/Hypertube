@@ -108,6 +108,8 @@ class UserController {
             if (userExists.emailVerified === false) {
                 return res.status(401).json({ message: 'Email not verified' });
             }
+            if (userExists.loginApi)
+                return res.status(401).json({message: 'You have logged using an API, try using it again'})
 
             const accessToken = this._generateToken(userExists.id, 1);
             const refreshToken = uuidv4();
@@ -223,7 +225,8 @@ class UserController {
                 const dataToUpdate = {
                     token: refreshToken,
                     tokenCreationDate: this._getTimestampString(),
-                    tokenExpirationDate: this._getTimestampString(1)
+                    tokenExpirationDate: this._getTimestampString(1),
+                    loginApi: true
                 };
                 await User.update(dataToUpdate, { where: { email: payload.email } });
                 res.cookie('accessToken', this._generateToken(userExists.id, 1), { httpOnly: true, maxAge: maxAgeAccessToken });
@@ -438,6 +441,10 @@ class UserController {
     deleteUser = async (req, res) => {
         try {
             const userId = req.user.userId;
+            const id = req.body.userdId;
+
+            if (userId != id)
+                return res.status(401).json({message: 'Cannot delete someone\'s else account'})
             const user = await User.findOne({ where: { id: userId } });
 
             if (!user) {

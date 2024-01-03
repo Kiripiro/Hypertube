@@ -27,7 +27,7 @@ export class SettingsService {
 		return this.http.post<UserSettings>(this.url + `/user/settingsUpdate`, { user, file }, { withCredentials: true });
 	}
 
-	public deleteUser(): Observable<any> {
-		return this.http.post(this.url + `/user/delete`, null, { withCredentials: true });
+	public deleteUser(id: Number): Observable<any> {
+		return this.http.post(this.url + `/user/delete`, {userId: id}, { withCredentials: true });
 	}
 }

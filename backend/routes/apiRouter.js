@@ -3,10 +3,10 @@ const UserController = require('../controllers/userController');
 const MoviesController = require('../controllers/moviesController');
 const CommentsController = require('../controllers/commentsController');
 const { validateApiRegister, validateApiGetUserById, validateApiPatchUserById, validateApiAuth } = require('../middlewares/validation/userMiddleware');
-const { validateApiMovieById, validateApiPostCommentByMoviesRoute } = require('../middlewares/moviesMiddleware');
-const { validateApiGetCommentById, validateApiPatchCommentById, validateApiDeleteCommentById, validateApiPostComment } = require('../middlewares/commentsMiddleware');
-const authApi = require('../middlewares/authApi');
-const authApiUser = require('../middlewares/authApiUser');
+const { validateApiMovieById, validateApiPostCommentByMoviesRoute } = require('../middlewares/validation/movieMiddleware');
+const { validateApiGetCommentById, validateApiPatchCommentById, validateApiDeleteCommentById, validateApiPostComment } = require('../middlewares/validation/commentsMiddleware');
+const authApi = require('../middlewares/auth/authApi');
+const authApiUser = require('../middlewares/auth/authApiUser');
 
 const apiRouter = express.Router();
 
