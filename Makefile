@@ -5,7 +5,7 @@ FRONTEND_NODE_MODULES := $(wildcard $(FRONTEND_DIR)/node_modules)
 
 BACKEND_NODE_MODULES := $(wildcard $(BACKEND_DIR)/node_modules)
 
-BACKEND_NODE_DOWNLOAD := $(wildcard $(BACKEND_DIR)/download/*.*)
+BACKEND_NODE_DOWNLOAD_FILES := $(wildcard $(BACKEND_DIR)/download/*.*)
 
 BACKEND_NODE_SRT_FILES := $(wildcard $(BACKEND_DIR)/subtitles/srt/*.*)
 
@@ -20,13 +20,13 @@ stop:	docker-compose down
 
 clean:
 	docker-compose down --rmi all
-	rm -rf $(FRONTEND_NODE_MODULES)
-	rm -rf $(BACKEND_NODE_MODULES)
-	rm -rf $(BACKEND_NODE_DOWNLOAD)
+	# rm -rf $(FRONTEND_NODE_MODULES)
+	# rm -rf $(BACKEND_NODE_MODULES)
+	rm -rf $(BACKEND_NODE_DOWNLOAD_FILES)
 	rm -rf $(BACKEND_NODE_SRT_FILES)
 	rm -rf $(BACKEND_NODE_VTT_FILES)
 	@if [ -n "$(wildcard $(BACKEND_DIR)/imagesSaved/*)" ]; then \
-		echo "Removing files in $(BACKEND_DIR)/imagesSaved..."; \
+		echo "Removing files in $(BACKEND_DIR)/imagesSaved/..."; \
 		find $(BACKEND_DIR)/imagesSaved -type f ! -name 'baseAvatar.png' -delete; \
 	fi
 

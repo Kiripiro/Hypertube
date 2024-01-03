@@ -7,6 +7,9 @@ backend/.env
 backend/node_modules
 backend/config/config.json
 backend/imagesSaved/*.png
-!backend/imagesSaved/baseAvatar.png
+!backend/imagesSaved/baseAvatar.pngs
 backend/imagesSaved/*.jpg
 backend/imagesSaved/*.jpeg
+!backend/donwload/.gitkeep
+!backend/subtitles/srt/.gitkeep
+!backendsubtitles/vtt/.gitkeep

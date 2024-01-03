@@ -20,6 +20,5 @@ export const googleGuard: CanActivateFn = (
     localStorage.setItem('loginApi', '1');
     localStorage.setItem('language', JSON.stringify('en'));
 
-    window.location.href = 'http://localhost:4200';
     return true;
 }
