@@ -2,11 +2,11 @@ require('dotenv').config();
 const fs = require('fs');
 const fsPromises = require('fs').promises;
 const path = require('path');
-// const ffmpeg = require('fluent-ffmpeg')
+const ffmpeg = require('fluent-ffmpeg')
 
-// const ffmpegInstaller = require('@ffmpeg-installer/ffmpeg');
+const ffmpegInstaller = require('@ffmpeg-installer/ffmpeg');
 const ffmpeg = require('fluent-ffmpeg');
-// ffmpeg.setFfmpegPath(ffmpegInstaller.path);
+ffmpeg.setFfmpegPath(ffmpegInstaller.path);
 // console.log(ffmpegInstaller.path, ffmpegInstaller.version);
 
 module.exports = ffmpeg;
