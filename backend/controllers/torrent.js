@@ -12,6 +12,7 @@ COUNT_BEFORE_ERROR_WHEN_DOWNLOADSTARTED = 30;
 
 PREDATOR_YTS_ID = 2390;
 PREDATOR_MKV_MAGNET = "magnet:?xt=urn:btih:FDB569EC7F853672103FB82EA79F5FAB20247591&dn=Predator%20(1987)%20720p%20BrRip%20mkv%20-%20650MB%20-%20YIFY&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A6969%2Fannounce&tr=udp%3A%2F%2Fopen.stealth.si%3A80%2Fannounce&tr=udp%3A%2F%2Ftracker.torrent.eu.org%3A451%2Fannounce&tr=udp%3A%2F%2Ftracker.bittor.pw%3A1337%2Fannounce&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337&tr=udp%3A%2F%2Fpublic.popcorn-tracker.org%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.dler.org%3A6969%2Fannounce&tr=udp%3A%2F%2Fexodus.desync.com%3A6969&tr=udp%3A%2F%2Fopentracker.i2p.rocks%3A6969%2Fannounce"
+TEST_MAGNET = "magnet:?xt=urn:btih:79816060ea56d56f2a2148cd45705511079f9bca&dn=TPB.AFK.2013.720p.h264-SimonKlose&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=udp%3A%2F%2Fopen.demonii.com%3A1337&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Fexodus.desync.com%3A6969"
 
 const green = "\x1b[32m";
 const red = "\x1b[31m";
@@ -37,6 +38,7 @@ class Torrent {
     lastFileSize;
     isMKV;
     isWebm;
+    noFilesToDownload;
 
     constructor(ytsId, freeId, imdbId, sortedTorrents) {
         this.ytsId = ytsId;
@@ -54,12 +56,16 @@ class Torrent {
         this.lastFileSize = 0;
         this.isMKV = false;
         this.isWebm = false;
+        this.noFilesToDownload = false;
     }
 
     checkDownload() {
         const currentSize = this.getDownloadedSize();
         console.log("currentSize = " + currentSize + ", lastFileSize = " + this.lastFileSize);
-        if (currentSize == this.lastFileSize) {
+        if (this.noFilesToDownload) {
+            return false;
+        }
+        if (currentSize == this.lastFileSize && currentSize < this.fileSize) {
             console.log("this.countBeforeError", this.countBeforeError)
             if (this.downloadStarted) {
                 if (this.countBeforeError > COUNT_BEFORE_ERROR_WHEN_DOWNLOADSTARTED) {
@@ -145,7 +151,6 @@ class Torrent {
             this.engine.files.forEach(async (file) => {
                 console.log(green + 'TORRENT ready file ' + file.name + ', path: ' + file.path + reset);
                 if (path.extname(file.name) == '.mp4' || path.extname(file.name) == '.webm' || path.extname(file.name) == '.mkv') { 
-                // if (ACCEPTED_FILES.includes(path.extname(file.name))) { // TODO
                     if (path.extname(file.name) == '.mkv') {
                         this.isMKV = true;
                     }
@@ -170,7 +175,8 @@ class Torrent {
                     callbackTorrentReady();
                 }
             });
-            if (!checkAcceptedFiles) { //TODO
+            if (!checkAcceptedFiles) {
+                this.noFilesToDownload = true;
                 console.log(red + "TORRENT no accepted files found" + reset);
                 this.engine.files.forEach(async (file) => {
                     console.log(green + 'TORRENT file ' + file.name + reset);

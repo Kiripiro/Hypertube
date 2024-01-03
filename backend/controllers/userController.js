@@ -51,6 +51,7 @@ class UserController {
             }
             const hashedPassword = await bcrypt.hash(password, 10);
             const token = uuidv4();
+            const emailVerificationToken = uuidv4();
 
             const newUser = await User.create({
                 username,
@@ -58,24 +59,29 @@ class UserController {
                 lastName,
                 email,
                 password: hashedPassword,
+                emailToken: emailVerificationToken,
                 avatar: 'baseAvatar.png',
                 token: token,
                 tokenCreationDate: this._getTimestampString(),
                 tokenExpirationDate: this._getTimestampString(1),
                 language
             });
-            // mailOptions.to = userData.email;
-            // mailOptions.subject = "Email verification";
-            // mailOptions.text = "Hi " + userData.username + "\nClick on the following link to activate your account:\n" + process.env.FRONTEND_URL + "/verification/email/" + emailVerificationToken;
-            // transporter.sendMail(mailOptions, function (error, info) {
-            //     if (error) {
-            //         console.log('error = ' + error);
-            //     } else {
-            //         console.log('Email sent: ' + info.response);
-            //     }
-            // });
+            const mailOptions = {
+                from: process.env.EMAIL,
+                to: newUser.email,
+                subject: "Email verification",
+                text: "Hi " + newUser.username + "\nClick on the following link to activate your account:\n" + process.env.FRONTEND_URL + "/verification/email/" + emailVerificationToken
+            };
+            console.log("mailOptions", mailOptions)
+            transporter.sendMail(mailOptions, function (error, info) {
+                if (error) {
+                    console.log('error = ' + error);
+                } else {
+                    console.log('Email sent: ' + info.response);
+                }
+            });
 
-            res.cookie('accessToken', this._generateToken(newUser.id), { httpOnly: true, maxAge: maxAgeAccessToken });
+            res.cookie('accessToken', this._generateToken(newUser.id, 1), { httpOnly: true, maxAge: maxAgeAccessToken });
             res.cookie('refreshToken', token, { httpOnly: true, maxAge: maxAgeRefreshToken });
             return res.status(201).json({ message: 'User registered successfully', user: newUser });
         } catch (error) {
@@ -99,11 +105,11 @@ class UserController {
                 return res.status(401).json({ message: 'Invalid password' });
             }
 
-            // if (userExists.emailVerified === false) {
-            //     return res.status(401).json({ message: 'Email not verified' });
-            // }
+            if (userExists.emailVerified === false) {
+                return res.status(401).json({ message: 'Email not verified' });
+            }
 
-            const accessToken = this._generateToken(userExists.id);
+            const accessToken = this._generateToken(userExists.id, 1);
             const refreshToken = uuidv4();
             if (userExists.passwordReset) {
                 const dataToUpdate = {
@@ -171,7 +177,7 @@ class UserController {
                     loginApi: true,
                     language: 'en'
                 });
-                res.cookie('accessToken', this._generateToken(newUser.id), { httpOnly: true, maxAge: maxAgeAccessToken });
+                res.cookie('accessToken', this._generateToken(newUser.id, 1), { httpOnly: true, maxAge: maxAgeAccessToken });
                 res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: maxAgeRefreshToken });
                 return res.status(201).json({ message: 'User registered successfully', user: newUser });
             }
@@ -181,7 +187,7 @@ class UserController {
                 tokenExpirationDate: this._getTimestampString(1)
             };
             await User.update(dataToUpdate, { where: { email: user.data.email } });
-            res.cookie('accessToken', this._generateToken(userExists.id), { httpOnly: true, maxAge: maxAgeAccessToken });
+            res.cookie('accessToken', this._generateToken(userExists.id, 1), { httpOnly: true, maxAge: maxAgeAccessToken });
             res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: maxAgeRefreshToken });
             return res.status(200).json({ message: 'User logged in successfully', user: userExists });
         } catch (error) {
@@ -210,7 +216,7 @@ class UserController {
                     loginApi: true,
                     language: 'en'
                 });
-                res.cookie('accessToken', this._generateToken(newUser.id), { httpOnly: true, maxAge: maxAgeAccessToken });
+                res.cookie('accessToken', this._generateToken(newUser.id, 1), { httpOnly: true, maxAge: maxAgeAccessToken });
                 res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: maxAgeRefreshToken });
                 return res.redirect(process.env.FRONTEND_URL + '/auth/redirect?id=' + newUser.id + '&username=' + newUser.username + '&firstName=' + newUser.firstName + '&lastName=' + newUser.lastName + '&emailVerified=' + newUser.emailVerified + '&avatar=' + newUser.avatar);
             } else {
@@ -220,7 +226,7 @@ class UserController {
                     tokenExpirationDate: this._getTimestampString(1)
                 };
                 await User.update(dataToUpdate, { where: { email: payload.email } });
-                res.cookie('accessToken', this._generateToken(userExists.id), { httpOnly: true, maxAge: maxAgeAccessToken });
+                res.cookie('accessToken', this._generateToken(userExists.id, 1), { httpOnly: true, maxAge: maxAgeAccessToken });
                 res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: maxAgeRefreshToken });
                 return res.redirect(process.env.FRONTEND_URL + '/auth/redirect?id=' + userExists.id + '&username=' + userExists.username + '&firstName=' + userExists.firstName + '&lastName=' + userExists.lastName + '&emailVerified=' + userExists.emailVerified + '&avatar=' + userExists.avatar);
             }
@@ -274,7 +280,7 @@ class UserController {
             if (now > expiration) {
                 return res.status(401).json({ message: 'Token expired' });
             }
-            const accessToken = this._generateToken(user.id);
+            const accessToken = this._generateToken(user.id, 1);
             res.cookie('accessToken', accessToken, { httpOnly: true, maxAge: maxAgeAccessToken });
             res.status(200).json({ message: 'Token refreshed successfully' });
         } catch (error) {
@@ -456,6 +462,24 @@ class UserController {
         }
     };
 
+    async emailValidation(req, res) {
+        try {
+            const validationEmailData = req.body;
+            const user = await User.findOne({ where: { emailToken: validationEmailData.token } });
+            if (user) {
+                const dataToUpdate = {
+                    emailVerified: true,
+                    emailToken: "",
+                };
+                await User.update(dataToUpdate, { where: { id: user.id } });
+                res.status(200).json({ message: 'Email validated' });
+            } else {
+                res.status(400).json({ error: 'Incorrect token' });
+            }
+        } catch (error) {
+            res.status(500).json({ error: 'Internal Server Error' });
+        }
+    }
 
     resetPassword = async (req, res) => {
         try {
@@ -464,7 +488,6 @@ class UserController {
             if (!user) {
                 return res.status(404).json({ message: 'User not found' });
             } else {
-                //send an email with a link to reset password
                 const passwordResetToken = uuidv4();
                 const dataToUpdate = {
                     passwordReset: true,
@@ -515,7 +538,7 @@ class UserController {
         }
     };
 
-    _generateToken(userId) {
+    _generateToken(userId, role) {
         const secretKey = process.env.JWT_SECRET;
         const expiresInMinutes = Number(process.env.JWT_EXPIRES_IN);
 
@@ -528,6 +551,29 @@ class UserController {
 
         const payload = {
             userId: userId,
+            iat: currentTimeInSeconds,
+            exp: expirationTimeInSeconds,
+            role: role
+        };
+        const token = jwt.sign(payload, secretKey);
+
+        return token;
+    }
+
+    _generateTokenApi(userId, password) {
+        const secretKey = process.env.JWT_SECRET_API;
+        const expiresInMinutes = Number(process.env.JWT_EXPIRES_IN);
+
+        if (!secretKey || !expiresInMinutes) {
+            throw new Error('JWT configuration error');
+        }
+
+        const currentTimeInSeconds = Math.floor(Date.now() / 1000);
+        const expirationTimeInSeconds = currentTimeInSeconds + expiresInMinutes * 60;
+
+        const payload = {
+            userId: userId,
+            userPassword: password,
             iat: currentTimeInSeconds,
             exp: expirationTimeInSeconds
         };
@@ -630,6 +676,23 @@ class UserController {
         });
     }
 
+    apiAuth = async (req, res) => {
+        try {
+            const { client, secret } = req.body;
+            console.log(client, secret);
+            console.log(process.env.API_CLIENT_ID, process.env.API_SECRET);
+            console.log(client === process.env.API_CLIENT_ID, secret === process.env.API_SECRET);
+            if (client !== process.env.API_CLIENT_ID || secret !== process.env.API_SECRET) {
+                return res.status(401).json({ message: 'Invalid credentials' }); 
+            }
+            const tokenGenerate = this._generateTokenApi(client, secret);
+            return res.status(201).json({ token: tokenGenerate });
+        } catch (error) {
+            console.error('Error apiRegister :', error);
+            return res.status(500).json({ message: 'Internal Server Error' });
+        }
+    };
+
     apiRegister = async (req, res) => {
         try {
             const { username, password } = req.body;
@@ -639,9 +702,15 @@ class UserController {
                 if (!await bcrypt.compare(password, existingUsername.password)) {
                     return res.status(400).json({ message: 'Invalid password' });
                 } else {
-                    const tokenGenerate = this._generateToken(existingUsername.id);
-                    const refreshToken = existingUsername.token;
-                    return res.status(201).json({ accesToken: tokenGenerate, refreshToken: refreshToken });
+                    const tokenGenerate = this._generateToken(existingUsername.id, 2);
+                    const newRefreshToken = uuidv4();
+                    const dataToUpdate = {
+                        token: newRefreshToken,
+                        tokenCreationDate: this._getTimestampString(),
+                        tokenExpirationDate: this._getTimestampString(1)
+                    };
+                    await User.update(dataToUpdate, { where: { id: existingUsername.id  } });
+                    return res.status(201).json({ accesToken: tokenGenerate, refreshToken: newRefreshToken });
                 }
             } else {
                 const hashedPassword = await bcrypt.hash(password, 10);
@@ -657,9 +726,10 @@ class UserController {
                     token: token,
                     tokenCreationDate: this._getTimestampString(),
                     tokenExpirationDate: this._getTimestampString(1),
-                    language: "en"
+                    language: "en",
+                    registerOurApi: true
                 });
-                const tokenGenerate = this._generateToken(newUser.id)
+                const tokenGenerate = this._generateToken(newUser.id, 2)
                 const refreshToken = token;
                 return res.status(201).json({ accesToken: tokenGenerate, refreshToken: refreshToken });
             }
@@ -668,29 +738,6 @@ class UserController {
             return res.status(500).json({ message: 'Internal Server Error' });
         }
     };
-
-    _generateTokenWithPassword(username, password) {
-        const secretKey = process.env.JWT_SECRET;
-        const expiresInMinutes = Number(process.env.JWT_EXPIRES_IN);
-
-        if (!secretKey || !expiresInMinutes) {
-            throw new Error('JWT configuration error');
-        }
-
-        const currentTimeInSeconds = Math.floor(Date.now() / 1000);
-        console.log("expiresInMinutes = " + expiresInMinutes)
-        const expirationTimeInSeconds = currentTimeInSeconds + expiresInMinutes * 60;
-
-        const payload = {
-            username: username,
-            password: password,
-            iat: currentTimeInSeconds,
-            exp: expirationTimeInSeconds
-        };
-        const token = jwt.sign(payload, secretKey);
-
-        return token;
-    }
 
     apiRefreshToken = async (req, res) => {
         try {
@@ -714,7 +761,12 @@ class UserController {
             if (now > expiration) {
                 return res.status(401).json({ message: 'Token expired' });
             }
-            const accessToken = this._generateToken(user.id);
+            let accessToken = "";
+            if (user.registerOurApi) {
+                accessToken = this._generateToken(user.id, 2);
+            } else {
+                accessToken = this._generateToken(user.id, 1);
+            }
             return res.status(201).json({ accesToken: accessToken, refreshToken: refreshToken });
         } catch (error) {
             console.error('Error api refreshing token:', error);

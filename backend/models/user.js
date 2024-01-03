@@ -74,6 +74,11 @@ module.exports = (sequelize, Sequelize) => {
       type: DataTypes.STRING,
       allowNull: true,
     },
+    registerOurApi: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
   });
 
   return User;

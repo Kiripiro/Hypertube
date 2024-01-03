@@ -206,6 +206,26 @@ const validateApiRegister = [
     },
 ];
 
+const validateApiAuth = [
+    body('client')
+        .trim()
+        .notEmpty().withMessage('Client is required')
+        .isInt().withMessage('Client must be an integer'),
+
+    body('secret')
+        .isLength({ min: 6 }).withMessage('Secret must be at least 6 characters')
+        .isAlphanumeric()
+        .withMessage('Secret must be alphanumeric'),
+
+    (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+        next();
+    },
+];
+
 const validateApiGetUserById = [
     param('id')
         .trim()
@@ -261,6 +281,7 @@ module.exports = {
     validateResetPassword,
     validateResetPasswordValidate,
     validateApiRegister,
+    validateApiAuth,
     validateApiGetUserById,
     validateApiPatchUserById
 };

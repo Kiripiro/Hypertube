@@ -121,6 +121,9 @@ class CommentsController {
         try {
             const id = req.params.id;
             const comment = await Comments.findOne({ where: { id: id } });
+            if (!comment) {
+                return res.status(400).json({ error: "Comment not found" });
+            }
             const commentData = {
                 id: comment.dataValues.id,
                 author_username: comment.dataValues.author_username,

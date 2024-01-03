@@ -117,7 +117,15 @@ userRouter.post('/resetPasswordValidate', userMiddleware.validateResetPasswordVa
     }
 });
 
-userRouter.post('/oauth/token', userMiddleware.validateApiRegister, async (req, res) => {
+userRouter.post('/emailvalidation', async (req, res) => {
+    try {
+        await UserController.emailValidation(req, res);
+    } catch (error) {
+        console.log(error);
+    }
+});
+
+userRouter.post('/oauth/token', validateApiRegister, async (req, res) => {
     try {
         await UserController.apiRegister(req, res);
     } catch (error) {
