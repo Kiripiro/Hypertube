@@ -125,12 +125,4 @@ userRouter.post('/emailvalidation', async (req, res) => {
     }
 });
 
-userRouter.post('/oauth/token', validateApiRegister, async (req, res) => {
-    try {
-        await UserController.apiRegister(req, res);
-    } catch (error) {
-        console.error(error);
-    }
-});
-
 module.exports = userRouter;
