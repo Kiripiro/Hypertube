@@ -21,11 +21,9 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.route.snapshot.queryParams['code'] && !this.authService.checkLog()) {
-      console.log(this.route.snapshot.queryParams['code']);
       this.authService.login42(this.route.snapshot.queryParams['code']);
     }
     else if (this.route.snapshot.queryParams['state'] && !this.authService.checkLog()) {
-      console.log(this.route.snapshot.queryParams['state']);
       this.loginGoogle();
     } else if (this.authService.checkLog()) {
       this.router.navigate(['']);
@@ -48,7 +46,6 @@ export class LoginComponent implements OnInit {
   }
 
   loginGoogle(): void {
-    console.log('login google');
     // this.googleApiService.loginWithGoogle();
   }
 }

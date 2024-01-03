@@ -43,9 +43,7 @@ export class ProfileComponent implements OnInit {
       }
       this.authService.getUserInfos(this.username).subscribe({
         next: (response) => {
-          console.log(response);
           this.userInfos = response.user;
-          console.log(this.userInfos);
           this.personalProfil = this.userInfos.id == this.id;
           if (this.userInfos.avatar && this.userInfos.avatar.includes("http") || this.userInfos.avatar.includes("https")) {
             this.userInfos.avatar = this.userInfos.avatar;
@@ -57,26 +55,21 @@ export class ProfileComponent implements OnInit {
             this.movieService.getMovieHistory().subscribe({
               next: (response) => {
                 this.movieHistory = response.movieHistory.map((movie: any) => { return movie.title });
-                console.log("movieHistory", this.movieHistory);
               },
               error: (error) => {
-                console.log(error);
               }
             });
           } else {
             this.movieService.getMovieHistoryById(this.userInfos.id).subscribe({
               next: (response) => {
                 this.movieHistory = response.movieHistory.map((movie: any) => { return movie.title });
-                console.log("movieHistory", this.movieHistory);
               },
               error: (error) => {
-                console.log(error);
               }
             });
           }
         },
         error: (error) => {
-          console.log(error);
           if (error.message == "User not found")
             this.error = true;
           else {
@@ -100,17 +93,5 @@ export class ProfileComponent implements OnInit {
       this.router.navigate(['auth/login']);
       return;
     }
-  }
-
-  test() {
-    console.log("test");
-    this.movieService.getMovieTest().subscribe({
-      next: (response) => {
-        console.log(response);
-      },
-      error: (error) => {
-        console.log(error);
-      }
-    });
   }
 }

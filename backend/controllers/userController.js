@@ -488,6 +488,9 @@ class UserController {
             if (!user) {
                 return res.status(404).json({ message: 'User not found' });
             } else {
+                if (!user.emailVerified) {
+                    return res.status(400).json({ message: 'Email not verified' });
+                }
                 const passwordResetToken = uuidv4();
                 const dataToUpdate = {
                     passwordReset: true,

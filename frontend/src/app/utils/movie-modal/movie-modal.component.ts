@@ -63,7 +63,6 @@ export class MovieModalComponent {
         } else {
           this.freeMovieId = this.data.free_movie_id ? this.data.free_movie_id : "";
         }
-        console.log("data", this.data);
         this.loading = false;
         this.commentsService.getComments(this.data.imdb_id).subscribe({
           next: (response: any) => {
@@ -73,23 +72,14 @@ export class MovieModalComponent {
               console.error('Invalid response format:', response);
             }
           }, error: (error) => {
-            console.log(error);
           }
         });
         
       },
       error: (error) => {
-        console.log(error);
         this.error = true;
       }
     });
-    // this.movieService.getTorrentInfos(data.yts_id).subscribe({
-    //   next: (response: any) => {
-    //     console.log("getTorrentInfos", response);
-    //   }, error: (error) => {
-    //     console.log(error);
-    //   }
-    // });
   }
 
   handleReplyToNestedComment(selectedComment: Comment) {
@@ -117,7 +107,6 @@ export class MovieModalComponent {
   }
 
   replyToComment(comment: Comment | null = null) {
-    console.log('Replying to comment:', comment);
     if (comment) {
       this.selectedComment = comment;
       this.replying = true;
@@ -152,15 +141,12 @@ export class MovieModalComponent {
             if (response && response.comments && Array.isArray(response.comments)) {
               this.comments = response.comments;
             } else {
-              console.error('Invalid response format:', response);
             }
           }, error: (error) => {
-            console.log(error);
           }
         });
 
       }, error: (error) => {
-        console.log(error);
       }
     });
   }
@@ -177,21 +163,17 @@ export class MovieModalComponent {
           this.replying = false;
           this.selectedComment = null;
         }, error: (error) => {
-          console.log(error);
         }
       });
     } else if (this.selectedComment && this.editing) {
       const updatedComment: Comment = { ...this.selectedComment as Comment, text: comment };
       this.commentsService.updateComment(updatedComment).subscribe({
         next: (response: any) => {
-          console.log(response);
           const updatedComment: Comment = { ...response.comment, updatedAt: new Date() };
           this.comments = this.comments.map(comment => comment.id === response.comment.id ? updatedComment : comment);
-          console.log(this.comments);
           this.editing = false;
           this.selectedComment = null;
         }, error: (error) => {
-          console.log(error);
         }
       });
     } else {
@@ -199,7 +181,6 @@ export class MovieModalComponent {
         next: (response: any) => {
           this.comments.push(response.comment);
         }, error: (error) => {
-          console.log(error);
         }
       });
     }

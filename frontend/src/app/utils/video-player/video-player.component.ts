@@ -7,6 +7,8 @@ import { MoviesService } from 'src/app/services/movie.service';
 import { DialogService } from 'src/app/services/dialog.service';
 import { SubtitlesItemResponse, languages } from 'src/app/models/models';
 import { LocalStorageService } from 'src/app/services/local-storage.service';
+import { Subject, timer } from 'rxjs';
+import { takeWhile } from 'rxjs/operators';
 
 @Component({
   selector: 'app-video-player',
@@ -30,6 +32,8 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   movieTitle = "";
   loaded = false;
   videoLoaded = false;
+  private loadedSubject = new Subject<boolean>();
+  private videoLoadedSubject = new Subject<boolean>();
   error = false;
   progressValue = 0;
   totalSize = 0;
@@ -92,6 +96,23 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
     private localStorageService: LocalStorageService
   ) {
     this.url = environment.backendUrl || 'http://localhost:3000';
+    this.loadedSubject.pipe(
+        takeWhile(() => this.loaded === true && this.videoLoaded === false)
+    ).subscribe(() => {
+        const tenSecondsTimer = timer(20000);
+        tenSecondsTimer.subscribe(() => {
+            if (!this.videoLoaded) {
+              const data = {
+                title: 'Video player error',
+                text: 'The video player did not load correctly, please reload the page',
+                text_yes_button: 'Ok',
+                yes_callback: () => { },
+                reload: true,
+              };
+              this.dialogService.openDialog(data);
+            }
+        });
+    });
   }
 
   ngOnInit(): void {
@@ -133,7 +154,6 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
     const languages = (userLanguage != null && userLanguage.length > 0 && userLanguage != "en") ? ['en', userLanguage] : ['en'];
     this.movieService.downloadSubtitles(this.imdbId, languages, this.timeExpected).subscribe({
       next: (response) => {
-        console.log("downloadSubtitles", response);
         const subtitlesReceived = response.subtitles;
         this.subtitlesErrorMessage = "";
         subtitlesReceived.forEach((sub: SubtitlesItemResponse) => {
@@ -148,7 +168,6 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
         }
       },
       error: (error) => {
-        console.log(error);
         this.subtitlesError = true;
         this.subtitlesErrorMessage = "Error with subtitles api";
       }
@@ -172,7 +191,6 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   }
 
   onVideoLoad() {
-    console.log('Video metadata loaded');
     this.video = document.getElementById('videoPlayerOrigin') as HTMLVideoElement;
     this.videoDurationSeconds = this.isMKV ? (this.durationData * 60) : this.video.duration;
     this.video.disablePictureInPicture = true;
@@ -188,16 +206,15 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
     }
     this.loadingBar = document.getElementById('loadingBar') as HTMLDivElement;
     this.value = this.video.volume * 100;
-    console.log('Video metadata loaded downloadedValue', this.downloadedValue);
     if (this.downloadedValue > 0 && this.downloadedValue < 100) {
       this.loadingBar.style.width = this.downloadedValue + "%";
     }
     this.videoLoaded = true;
+    this.videoLoadedSubject.next(true);
     this.videoControls = document.getElementById('videoControls') as HTMLDivElement;
     this.videoControls.style.display = "block";
     this.videoDuration = this._convertSecondsToTime(this.videoDurationSeconds);
     if (this.isMKV) {
-      console.log("this.timeExpected videoload", this.timeExpected)
       this.videoCurrentTime = this._convertSecondsToTime(this.timeExpected + this.video.currentTime);
     } else {
       this.videoCurrentTime = this._convertSecondsToTime(this.video.currentTime);
@@ -209,7 +226,6 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   _addSubtitles() {
     if (this.subtitles != null && this.subtitles.length > 0) {
       this.subtitles.forEach((sub: SubtitlesItemResponse) => {
-        console.log("sub", sub)
         if (sub.filePath != null && sub.filePath.length > 0) {
           this.movieService.getSubtitles(sub.filePath).subscribe(subtitles => {
             const blob = new Blob([subtitles], { type: 'webvtt' });
@@ -229,12 +245,10 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   }
 
   changeSubtitles(newSub: { value: string, viewValue: string }) {
-    console.log("changeSubtitles", newSub)
     if (newSub.value != this.currentSubtitles) {
       const tracks = this.video.textTracks;
       for (let i = 0; i < tracks.length; i++) {
         const track = tracks[i];
-        console.log("track", track)
         if (track.language == newSub.value) {
           track.mode = 'showing';
           this.currentSubtitles = newSub.value;
@@ -254,7 +268,6 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
     if (!this.videoPlaying) {
       const videoTimeMax = this.maxProgressBar * this.videoDurationSeconds / 100;
       if (this.video.currentTime >= videoTimeMax) {
-        console.log("force pause togglevideo")
         return;
       }
       if (this.isMKV && this.video.currentTime >= this.video.duration) {
@@ -278,9 +291,9 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
     const percentage = (clickPosition / progressRangeWidth) * 100;
     const videoTimeSelected = (percentage * this.videoDurationSeconds) / 100;
     const videoTimeMax = this.maxProgressBar * this.videoDurationSeconds / 100;
-    console.log("percentage = " + percentage + ", maxProgressBar = " + this.maxProgressBar + ", videoTimeSelected = " + videoTimeSelected + ", videoTimeMax = " + videoTimeMax + ", this.totalSize = " + this.totalSize);
+    // console.log("percentage = " + percentage + ", maxProgressBar = " + this.maxProgressBar + ", videoTimeSelected = " + videoTimeSelected + ", videoTimeMax = " + videoTimeMax + ", this.totalSize = " + this.totalSize);
     if ((videoTimeSelected + this.SECU_TIME) < videoTimeMax) {
-      console.log("this.video.currentTime = " + this.video.currentTime + ", videoTimeSelected = " + videoTimeSelected + ", videoTimeMax = " + videoTimeMax + ", this.video.duration = " + this.video.duration)
+      // console.log("this.video.currentTime = " + this.video.currentTime + ", videoTimeSelected = " + videoTimeSelected + ", videoTimeMax = " + videoTimeMax + ", this.video.duration = " + this.video.duration)
       if (this.isMKV) {
         this._realoadWithTime(Math.floor(videoTimeSelected));
       } else {
@@ -290,7 +303,6 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   }
 
   _realoadWithTime(time: number) {
-    console.log("_realoadWithTime", time);
     this.router.navigate(['stream/' + this.movieId + '/' + this.imdbId + '/' + this.movieTitle + '/' + this.freeId + '/' + time]).then(() => {
       window.location.reload();
     });
@@ -315,7 +327,6 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
         return;
       }
       this.video.currentTime = this.oldCurrentTime;
-      console.log("force pause onTimeUpdate 1")
       this.video.pause();
       this.videoPlaying = false;
       this.videoPlayButtonIcon = "play_arrow";
@@ -344,7 +355,6 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
       this.videoCurrentTime = this._convertSecondsToTime(this.video.currentTime);
     }
     if (this.videoPlaying && this.video.currentTime >= videoTimeMax) {
-      console.log("force pause onTimeUpdate 2")
       this.video.pause();
       this.videoPlaying = false;
       this.videoPlayButtonIcon = "play_arrow";
@@ -360,15 +370,11 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
     //     console.log(error);
     //   }
     // });
-    console.log('ngOnDestroy');
-    console.log("this.video.currentTime", this.video.currentTime);
-    if (this.video.currentTime > 0) {
-      this.movieService.addMovieHistory(this.imdbId, this.movieTitle, this.video.currentTime).subscribe({
+    if (this.oldCurrentTime > 0) {
+      this.movieService.addMovieHistory(this.imdbId, this.movieTitle, this.oldCurrentTime).subscribe({
         next: (response) => {
-          console.log("addMovieHistory", response.seen);
         },
         error: (error) => {
-          console.log(error);
         }
       });
     }
@@ -376,10 +382,8 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
 
   getLoadingMovie() {
     if (this.router.url.includes("/stream/" + this.movieId)) {
-      // console.log("getLoadingMovie " + this.movieId + " " + this.freeId);
       this.movieService.getLoadingMovie(this.movieId, this.freeId, this.imdbId).subscribe({
         next: (response) => {
-          // console.log("getLoadingMovie", response.data);
           if (response.data.downloadError) {
             const data = {
               title: 'Download error',
@@ -400,7 +404,6 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
           }
           this.progressValue = Math.floor(response.data.size * 100 / this.MIN_BYTES);
           this.totalSize = response.data.totalSize;
-          // console.log("this.totalSize", this.totalSize)
           if (this.totalSize > 0 && this.totalSize <= this.MIN_BYTES) {
             this.MIN_BYTES = this.totalSize;
           }
@@ -411,6 +414,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
             }, 5000);
           } else if (response.data.size >= this.MIN_BYTES) {
             this.loaded = true;
+            this.loadedSubject.next(true);
           }
         },
         error: (error) => {
@@ -430,18 +434,13 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   getMovieFileSize() {
     this.movieService.getMovieFileSize(this.movieId, this.freeId).subscribe({
       next: (response) => {
-        // console.log("getMovieFileSize", response.data);
-        // console.log("getMovieFileSize size = " + response.data.size + ", totalSize = " + this.totalSize);
         const sizeNormalized = (response.data.size - this.SECU_BYTES) / this.totalSize;
         const value = (this.totalSize <= 0) ? 0 : ((response.data.size >= this.totalSize) ? 100 : (sizeNormalized * 100))
         this.downloadedValue = value;
-        // console.log("getMovieFileSize sizeNormalized = " + sizeNormalized);
-        // console.log("getMovieFileSize downloadedValue", this.downloadedValue);
         this.maxProgressBar = value >= 100 ? 100 : value;
         if (this.loadingBar) {
           this.loadingBar.style.width = this.downloadedValue + "%";
         }
-        // console.log("getMovieFileSize this.totalSize = " + this.totalSize + ", response.data.size = " + response.data.size);
         if (((this.totalSize > 0 && response.data.size < this.totalSize) || response.data.size == 0 || this.totalSize == 0)
           && this.router.url.includes("/stream/" + this.movieId)) {
           setTimeout(() => {
@@ -450,7 +449,6 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
         }
       },
       error: (error) => {
-        console.log(error);
       }
     });
   }
@@ -474,11 +472,11 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
       if (!document.fullscreenElement) {
         if (this.video.requestFullscreen) {
           this.video.requestFullscreen();
-        } else if (this.video.mozRequestFullScreen) { /* Firefox */
+        } else if (this.video.mozRequestFullScreen) {
           this.video.mozRequestFullScreen();
-        } else if (this.video.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
+        } else if (this.video.webkitRequestFullscreen) {
           this.video.webkitRequestFullscreen();
-        } else if (this.video.msRequestFullscreen) { /* IE/Edge */
+        } else if (this.video.msRequestFullscreen) {
           this.video.msRequestFullscreen();
         }
       } else {

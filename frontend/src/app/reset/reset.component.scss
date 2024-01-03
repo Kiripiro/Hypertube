@@ -8,3 +8,12 @@
 .title {
     line-height: 40px;
 }
+
+.resetForm {
+    display: flex;
+    flex-direction: column;
+
+    button {
+        margin-top: 1rem;
+    }
+}

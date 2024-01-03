@@ -77,7 +77,6 @@ export class HomeComponent implements OnInit {
             this.hasMore = response.hasMore;
           },
           error: (error) => {
-            console.log(error);
           },
         });
     }
@@ -108,17 +107,14 @@ export class HomeComponent implements OnInit {
       next: (response) => {
         this.films = response.movies;
         this.hasMore = response.hasMore;
-        console.log("loadMovies 2")
         this.loading = false;
       },
       error: (error) => {
-        console.log(error);
       }
     });
   }
 
   loadData() {
-    console.log("loadData");
     if (this.hasMore) {
       this.params = {
         ...this.params,
@@ -131,7 +127,6 @@ export class HomeComponent implements OnInit {
           this.hasMore = response.hasMore;
         },
         error: (error) => {
-          console.log(error);
         }
       });
     }

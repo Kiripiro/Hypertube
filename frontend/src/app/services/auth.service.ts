@@ -43,7 +43,6 @@ export class AuthService {
   }
 
   checkLog() {
-    console.log("checkLog", this.localStorageService.getItem(localStorageName.username));
     if (!this.localStorageService.getItem(localStorageName.username))
       return false;
     return true;
@@ -90,7 +89,6 @@ export class AuthService {
             no_callback: () => { this.router.navigate(['/auth/login']); },
             reload: false
           };
-          console.log(response);
           this.dialogService.openDialog(dialogData);
         },
         error: (error) => {
@@ -145,7 +143,6 @@ export class AuthService {
   login42(code: string) {
     this.http.post<LoginResponseData>(this.url + '/user/login42', { code }, { withCredentials: true }).subscribe({
       next: (response) => {
-        console.log(response);
         this.localStorageService.setMultipleItems(
           { key: localStorageName.id, value: response.user.id || -1 },
           { key: localStorageName.username, value: response.user.username || "" },
@@ -160,7 +157,6 @@ export class AuthService {
         this.logEmitChange(true);
       },
       error: (error) => {
-        console.log(error);
         const dialogData = {
           title: 'Login failed',
           text: error.message,
@@ -225,13 +221,11 @@ export class AuthService {
 
   getLocationWithIp() {
     this.http.get<IpApiResponseData>('http://ip-api.com/json/?fields=status,message,lat,lon').subscribe(data => {
-      console.log("ip-api", data);
     });
   }
 
   getIpInfos() {
     this.http.get<any>('https://api.ipify.org?format=json').subscribe(data => {
-      console.log("ipify", data);
     });
   }
 }

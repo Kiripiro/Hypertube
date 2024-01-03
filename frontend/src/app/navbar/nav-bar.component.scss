@@ -70,8 +70,8 @@
     }
 
     .secondaryButton {
-        background-color: $surface;
-        color: white;
+        background-color: $second_surfaceAlt;
+        color: $second_onSurfaceAlt;
         font-size: 1.5rem;
         font-weight: 600;
     }
@@ -145,6 +145,13 @@
         img {
             width: 70px;
             cursor: pointer;
+        }
+    }
+
+    @media only screen and (max-height: 900px) {
+    
+        img {
+            width: 50px;
         }
     }
 }

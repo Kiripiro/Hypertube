@@ -1,7 +1,7 @@
 <div class="centerDiv">
     <div class="formCard">
         <p class="title">{{title}}</p>
-        <form (ngSubmit)="onSubmit()" [formGroup]="resetForm" *ngIf="!sent">
+        <form (ngSubmit)="onSubmit()" [formGroup]="resetForm" *ngIf="!sent" class="resetForm">
             <mat-form-field class="form-field" hideRequiredMarker>
                 <mat-label>Email</mat-label>
                 <input matInput id="email" formControlName="email" required email>

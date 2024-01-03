@@ -26,7 +26,6 @@ export class CommentsService {
     }
 
     updateComment(comment: Comment): Observable<Comment> {
-        console.log(comment);
         return this.http.put<Comment>(this.apiUrl + '/updateComment/', { comment: comment }, { withCredentials: true });
     }
 

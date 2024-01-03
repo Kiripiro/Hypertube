@@ -45,7 +45,6 @@ export class WaitComponent implements OnInit {
           this.text = "Wait...";
           this.authService.emailValidation(this.token).subscribe(
             (response) => {
-              console.log("response", response);
               this.text = "Your email has been verified !";
               this.emailValid = true;
             },

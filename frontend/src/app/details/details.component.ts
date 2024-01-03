@@ -51,17 +51,13 @@ export class DetailsComponent implements OnInit {
       console.log(this.imdbId);
       this.moviesService.getMovieDetails(this.imdbId).subscribe({
         next: (response) => {
-          console.log(response);
           this.imdbData = response.movie;
           this.posterUrl = this.imdbData.poster;
           this.loading = false;
           this.success = true;
           this.duration = this.convertDurationToNumber(this.imdbData.runtime);
-          console.log(this.duration);
         },
         error: (error) => {
-          console.log(error);
-          console.log("error");
           this.error = true;
         }
       });

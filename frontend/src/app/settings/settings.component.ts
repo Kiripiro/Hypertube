@@ -57,12 +57,9 @@ export class SettingsComponent implements OnInit {
 
   getUser() {
     this.authService.getUserInfosById(this.id).subscribe((userJson: any) => {
-      console.log(userJson);
       this.user = userJson.user;
       if (this.user) {
         this.selected = this.languages.find((lang) => lang.value === this.user?.language)?.viewValue || "";
-        console.log(this.user);
-        console.log(this.selected);
         if (this.user.avatar) {
           if (this.user.avatar.includes("http") || this.user.avatar.includes("https"))
             this.actualImg = this.user.avatar;
@@ -255,7 +252,6 @@ export class SettingsComponent implements OnInit {
 
     this.settingsService.updateUser(updatedFields, this.file).subscribe({
       next: (response) => {
-        console.log("response", response)
         if (response.message === "User updated") {
           this.localStorageService.setMultipleItems(
             { key: localStorageName.username, value: response.user.username || "" },

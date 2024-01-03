@@ -54,16 +54,40 @@ export class ResetComponent implements OnInit {
         },
         error: (error) => {
           console.error('sendPasswordResetRequest failed:', error);
-          const dialogData = {
-            title: 'Error',
-            text: error.error,
-            text_yes_button: "",
-            text_no_button: "Close",
-            yes_callback: () => { },
-            no_callback: () => { },
-            reload: false
-          };
-          this.dialogService.openDialog(dialogData);
+          if (error && error.message && error.message == "User not found") {
+            const dialogData = {
+              title: 'Error',
+              text: "User not found",
+              text_yes_button: "",
+              text_no_button: "Close",
+              yes_callback: () => { },
+              no_callback: () => { },
+              reload: false
+            };
+            this.dialogService.openDialog(dialogData);
+          } else if (error && error.message && error.message == "Email not verified") {
+            const dialogData = {
+              title: 'Error',
+              text: "Email not verified",
+              text_yes_button: "",
+              text_no_button: "Close",
+              yes_callback: () => { },
+              no_callback: () => { },
+              reload: false
+            };
+            this.dialogService.openDialog(dialogData);
+          } else {
+            const dialogData = {
+              title: 'Error',
+              text: "",
+              text_yes_button: "",
+              text_no_button: "Close",
+              yes_callback: () => { },
+              no_callback: () => { },
+              reload: false
+            };
+            this.dialogService.openDialog(dialogData);
+          }
         }
       });
     }

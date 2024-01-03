@@ -45,7 +45,6 @@ export class SearchComponent implements OnInit {
           console.error('Invalid response format:', response);
         }
       }, error: (error) => {
-        console.log(error);
       }
     });
   }
