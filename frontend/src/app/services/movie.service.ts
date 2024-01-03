@@ -51,11 +51,10 @@ export class MoviesService {
     return this.http.get<any>(this.url + '/movie/movieStream/' + movieId + '/' + freeId, { withCredentials: true });
   }
 
-  addMovieHistory(imdbId: String, title: String): Observable<any> {
-    console.log("addMovieHistory", imdbId,);
-    return this.http.post<any>(this.url + '/movie/addMovieHistory/', { imdbId, title }, { withCredentials: true });
+  addMovieHistory(imdbId: String, title: String, timestamp: Number): Observable<any> {
+    return this.http.post<any>(this.url + '/movie/addMovieHistory/', { imdbId, title, timestamp }, { withCredentials: true });
   }
-  
+
   getMovieDetails(imdbId: Number): Observable<MovieDetailsResponse> {
     return this.http.get<MovieDetailsResponse>(this.url + '/movie/fetchMovieDetails/' + imdbId, { withCredentials: true });
   }
@@ -68,29 +67,15 @@ export class MoviesService {
   getMovieHistory(): Observable<any> {
     return this.http.get<any>(this.url + '/movie/getMovieHistory/', { withCredentials: true });
   }
-  getSubtitles(fileName: string) : Observable<any> {
+  getSubtitles(fileName: string): Observable<any> {
     return this.http.get(this.url + '/subtitles/' + fileName, { responseType: 'text', withCredentials: true });
   }
 
   getMovieHistoryById(id: Number): Observable<any> {
     return this.http.get<any>(this.url + '/movie/getMovieHistoryById/' + id, { withCredentials: true });
   }
-  
-  getMovieTest() : Observable<any> { // FOR TEST, TO DELETE
-    return this.http.get<MovieDetailsResponse>(this.url + '/movie/testMovies', { withCredentials: true });
-  }
 
-  _convertTime(time: string): number {
-    console.log("time", time);
-    const regExp = new RegExp(/^\d+$/);
-    console.log("regExp.test(time)", regExp.test(time));
-    if (!regExp.test(time)) {
-      return -1;
-    }
-    const timeConverted = parseInt(time);
-    if (isNaN(timeConverted)) {
-      return -1;
-    }
-    return timeConverted;
+  getMovieTest(): Observable<any> { // FOR TEST, TO DELETE
+    return this.http.get<MovieDetailsResponse>(this.url + '/movies/testMovies', { withCredentials: true });
   }
 }

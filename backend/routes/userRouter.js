@@ -1,10 +1,10 @@
 const express = require('express');
 const UserController = require('../controllers/userController');
-const { validateUserRegistration, validateUserLogin, validateApiRegister } = require('../middlewares/userMiddleware');
-const auth = require('../middlewares/auth');
+const userMiddleware = require('../middlewares/validation/userMiddleware');
+const auth = require('../middlewares/auth/auth');
 
 const userRouter = express.Router();
-userRouter.post('/register', validateUserRegistration, async (req, res) => {
+userRouter.post('/register', userMiddleware.validateUserRegistration, async (req, res) => {
     try {
         await UserController.register(req, res);
     } catch (error) {
@@ -12,7 +12,7 @@ userRouter.post('/register', validateUserRegistration, async (req, res) => {
     }
 });
 
-userRouter.post('/login', validateUserLogin, async (req, res) => {
+userRouter.post('/login', userMiddleware.validateUserLogin, async (req, res) => {
     try {
         await UserController.login(req, res);
     } catch (error) {
@@ -20,7 +20,7 @@ userRouter.post('/login', validateUserLogin, async (req, res) => {
     }
 });
 
-userRouter.post('/login42', async (req, res) => {
+userRouter.post('/login42', userMiddleware.validateUserLogin42, async (req, res) => {
     try {
         await UserController.login42(req, res);
     } catch (error) {
@@ -28,7 +28,7 @@ userRouter.post('/login42', async (req, res) => {
     }
 });
 
-userRouter.post('/loginGoogle', async (req, res) => {
+userRouter.post('/loginGoogle',/* userMiddleware.validateUserLoginGoogle,*/ async (req, res) => {
     try {
         await UserController.loginGoogle(req, res);
     } catch (error) {
@@ -52,7 +52,7 @@ userRouter.post('/refreshToken', async (req, res) => {
     }
 });
 
-userRouter.post('/id', auth, async (req, res) => {
+userRouter.post('/id', auth, userMiddleware.validateGetUserById, async (req, res) => {
     try {
         await UserController.getUserById(req, res);
     } catch (error) {
@@ -60,7 +60,7 @@ userRouter.post('/id', auth, async (req, res) => {
     }
 });
 
-userRouter.post('/username', auth, async (req, res) => {
+userRouter.post('/username', auth, userMiddleware.validateGetUserByUsername, async (req, res) => {
     try {
         await UserController.getUserByUsername(req, res);
     } catch (error) {
@@ -84,7 +84,7 @@ userRouter.get('/allUsernames', auth, async (req, res) => {
     }
 });
 
-userRouter.post('/settingsUpdate', auth, async (req, res) => {
+userRouter.post('/settingsUpdate', auth, userMiddleware.validateSettingsUpdateInfos, async (req, res) => {
     try {
         await UserController.settingsUpdateInfos(req, res);
     } catch (error) {
@@ -93,7 +93,7 @@ userRouter.post('/settingsUpdate', auth, async (req, res) => {
 });
 
 
-userRouter.post('/delete', auth, async (req, res) => {
+userRouter.post('/delete', auth, userMiddleware.validateDeleteUser, async (req, res) => {
     try {
         await UserController.deleteUser(req, res);
     } catch (error) {
@@ -101,7 +101,7 @@ userRouter.post('/delete', auth, async (req, res) => {
     }
 });
 
-userRouter.post('/resetPassword', async (req, res) => {
+userRouter.post('/resetPassword', userMiddleware.validateResetPassword, async (req, res) => {
     try {
         await UserController.resetPassword(req, res);
     } catch (error) {
@@ -109,7 +109,7 @@ userRouter.post('/resetPassword', async (req, res) => {
     }
 });
 
-userRouter.post('/resetPasswordValidate', async (req, res) => {
+userRouter.post('/resetPasswordValidate', userMiddleware.validateResetPasswordValidate, async (req, res) => {
     try {
         await UserController.resetPasswordValidate(req, res);
     } catch (error) {

@@ -7,7 +7,7 @@ import { LocalStorageService, localStorageName } from './local-storage.service';
 import { DialogService } from './dialog.service';
 import { GetUserResponseData, LoginResponseData, RegisterResponseData, CompleteRegisterResponseData, IpApiResponseData, LocationIQApiResponseData, UpdateLocationResponseData, EmailValidationResponseData, PasswordResetRequestResponseData, PasswordResetValidationResponseData } from '../models/models';
 import { environment } from '../../environments/environment.template';
-
+declare var window: any;
 
 @Injectable({
   providedIn: 'root'
@@ -29,6 +29,7 @@ export class AuthService {
 
   private isLogged = new Subject<boolean>();
   public isLoggedEmitter = this.isLogged.asObservable();
+
   logEmitChange(usr: boolean) {
     this.isLogged.next(usr);
   }
@@ -42,6 +43,7 @@ export class AuthService {
   }
 
   checkLog() {
+    console.log("checkLog", this.localStorageService.getItem(localStorageName.username));
     if (!this.localStorageService.getItem(localStorageName.username))
       return false;
     return true;
@@ -75,8 +77,8 @@ export class AuthService {
     });
   }
 
-  register(username: string, firstName: string, lastName: string, email: string, password: string, language: string): any {
-    this.http.post<RegisterResponseData>(this.url + '/user/register', { username, firstName, lastName, email, password, language }, { withCredentials: true })
+  register(username: string, firstName: string, lastName: string, email: string, password: string, confirm_password: string, language: string): any {
+    this.http.post<RegisterResponseData>(this.url + '/user/register', { username, firstName, lastName, email, password, confirm_password, language }, { withCredentials: true })
       .subscribe({
         next: (response) => {
           const dialogData = {
@@ -182,6 +184,7 @@ export class AuthService {
         },
         complete: () => {
           this._frontLogOut('');
+          // window.open("/", "_self");
         }
       });
   }

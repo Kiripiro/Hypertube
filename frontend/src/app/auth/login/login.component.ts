@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from 'src/app/services/auth.service';
 import { Router, ActivatedRoute } from '@angular/router';
-import { GoogleApiService } from 'src/app/services/google-api.service';
+import { environment } from 'src/environments/environment.template';
+// import { GoogleAuthService } from 'src/app/services/google-api.service';
 
 @Component({
   selector: 'app-login',
@@ -16,7 +17,6 @@ export class LoginComponent implements OnInit {
     private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute,
-    private googleApiService: GoogleApiService,
   ) { }
 
   ngOnInit(): void {
@@ -24,7 +24,10 @@ export class LoginComponent implements OnInit {
       console.log(this.route.snapshot.queryParams['code']);
       this.authService.login42(this.route.snapshot.queryParams['code']);
     }
-    else if (this.authService.checkLog()) {
+    else if (this.route.snapshot.queryParams['state'] && !this.authService.checkLog()) {
+      console.log(this.route.snapshot.queryParams['state']);
+      this.loginGoogle();
+    } else if (this.authService.checkLog()) {
       this.router.navigate(['']);
     }
     this.loginForm = this.fb.group({
@@ -45,6 +48,7 @@ export class LoginComponent implements OnInit {
   }
 
   loginGoogle(): void {
-    this.googleApiService.loginWithGoogle();
+    console.log('login google');
+    // this.googleApiService.loginWithGoogle();
   }
 }

@@ -11,7 +11,8 @@ require('./config/cron');
 
 const port = process.env.NODE_PORT;
 
-sequelize.sync({ alter: true }) //enable alter to update tables, disable to prevent data loss
+
+sequelize.sync({ alter: false }) //enable alter to update tables, disable to prevent data loss
     .then(() => {
         console.log('Tables synchronized successfully');
     })

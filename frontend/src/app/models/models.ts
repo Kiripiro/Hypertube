@@ -344,7 +344,6 @@ export interface Notification {
 }
 
 /* Movies */
-
 export interface LoadingMovieResponse {
 	data: {
 		size: number,

@@ -35,7 +35,7 @@ class UserController {
 
     register = async (req, res) => {
         try {
-            const { username, firstName, lastName, email, password, language } = req.body;
+            const { username, firstName, lastName, email, password, confirm_password, language } = req.body;
 
             const existingUser = await User.findOne({ where: { email } });
             if (existingUser) {
@@ -46,6 +46,9 @@ class UserController {
                 return res.status(409).json({ error: 'Username is already taken.' });
             }
 
+            if (password !== confirm_password) {
+                return res.status(400).json({ error: 'Passwords do not match' });
+            }
             const hashedPassword = await bcrypt.hash(password, 10);
             const token = uuidv4();
 
@@ -189,20 +192,18 @@ class UserController {
 
     loginGoogle = async (req, res) => {
         try {
-            const userData = req.body.user;
-            const userExists = await User.findOne({ where: { email: userData.email } });
-            if (userExists && !userExists.loginApi) {
-                return res.status(401).json({ error: 'Invalid credentials, you have signed up manually using this email.' });
-            }
+            const { credential } = req.body;
+            const payload = jwt.decode(credential);
+            const userExists = await User.findOne({ where: { email: payload.email } });
             const refreshToken = uuidv4();
             if (!userExists) {
                 const newUser = await User.create({
-                    username: userData.name,
-                    firstName: userData.given_name,
-                    lastName: userData?.family_name || null,
-                    email: userData.email,
-                    email_checked: true,
-                    avatar: userData.avatar || 'baseAvatar.png',
+                    username: payload.name,
+                    firstName: payload.given_name,
+                    lastName: payload.family_name,
+                    email: payload.email,
+                    emailVerified: true,
+                    avatar: payload.picture,
                     token: refreshToken,
                     tokenCreationDate: this._getTimestampString(),
                     tokenExpirationDate: this._getTimestampString(1),
@@ -210,18 +211,18 @@ class UserController {
                     language: 'en'
                 });
                 res.cookie('accessToken', this._generateToken(newUser.id), { httpOnly: true, maxAge: maxAgeAccessToken });
-                res.cookie('refreshToken', userData.sub, { httpOnly: true, maxAge: maxAgeRefreshToken });
-                return res.status(201).json({ message: 'User registered successfully', user: newUser });
+                res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: maxAgeRefreshToken });
+                return res.redirect(process.env.FRONTEND_URL + '/auth/redirect');
             } else {
                 const dataToUpdate = {
                     token: refreshToken,
                     tokenCreationDate: this._getTimestampString(),
                     tokenExpirationDate: this._getTimestampString(1)
                 };
-                await User.update(dataToUpdate, { where: { email: userData.email } });
+                await User.update(dataToUpdate, { where: { email: payload.email } });
                 res.cookie('accessToken', this._generateToken(userExists.id), { httpOnly: true, maxAge: maxAgeAccessToken });
-                res.cookie('refreshToken', userData.sub, { httpOnly: true, maxAge: maxAgeRefreshToken });
-                return res.status(200).json({ message: 'User logged in successfully', user: userExists });
+                res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: maxAgeRefreshToken });
+                return res.redirect(process.env.FRONTEND_URL + '/auth/redirect?id=' + userExists.id + '&username=' + userExists.username + '&firstName=' + userExists.firstName + '&lastName=' + userExists.lastName + '&emailVerified=' + userExists.emailVerified + '&avatar=' + userExists.avatar);
             }
         } catch (error) {
             console.error('Error logging in user:', error);
@@ -409,6 +410,8 @@ class UserController {
             }
             await User.update(userData, { where: { id: userId } });
             const user = await User.findOne({ where: { id: userId } });
+            const userComments = await Comments.findAll({ where: { author_id: userId } });
+            await Promise.all(userComments.map(comment => comment.update({ author_username: user.username })));
             const userReturn = {
                 "id": user.id,
                 "username": user.username,

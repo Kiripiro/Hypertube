@@ -1,109 +1,57 @@
+// import { ActivatedRouteSnapshot, CanActivateFn, Router, RouterStateSnapshot } from "@angular/router";
+
+// export const googleGuard: CanActivateFn = (
+//   next: ActivatedRouteSnapshot,
+//   state: RouterStateSnapshot) => {
+//   const { id, username, firstName, lastName, emailVerified, avatar } = next.queryParams;
+//   console.log(next.queryParams);
+//   if (!username || !firstName || !lastName || !emailVerified || !avatar || !id) {
+//     console.log('error');
+//     return false;
+//   }
+//   console.log(typeof username);
+//   console.log(typeof firstName);
+//   localStorage.setItem('id', id);
+//   localStorage.setItem('username', JSON.stringify(username));
+//   localStorage.setItem('firstName', JSON.stringify(firstName));
+//   localStorage.setItem('lastName', JSON.stringify(lastName));
+//   localStorage.setItem('email_checked', emailVerified);
+//   localStorage.setItem('avatar', JSON.stringify(avatar));
+//   localStorage.setItem('loginApi', '1');
+//   localStorage.setItem('language', 'en');
+
+//   window.location.href = 'http://localhost:4200';
+//   return true;
+// }
+
 import { Injectable } from '@angular/core';
-import { OAuthService } from 'angular-oauth2-oidc';
-import { environment } from 'src/environments/environment.template';
-import { HttpClient } from '@angular/common/http';
-import { LocalStorageService, localStorageName } from './local-storage.service';
-import { loginGoogleResponseData } from '../models/models';
-import { AuthService } from './auth.service';
-import { Router } from '@angular/router';
-import { DialogService } from './dialog.service';
-
-const oAuthConfig = {
-  issuer: 'https://accounts.google.com',
-  strictDiscoveryDocumentValidation: false,
-  redirectUri: 'http://localhost:4200/auth/login',
-  clientId: environment.CLIENT_ID_GOOGLE,
-  scope: 'openid profile email',
-};
-
-export interface GoogleUser {
-  name: string;
-  given_name: string;
-  family_name: string;
-  avatar: string;
-  email: string;
-  email_verified: boolean;
-}
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
-export class GoogleApiService {
-  user!: GoogleUser;
-  url!: string;
+export class GoogleAuthService {
+  private scriptElement: HTMLScriptElement | undefined;
 
-  constructor(
-    private readonly oAuthService: OAuthService,
-    private http: HttpClient,
-    private localStorageService: LocalStorageService,
-    private dialogService: DialogService,
-    private authService: AuthService,
-    private router: Router,
+  initGoogleSignIn(clientId: string): void {
+    this.scriptElement = document.createElement('script');
+    this.scriptElement.src = 'https://accounts.google.com/gsi/client';
+    this.scriptElement.async = true;
+    this.scriptElement.defer = true;
 
-  ) {
-    this.url = environment.backendUrl || 'http://localhost:3000';
-    this.configureOAuth();
-  }
+    document.body.appendChild(this.scriptElement);
 
-  private configureOAuth(): void {
-    this.oAuthService.configure(oAuthConfig);
-    this.oAuthService.loadDiscoveryDocument();
-  }
-
-
-  loginWithGoogle(): void {
-    this.oAuthService.tryLoginImplicitFlow().then(() => {
-      if (!this.oAuthService.hasValidAccessToken()) {
-        this.oAuthService.initImplicitFlow();
-      } else {
-        this.oAuthService.loadUserProfile().then((user: any) => {
-          const infos = JSON.stringify(user.info);
-          const { name, given_name, family_name, picture, email, email_verified } = JSON.parse(infos);
-          this.user = {
-            name,
-            given_name,
-            family_name,
-            avatar: picture,
-            email,
-            email_verified
-          };
-          this.http.post<loginGoogleResponseData>(this.url + '/user/loginGoogle', { user: this.user }, { withCredentials: true }).subscribe({
-            next: (response) => {
-              if (response.message == "User logged in successfully" && response.user) {
-                this.localStorageService.setMultipleItems(
-                  { key: localStorageName.id, value: response.user.id || -1 },
-                  { key: localStorageName.username, value: response.user.username || "" },
-                  { key: localStorageName.firstName, value: response.user.firstName || "" },
-                  { key: localStorageName.lastName, value: response.user.lastName || "" },
-                  { key: localStorageName.avatar, value: response.user.avatar || false },
-                  { key: localStorageName.emailChecked, value: true },
-                  { key: localStorageName.loginApi, value: response.user.loginApi }
-                );
-              }
-              this.authService.logEmitChange(true);
-              this.router.navigate(['']);
-              location.reload();
-            },
-            error: (error) => {
-              const dialogData = {
-                title: 'Login error',
-                text: error.error,
-                text_yes_button: "",
-                text_no_button: "Close",
-                yes_callback: () => { },
-                no_callback: () => { },
-                reload: false
-              };
-              this.dialogService.openDialog(dialogData);
-            }
-          });
-        }).catch((err) => {
-          console.log('Error fetching Google user:', err);
-        });
+    this.scriptElement.onload = () => {
+      // Logic to initialize Google Sign-In with client ID
+      const gIdOnload = document.getElementById('g_id_onload');
+      if (gIdOnload) {
+        gIdOnload.setAttribute('data-client_id', clientId);
       }
+    };
+  }
+
+  destroyGoogleSignIn(): void {
+    if (this.scriptElement) {
+      document.body.removeChild(this.scriptElement);
     }
-    ).catch((err) => {
-      console.log('Google user not logged in');
-    });
   }
 }

@@ -2,15 +2,19 @@ const fs = require('fs');
 const path = require('path');
 const { CronJob } = require('cron');
 const { MoviesHistory } = require('../models');
-const sequelize = require('./db');
 const { Op } = require('sequelize');
+
 const cleanupTask = async () => {
     try {
-        // const oneMonthAgo = new Date();
-        // oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-        const oneMonthAgo = new Date(new Date().setHours(new Date().getHours() - 2));
+        console.log('Running cleanup task...');
+        const oneMonthAgo = new Date();
+        // Uncomment the line below for production use
+        oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+        // Fake date for testing purposes, use 5min ago instead
+        // oneMonthAgo.setMinutes(oneMonthAgo.getMinutes() - 5);
+
         const rows = await MoviesHistory.findAll({
-            attributes: [[sequelize.fn('DISTINCT', sequelize.col('title')), 'title']],
+            attributes: ['imdbId'],
             where: {
                 updatedAt: {
                     [Op.lt]: oneMonthAgo,
@@ -18,25 +22,56 @@ const cleanupTask = async () => {
             },
         });
 
-        for (const { title } of rows) {
+        if (rows.length > 0) {
+            console.log(`Found ${rows.length} movie(s) to delete`);
+        } else {
+            console.log(`Found 0 movies to delete`);
+            return;
+        }
+
+        for (const { imdbId } of rows) {
             const count = await MoviesHistory.count({
                 where: {
-                    title,
+                    imdbId,
                     updatedAt: {
                         [Op.gte]: oneMonthAgo,
                     },
                 },
             });
 
-            if (count === 0) {
-                if (fs.existsSync(path.join(__dirname, `../download/${title}`))) {
-                    const files = fs.readdirSync(path.join(__dirname, `../download/${title}`));
-                    const file = files[0];
-                    const extension = path.extname(file);
-                    fs.unlinkSync(path.join(__dirname, `../download/${title}/${file}.${extension}`));
-                    //delete the subtitles
+            console.log(count);
+            const mp4Path = path.join(__dirname, `../download/${imdbId}.mp4`);
+            const mkvPath = path.join(__dirname, `../download/${imdbId}.mkv`);
+            const filePath = fs.existsSync(mp4Path) ? mp4Path : fs.existsSync(mkvPath) ? mkvPath : null;
+
+            if (filePath && count === 0) {
+                console.log(`Deleting movie with imdb_id '${imdbId}'`);
+                const files = fs.existsSync(filePath) ? [filePath] : [];
+                const file = files[0];
+
+                if (file) {
+                    fs.unlinkSync(filePath);
+
+                    const subtitleDirVtt = path.join(__dirname, `../subtitles/vtt`);
+                    const subtitleDirSrt = path.join(__dirname, `../subtitles/srt`);
+
+                    const deleteSubtitles = (subtitleDir, extension) => {
+                        const subtitleFiles = fs.readdirSync(subtitleDir)
+                            .filter(file => file.startsWith(`${imdbId}-`) && file.endsWith(extension));
+
+                        subtitleFiles.forEach(subtitleFile => {
+                            const filePath = path.join(subtitleDir, subtitleFile);
+                            fs.unlinkSync(filePath);
+                        });
+                    };
+
+                    deleteSubtitles(subtitleDirVtt, '.vtt');
+                    deleteSubtitles(subtitleDirSrt, '.srt');
+
+                    console.log(`Deleted file and subtitles for movie with imdb_id '${imdbId}'`);
+                } else {
+                    console.log(`No file found for movie with imdb_id '${imdbId}'`);
                 }
-                console.log(`Deleted file and subtitles for movieTitle '${title}'`);
             }
         }
     } catch (error) {
@@ -44,6 +79,9 @@ const cleanupTask = async () => {
     }
 };
 
-const job = new CronJob('*/1 * * * *', cleanupTask);;
+// Run every minute for testing purposes
+// const job = new CronJob('*/1 * * * *', cleanupTask);
+// Uncomment the line below for production use to run every day at 00:00
+const job = new CronJob('0 0 * * *', cleanupTask);
 
 module.exports = job;

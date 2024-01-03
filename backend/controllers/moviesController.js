@@ -142,7 +142,6 @@ class MoviesController {
         const omdbApiUrl = 'http://www.omdbapi.com/';
         try {
             const omdbResponse = await axios.get(`${omdbApiUrl}?i=${imdb_id}&apikey=${process.env.OMDB_API_KEY}`);
-            // console.log("omdbResponse", omdbResponse);
             const omdbData = omdbResponse.data;
             return res.status(200).json({ movie: this._filteredMovieData(omdbData) });
         } catch (error) {
@@ -182,21 +181,26 @@ class MoviesController {
     addMovieHistory = async (req, res) => {
         try {
             const userId = req.user.userId;
-            const { imdbId, title } = req.body;
+            const { imdbId, title, timestamp } = req.body;
             const seen = await MoviesHistory.findOne({
                 where: {
                     userId,
                     imdbId,
-                    title
+                    title,
                 }
             });
             if (seen) {
-                return res.status(200).json({ seen });
+                //update the updatedAt field and timestamp if it's > than the previous one
+                if (seen.timestamp < timestamp) {
+                    seen.timestamp = timestamp;
+                    await seen.save();
+                }
             } else {
                 const movieHistory = await MoviesHistory.create({
                     userId,
                     imdbId,
-                    title
+                    title,
+                    timestamp
                 });
                 return res.status(200).json({ movieHistory });
             }

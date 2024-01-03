@@ -1,12 +1,12 @@
 const express = require('express');
 const moviesRouter = express.Router();
-const auth = require('../middlewares/auth');
+const auth = require('../middlewares/auth/auth');
 const MoviesController = require('../controllers/moviesController');
 const StreamController = require('../controllers/streamController');
 const cors = require('cors');
 const { validateMovieDetails, validateMovieStream, validateMovieLoading, validateMovieStopLoading, validateAddMovieHistory, validateMovieDownloadSubtitles, validateMovieFileSize } = require('../middlewares/moviesMiddleware');
 
-moviesRouter.get('/fetchYTSMovies', auth, async (req, res) => {
+moviesRouter.get('/fetchYTSMovies', auth, moviesMiddleware.fetchYTSMovies, async (req, res) => {
     try {
         await MoviesController.fetchYTSMovies(req, res);
     } catch (error) {
@@ -70,7 +70,7 @@ moviesRouter.get('/downloadSubtitles/:imdbId/:lang/:time', validateMovieDownload
     }
 });
 
-moviesRouter.get('/getMovieHistory', auth, async (req, res) => {
+moviesRouter.get('/getMovieHistory', auth, moviesMiddleware.getMovieHistory, async (req, res) => {
     try {
         await MoviesController.getMovieHistory(req, res);
     } catch (error) {
@@ -85,7 +85,7 @@ moviesRouter.get('/getMovieHistory', auth, async (req, res) => {
 //     }
 // });
 
-moviesRouter.get('/getMovieHistoryById/:id', auth, async (req, res) => {
+moviesRouter.get('/getMovieHistoryById/:id', auth, moviesMiddleware.getMovieHistory, async (req, res) => {
     try {
         await MoviesController.getMovieHistory(req, res);
     } catch (error) {

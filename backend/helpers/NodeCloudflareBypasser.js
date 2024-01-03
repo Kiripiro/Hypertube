@@ -156,7 +156,8 @@ class NodeCloudflareBypasser {
         // Additional setup
         this.setupHeaders(params);
         this.setupUserAgent(params);
-        this.setupReferer(params);
+        if (params.uri)
+            this.setupReferer(params);
         this.setupCookies(params);
 
         return params;

@@ -26,7 +26,7 @@ module.exports = (sequelize, DataTypes) => {
     userId: DataTypes.INTEGER,
     imdbId: DataTypes.STRING,
     title: DataTypes.STRING,
-    timestamp: DataTypes.DATE
+    timestamp: DataTypes.FLOAT
   }, {
     sequelize,
     modelName: 'MoviesHistory',

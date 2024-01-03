@@ -27,7 +27,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   movieId = 0;
   freeId = "";
   imdbId = "";
-  movieTitle= "";
+  movieTitle = "";
   loaded = false;
   videoLoaded = false;
   error = false;
@@ -162,6 +162,11 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
     this.subUrl = this.url + '/movie/testMovies';
   }
 
+  addSubtitlesToVideo(subtitles: string) {
+    const videoElement = document.querySelector('video');
+
+  }
+
   ngAfterViewInit() {
 
   }
@@ -223,7 +228,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
     }
   }
 
-  changeSubtitles(newSub: {value: string, viewValue: string}) {
+  changeSubtitles(newSub: { value: string, viewValue: string }) {
     console.log("changeSubtitles", newSub)
     if (newSub.value != this.currentSubtitles) {
       const tracks = this.video.textTracks;
@@ -307,7 +312,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
         this.video.pause();
         this.videoPlaying = false;
         this.videoPlayButtonIcon = "play_arrow";
-        return ;
+        return;
       }
       this.video.currentTime = this.oldCurrentTime;
       console.log("force pause onTimeUpdate 1")
@@ -356,14 +361,17 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
     //   }
     // });
     console.log('ngOnDestroy');
-    this.movieService.addMovieHistory(this.imdbId, this.movieTitle).subscribe({
-      next: (response) => {
-        console.log("addMovieHistory", response.seen);
-      },
-      error: (error) => {
-        console.log(error);
-      }
-    });
+    console.log("this.video.currentTime", this.video.currentTime);
+    if (this.video.currentTime > 0) {
+      this.movieService.addMovieHistory(this.imdbId, this.movieTitle, this.video.currentTime).subscribe({
+        next: (response) => {
+          console.log("addMovieHistory", response.seen);
+        },
+        error: (error) => {
+          console.log(error);
+        }
+      });
+    }
   }
 
   getLoadingMovie() {

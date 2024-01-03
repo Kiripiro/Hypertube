@@ -57,6 +57,7 @@ export class SettingsComponent implements OnInit {
 
   getUser() {
     this.authService.getUserInfosById(this.id).subscribe((userJson: any) => {
+      console.log(userJson);
       this.user = userJson.user;
       if (this.user) {
         this.selected = this.languages.find((lang) => lang.value === this.user?.language)?.viewValue || "";

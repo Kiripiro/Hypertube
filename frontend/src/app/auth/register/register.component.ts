@@ -50,7 +50,7 @@ export class RegisterComponent implements OnInit {
         this.dialogService.openDialog(data);
         return;
       }
-      this.authService.register(username, firstName, lastName, email, password, language);
+      this.authService.register(username, firstName, lastName, email, password, repeat_password, language);
     }
   }
 }

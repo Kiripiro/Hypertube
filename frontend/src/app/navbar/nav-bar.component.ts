@@ -2,11 +2,8 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { LocalStorageService, localStorageName } from 'src/app/services/local-storage.service';
-import { NotificationsService } from 'src/app/services/notifications.service';
 import { MatMenuTrigger } from '@angular/material/menu';
-import { Notification } from 'src/app/models/models';
-import { trigger, state, style, animate, transition } from '@angular/animations';
-declare var handleSignOut: any;
+import { trigger, style, animate, transition } from '@angular/animations';
 
 @Component({
   selector: 'app-nav-bar',
@@ -27,8 +24,6 @@ declare var handleSignOut: any;
 export class NavBarComponent implements OnInit {
   isLoggedIn: boolean | undefined;
   username = "";
-  notifications: Notification[] = [];
-  notificationCount: number = 0;
   sideNavOpened = false;
 
   @ViewChild(MatMenuTrigger) private menuTrigger!: MatMenuTrigger;
@@ -36,7 +31,6 @@ export class NavBarComponent implements OnInit {
     private router: Router,
     private authService: AuthService,
     private localStorageService: LocalStorageService,
-    protected notificationsService: NotificationsService,
   ) {
     this.isLoggedIn = this.authService.checkLog();
     if (this.isLoggedIn) {
@@ -51,12 +45,6 @@ export class NavBarComponent implements OnInit {
   }
   ngOnInit(): void {
     this.authService.checkLogAndLogout();
-    this.notificationsService.notifications$.subscribe((notifications) => {
-      this.notifications = notifications;
-    });
-    this.notificationsService.notificationsCount$.subscribe((notifications) => {
-      this.notificationCount = notifications;
-    });
   }
 
   logOut() {
@@ -68,7 +56,8 @@ export class NavBarComponent implements OnInit {
   }
 
   profile() {
-    this.router.navigate(['profile/' + this.localStorageService.getItem('username')]);
+    this.username = this.localStorageService.getItem('username');
+    this.router.navigate(['profile/' + this.username]);
   }
 
   sideNavToggle() {

@@ -1,11 +1,8 @@
-const { Comments, Movies, User } = require("../models");
-const axios = require('axios');
+const { Comments, User } = require("../models");
 class CommentsController {
-    // Add your controller methods here
     addComment = async (req, res) => {
         const { author_id, text, imdb_id, parent_id } = req.body;
         try {
-            // console.log(req.body);
             const user = await User.findOne({ where: { id: author_id } });
             if (!user) {
                 return res.status(400).json({ error: "User not found" });
@@ -48,7 +45,6 @@ class CommentsController {
 
     updateComment = async (req, res) => {
         const { comment } = req.body;
-        console.log(req.body, comment);
         try {
             const commentExists = await Comments.findOne({ where: { id: comment.id, author_id: req.user.userId } });
             if (!commentExists) {
@@ -193,7 +189,8 @@ class CommentsController {
                 author_username: user.username,
                 text: comment,
                 imdb_id: movie_id,
-                parent_id: null });
+                parent_id: null
+            });
             if (!comment) {
                 return res.status(400).json({ error: "Comment could not be added" });
             }
@@ -222,7 +219,8 @@ class CommentsController {
                 author_username: user.username,
                 text: comment,
                 imdb_id: movie_id,
-                parent_id: null });
+                parent_id: null
+            });
             if (!comment) {
                 return res.status(400).json({ error: "Comment could not be added" });
             }

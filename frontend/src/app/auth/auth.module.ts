@@ -13,10 +13,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { OAuthModule } from 'angular-oauth2-oidc';
 import { MatSelectModule } from '@angular/material/select';
+import { googleGuard } from './login/google/google-api.guard';
+import { GoogleButtonComponent } from './login/google/google-api.component';
 @NgModule({
-  declarations: [RegisterComponent, LoginComponent],
+  declarations: [RegisterComponent, LoginComponent, GoogleButtonComponent],
   imports: [
     CommonModule,
     FormsModule,
@@ -33,8 +34,8 @@ import { MatSelectModule } from '@angular/material/select';
     RouterModule.forChild([
       { path: 'register', component: RegisterComponent },
       { path: 'login', component: LoginComponent },
+      { path: 'redirect', canActivate: [googleGuard], component: LoginComponent },
     ])
   ],
-
 })
 export class AuthModule { }

@@ -4,10 +4,9 @@ const fsPromises = require('fs').promises;
 const path = require('path');
 // const ffmpeg = require('fluent-ffmpeg')
 
-const ffmpegInstaller = require('@ffmpeg-installer/ffmpeg');
+// const ffmpegInstaller = require('@ffmpeg-installer/ffmpeg');
 const ffmpeg = require('fluent-ffmpeg');
-
-ffmpeg.setFfmpegPath(ffmpegInstaller.path);
+// ffmpeg.setFfmpegPath(ffmpegInstaller.path);
 // console.log(ffmpegInstaller.path, ffmpegInstaller.version);
 
 module.exports = ffmpeg;
@@ -145,35 +144,63 @@ class StreamController {
                     startTime = time;
                 }
                 console.log("startTime", startTime);
+                const headers = {
+                    'Content-Duration': "107",
+                };
+                res.writeHead(200, headers);
                 const startTimeString = startTime.toString();
                 // const headers = {
                 //     'Content-Duration': "107",
                 //   };
                 //   res.writeHead(200, headers);
                 ffmpeg()
-                .input(readStream)
-                .outputOptions([
-                    '-ss ' + startTime.toString(),
-                    '-deadline realtime',
-                    '-preset ultrafast',
-                    '-movflags frag_keyframe+separate_moof+omit_tfhd_offset+empty_moov+faststart',
-                    '-g 52',
-                ])
-                .outputFormat('mp4')
-                .on('start', () => {
-                    console.log('start')
-                })
-                .on('progress', (progress) => {
-                    console.log(`progress: ${progress.timemark}`)
-                })
-                .on('end', () => {
-                    console.log('Finished processing')
-                    readStream.destroy()
-                })
-                .on('error', (err) => {
-                    console.log(`ERROR: ${err.message}`)
-                })
-                .pipe(res)
+                    .input(readStream)
+                    // .setStartTime(startTime)
+                    .outputOptions([
+                        '-deadline realtime',
+                        '-preset ultrafast',
+                        '-start_number ${startTime}',
+                        '-movflags frag_keyframe+separate_moof+omit_tfhd_offset+empty_moov+faststart',
+                        '-g 52',
+                    ])
+                    .outputFormat('mp4')
+                    .on('start', () => {
+                        console.log('start')
+                    })
+                    .on('progress', (progress) => {
+                        console.log(`progress: ${progress.timemark}`)
+                    })
+                    .on('end', () => {
+                        console.log('Finished processing')
+                        readStream.destroy()
+                    })
+                    .on('error', (err) => {
+                        console.log(`ERROR: ${err.message}`)
+                    })
+                    .pipe(res)
+                    .input(readStream)
+                    .outputOptions([
+                        '-ss ' + startTime.toString(),
+                        '-deadline realtime',
+                        '-preset ultrafast',
+                        '-movflags frag_keyframe+separate_moof+omit_tfhd_offset+empty_moov+faststart',
+                        '-g 52',
+                    ])
+                    .outputFormat('mp4')
+                    .on('start', () => {
+                        console.log('start')
+                    })
+                    .on('progress', (progress) => {
+                        console.log(`progress: ${progress.timemark}`)
+                    })
+                    .on('end', () => {
+                        console.log('Finished processing')
+                        readStream.destroy()
+                    })
+                    .on('error', (err) => {
+                        console.log(`ERROR: ${err.message}`)
+                    })
+                    .pipe(res)
                 res.on('close', () => {
                     console.log('res.on close')
                     // readStream.destroy()
@@ -201,9 +228,9 @@ class StreamController {
                         const startData = fileSize - (chunksize * 4) - 1;
                         // const startData = 0; // TODO
                         const endData = start + chunksize;
-    
+
                         const readStream = fs.createReadStream(filePath, { startData, endData })
-    
+
                         const head = {
                             'Content-Range': `bytes ${start}-${end}/${expectedFileSize}`,
                             'Accept-Ranges': 'bytes',
@@ -426,7 +453,7 @@ class StreamController {
         } else {
             fractional = "000";
         }
-        if(fractional.length === 1) {
+        if (fractional.length === 1) {
             fractional = fractional + "0";
         }
         let hoursStr = hoursPat.toString().padStart(2, '0');
@@ -435,7 +462,7 @@ class StreamController {
         const timeString = `${hoursStr}:${minutesStr}:${secondsStr}.${fractional}`;
         return timeString;
     }
-      
+
     async processVTT(inputPath, outputPath, offsetSeconds, _updateTime) {
         try {
             const data = await fsPromises.readFile(inputPath, 'utf8')
