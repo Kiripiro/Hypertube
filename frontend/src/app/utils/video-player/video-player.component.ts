@@ -25,6 +25,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
   SECU_BYTES = 100000000;
   SECU_TIME = 0;
   SECU_TIME_CONVERTED = 120;
+  TIMER_BEFORE_ERROR = 30000;
 
   movieId = 0;
   freeId = "";
@@ -99,14 +100,16 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
     this.loadedSubject.pipe(
         takeWhile(() => this.loaded === true && this.videoLoaded === false)
     ).subscribe(() => {
-        const tenSecondsTimer = timer(20000);
+        const tenSecondsTimer = timer((this.isMKV ? (this.TIMER_BEFORE_ERROR * 3) : this.TIMER_BEFORE_ERROR));
         tenSecondsTimer.subscribe(() => {
             if (!this.videoLoaded) {
               const data = {
                 title: 'Video player error',
                 text: 'The video player did not load correctly, please reload the page',
-                text_yes_button: 'Ok',
+                text_yes_button: 'Reload',
                 yes_callback: () => { },
+                text_no_button: 'Ok',
+                no_callback: () => { },
                 reload: true,
               };
               this.dialogService.openDialog(data);
