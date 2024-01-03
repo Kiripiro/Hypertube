@@ -142,36 +142,8 @@ class StreamController {
                     startTime = time;
                 }
                 console.log("startTime", startTime);
-                const headers = {
-                    'Content-Duration': "107",
-                };
-                res.writeHead(200, headers);
                 const startTimeString = startTime.toString();
                 ffmpeg()
-                    .input(readStream)
-                    // .setStartTime(startTime)
-                    .outputOptions([
-                        '-deadline realtime',
-                        '-preset ultrafast',
-                        '-start_number ${startTime}',
-                        '-movflags frag_keyframe+separate_moof+omit_tfhd_offset+empty_moov+faststart',
-                        '-g 52',
-                    ])
-                    .outputFormat('mp4')
-                    .on('start', () => {
-                        console.log('start')
-                    })
-                    .on('progress', (progress) => {
-                        console.log(`progress: ${progress.timemark}`)
-                    })
-                    .on('end', () => {
-                        console.log('Finished processing')
-                        readStream.destroy()
-                    })
-                    .on('error', (err) => {
-                        console.log(`ERROR: ${err.message}`)
-                    })
-                    .pipe(res)
                     .input(readStream)
                     .outputOptions([
                         '-ss ' + startTime.toString(),

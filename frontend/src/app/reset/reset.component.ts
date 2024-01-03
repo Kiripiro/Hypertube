@@ -65,6 +65,17 @@ export class ResetComponent implements OnInit {
               reload: false
             };
             this.dialogService.openDialog(dialogData);
+          } else if (error && error.message && error.message == "You cannot reset the password of a 42 or Google account") {
+            const dialogData = {
+              title: 'Error',
+              text: "You cannot reset the password of a 42 or Google account",
+              text_yes_button: "",
+              text_no_button: "Close",
+              yes_callback: () => { },
+              no_callback: () => { },
+              reload: false
+            };
+            this.dialogService.openDialog(dialogData);
           } else if (error && error.message && error.message == "Email not verified") {
             const dialogData = {
               title: 'Error',

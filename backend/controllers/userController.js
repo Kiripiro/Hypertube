@@ -488,6 +488,9 @@ class UserController {
             if (!user) {
                 return res.status(404).json({ message: 'User not found' });
             } else {
+                if (user.loginApi) {
+                    return res.status(400).json({ message: 'You cannot reset the password of a 42 or Google account' });
+                }
                 if (!user.emailVerified) {
                     return res.status(400).json({ message: 'Email not verified' });
                 }
