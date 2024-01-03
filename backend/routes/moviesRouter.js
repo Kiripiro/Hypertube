@@ -77,13 +77,6 @@ moviesRouter.get('/getMovieHistory', auth, async (req, res) => {
         console.error(error);
     }
 });
-// moviesRouter.get('/torrentInfos/:id', auth, async (req, res) => { // FOR TEST, TO DELETE
-//     try {
-//         await StreamController.getTorrentInfos(req, res);
-//     } catch (error) {
-//         console.error(error);
-//     }
-// });
 
 moviesRouter.get('/getMovieHistoryById/:id', auth, async (req, res) => {
     try {

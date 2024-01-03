@@ -24,9 +24,12 @@ module.exports = (req, res, next) => {
             return res.status(403).send({ error: 'Invalid accessToken blacklisted' });
         }
         const decoded = jwt.verify(accessToken, process.env.JWT_SECRET);
-        req.user = decoded;
-        // console.log(req.user.id);
-        next();
+        if (decoded.role == 1) {
+            req.user = decoded;
+            next();
+        } else {
+            return res.status(401).send({ error: "You do not have permission to use this endpoint" });
+        }
     } catch (error) {
         console.error("error = " + error);
         if (error.name === "TokenExpiredError")

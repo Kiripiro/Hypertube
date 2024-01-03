@@ -64,14 +64,16 @@
     //     margin-right: 1.0rem;
     // }
 
-    // .primaryButton {
-    //     background-color: $onPrimaryAlt;
-    //     color: white;
-    // }
+    .primaryButton {
+        color: $second_surfaceAlt;
+        font-size: 1.5rem;
+    }
 
     .secondaryButton {
         background-color: $surface;
         color: white;
+        font-size: 1.5rem;
+        font-weight: 600;
     }
 
     .menu {
