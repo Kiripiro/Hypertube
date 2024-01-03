@@ -8,8 +8,16 @@ form {
     justify-content: space-between;
     align-items: center;
 
+    @media (max-width: 767px) {
+        width: 100%;
+    }
+
     mat-hint {
         color: $onPrimary;
         margin-bottom: 0.3rem;
+    }
+
+    mat-form-field {
+        width: 100%;
     }
 }

@@ -1,13 +1,4 @@
-$background: #FAFAFA;
-$primary: #FDBABA;
-$surface: #3E2266;
-$surfaceAlt: #6DB1BF;
-$surfaceAltDark: #2e7280;
-$onPrimary: #f3f3f3;
-$onSurface: white;
-$onPrimaryAlt: #6DB1BF;
-$greyInfos: #9a9fa3;
-$greyInfosDark: #333435;
+@import '../app.component.scss';
 
 mat-label {
     font-size: 1.2rem;
@@ -16,11 +7,12 @@ mat-label {
     margin-bottom: 0.3rem;
 }
 
+
+
 .settings-container {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    width: 50vw;
 
     p {
         display: flex;
@@ -29,6 +21,18 @@ mat-label {
         font-size: 2.5rem;
         font-weight: 500;
         color: $onPrimary;
+    }
+}
+
+@media (max-width: 768px) {
+    .settings-container {
+        width: 90vw;
+    }
+}
+
+@media (min-width: 768px) {
+    .settings-container {
+        width: 60vw;
     }
 }
 
@@ -77,7 +81,7 @@ mat-label {
     margin-bottom: 1rem;
     font-size: 1.1rem;
     font-weight: 500;
-    color: $onSurface;
+    color: $onPrimary;
 
     label {
         width: 100%;

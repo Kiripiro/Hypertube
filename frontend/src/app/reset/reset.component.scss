@@ -12,6 +12,15 @@
 .resetForm {
     display: flex;
     flex-direction: column;
+    width: 50%;
+
+    @media (max-width: 800px) {
+        width: 100%;
+    }
+
+    @media (min-width: 800px) and (max-width: 1024px) {
+        width: 80%;
+    }
 
     button {
         margin-top: 1rem;

@@ -14,7 +14,7 @@ import { MovieModalComponent } from '../utils/movie-modal/movie-modal.component'
 })
 export class HomeComponent implements OnInit {
   notConnected = false;
-  loading = false;
+  loading = true;
   error = false;
   films: FilmDetails[] = [];
   hasMore = false;
