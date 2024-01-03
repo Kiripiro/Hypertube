@@ -6,6 +6,7 @@ const { validateApiRegister, validateApiGetUserById, validateApiPatchUserById, v
 const { validateApiMovieById, validateApiPostCommentByMoviesRoute } = require('../middlewares/moviesMiddleware');
 const { validateApiGetCommentById, validateApiPatchCommentById, validateApiDeleteCommentById, validateApiPostComment } = require('../middlewares/commentsMiddleware');
 const authApi = require('../middlewares/authApi');
+const authApiUser = require('../middlewares/authApiUser');
 
 const apiRouter = express.Router();
 
@@ -17,7 +18,7 @@ apiRouter.post('/oauth/token', validateApiAuth, async (req, res) => {
     }
 });
 
-apiRouter.post('/register', validateApiRegister, async (req, res) => {
+apiRouter.post('/register', authApi, validateApiRegister, async (req, res) => {
     try {
         await UserController.apiRegister(req, res);
     } catch (error) {
@@ -33,7 +34,7 @@ apiRouter.get('/refreshToken', async (req, res) => {
     }
 });
 
-apiRouter.get('/users', authApi, async (req, res) => {
+apiRouter.get('/users', authApiUser, async (req, res) => {
     try {
         await UserController.apiGetUsers(req, res);
     } catch (error) {
@@ -41,7 +42,7 @@ apiRouter.get('/users', authApi, async (req, res) => {
     }
 });
 
-apiRouter.get('/users/:id', authApi, validateApiGetUserById, async (req, res) => {
+apiRouter.get('/users/:id', authApiUser, validateApiGetUserById, async (req, res) => {
     try {
         await UserController.apiGetUserById(req, res);
     } catch (error) {
@@ -49,7 +50,7 @@ apiRouter.get('/users/:id', authApi, validateApiGetUserById, async (req, res) =>
     }
 });
 
-apiRouter.patch('/users/:id', authApi, validateApiPatchUserById, async (req, res) => {
+apiRouter.patch('/users/:id', authApiUser, validateApiPatchUserById, async (req, res) => {
     try {
         await UserController.apiPatchUserById(req, res);
     } catch (error) {
@@ -65,7 +66,7 @@ apiRouter.get('/movies', async (req, res) => {
     }
 });
 
-apiRouter.get('/movies/:id', authApi, validateApiMovieById, async (req, res) => {
+apiRouter.get('/movies/:id', authApiUser, validateApiMovieById, async (req, res) => {
     try {
         await MoviesController.apiGetMovieById(req, res);
     } catch (error) {
@@ -73,7 +74,7 @@ apiRouter.get('/movies/:id', authApi, validateApiMovieById, async (req, res) => 
     }
 });
 
-apiRouter.get('/comments', authApi, async (req, res) => {
+apiRouter.get('/comments', authApiUser, async (req, res) => {
     try {
         await CommentsController.apiGetLatestComments(req, res);
     } catch (error) {
@@ -81,7 +82,7 @@ apiRouter.get('/comments', authApi, async (req, res) => {
     }
 });
 
-apiRouter.get('/comments/:id', authApi, validateApiGetCommentById, async (req, res) => {
+apiRouter.get('/comments/:id', authApiUser, validateApiGetCommentById, async (req, res) => {
     try {
         await CommentsController.apiGetCommentById(req, res);
     } catch (error) {
@@ -89,7 +90,7 @@ apiRouter.get('/comments/:id', authApi, validateApiGetCommentById, async (req, r
     }
 });
 
-apiRouter.patch('/comments/:id', authApi, validateApiPatchCommentById, async (req, res) => {
+apiRouter.patch('/comments/:id', authApiUser, validateApiPatchCommentById, async (req, res) => {
     try {
         await CommentsController.apiPatchCommentById(req, res);
     } catch (error) {
@@ -97,7 +98,7 @@ apiRouter.patch('/comments/:id', authApi, validateApiPatchCommentById, async (re
     }
 });
 
-apiRouter.delete('/comments/:id', authApi, validateApiDeleteCommentById, async (req, res) => {
+apiRouter.delete('/comments/:id', authApiUser, validateApiDeleteCommentById, async (req, res) => {
     try {
         await CommentsController.apiDeleteCommentById(req, res);
     } catch (error) {
@@ -105,7 +106,7 @@ apiRouter.delete('/comments/:id', authApi, validateApiDeleteCommentById, async (
     }
 });
 
-apiRouter.post('/comments', authApi, validateApiPostComment, async (req, res) => {
+apiRouter.post('/comments', authApiUser, validateApiPostComment, async (req, res) => {
     try {
         await CommentsController.apiPostComment(req, res);
     } catch (error) {
@@ -113,7 +114,7 @@ apiRouter.post('/comments', authApi, validateApiPostComment, async (req, res) =>
     }
 });
 
-apiRouter.post('/movies/:movie_id/comments', authApi, validateApiPostCommentByMoviesRoute, async (req, res) => {
+apiRouter.post('/movies/:movie_id/comments', authApiUser, validateApiPostCommentByMoviesRoute, async (req, res) => {
     try {
         await CommentsController.apiPostCommentByMoviesRoute(req, res);
     } catch (error) {

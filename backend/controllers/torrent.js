@@ -65,7 +65,7 @@ class Torrent {
         if (this.noFilesToDownload) {
             return false;
         }
-        if (currentSize == this.lastFileSize) {
+        if (currentSize == this.lastFileSize && currentSize < this.fileSize) {
             console.log("this.countBeforeError", this.countBeforeError)
             if (this.downloadStarted) {
                 if (this.countBeforeError > COUNT_BEFORE_ERROR_WHEN_DOWNLOADSTARTED) {

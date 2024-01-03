@@ -101,7 +101,6 @@ class MoviesController {
             const validMovies = filteredMovies.filter(movie => movie !== null);
             return res.status(200).json({ movies: validMovies, hasMore });
         } catch (e) {
-            console.log("azeae")
             console.error(e);
             return { movies: [], hasMore: false };
         }

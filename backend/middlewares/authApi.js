@@ -9,7 +9,6 @@ module.exports = (req, res, next) => {
         }
         const authToken = authHeader.split(' ')[1];
         const decoded = jwt.verify(authToken, process.env.JWT_SECRET_API);
-        console.log(decoded);
         req.user = decoded;
         next();
     } catch (error) {

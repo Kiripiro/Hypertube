@@ -676,6 +676,12 @@ class UserController {
     apiAuth = async (req, res) => {
         try {
             const { client, secret } = req.body;
+            console.log(client, secret);
+            console.log(process.env.API_CLIENT_ID, process.env.API_SECRET);
+            console.log(client === process.env.API_CLIENT_ID, secret === process.env.API_SECRET);
+            if (client !== process.env.API_CLIENT_ID || secret !== process.env.API_SECRET) {
+                return res.status(401).json({ message: 'Invalid credentials' }); 
+            }
             const tokenGenerate = this._generateTokenApi(client, secret);
             return res.status(201).json({ token: tokenGenerate });
         } catch (error) {
