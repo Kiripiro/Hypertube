@@ -9,9 +9,9 @@ const cleanupTask = async () => {
         console.log('Running cleanup task...');
         const oneMonthAgo = new Date();
         // Uncomment the line below for production use
-        oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+        // oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
         // Fake date for testing purposes, use 5min ago instead
-        // oneMonthAgo.setMinutes(oneMonthAgo.getMinutes() - 5);
+        oneMonthAgo.setMinutes(oneMonthAgo.getMinutes() - 5);
 
         const rows = await MoviesHistory.findAll({
             attributes: ['imdbId'],

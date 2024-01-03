@@ -20,8 +20,8 @@ stop:	docker-compose down
 
 clean:
 	docker-compose down --rmi all
-	# rm -rf $(FRONTEND_NODE_MODULES)
-	# rm -rf $(BACKEND_NODE_MODULES)
+	rm -rf $(FRONTEND_NODE_MODULES)
+	rm -rf $(BACKEND_NODE_MODULES)
 	rm -rf $(BACKEND_NODE_DOWNLOAD_FILES)
 	rm -rf $(BACKEND_NODE_SRT_FILES)
 	rm -rf $(BACKEND_NODE_VTT_FILES)

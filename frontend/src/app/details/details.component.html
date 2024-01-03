@@ -66,5 +66,58 @@
                 <p>{{imdbData.awards}}</p>
             </div>
         </div>
+        <div class="comments detailsCard">
+        <h3>Comments</h3>
+        <div *ngIf="!comments.length">No comments yet</div>
+        <ng-container *ngFor="let comment of comments">
+            <div class="comment" *ngIf="!comment.parent_id">
+                <div class="comment-header">
+                    <p class="comment-author">{{ comment.author_username}}</p>
+                    <p class="comment-date">{{ comment.createdAt === comment.updatedAt ? (comment.createdAt |
+                        date:'short') : (comment.updatedAt | date:'short') }} {{ comment.createdAt ===
+                        comment.updatedAt ? '' : '🖋️' }}</p>
+                </div>
+                <p class="comment-text">{{ comment.text }}</p>
+                <button class="comment-reply-button" (click)="replyToComment(comment)">
+                    <mat-hint class="hint">Reply</mat-hint>
+                </button>
+                <button *ngIf="comment.author_id === id" class="comment-reply-button"
+                    (click)="editComment(comment)">
+                    <mat-hint class="hint">Edit</mat-hint>
+                </button>
+                <button *ngIf="comment.author_id === id" class="comment-reply-button"
+                    (click)="deleteComment(comment)">
+                    <mat-hint class="hint">Delete</mat-hint>
+                </button>
+                <app-nested-comments (replyToNestedCommentEvent)="handleReplyToNestedComment($event)"
+                    (editNestedCommentEvent)="handleEditNestedComment($event)"
+                    (deleteNestedCommentEvent)="handleDeleteNestedComment($event)" [parentComment]="comment"
+                    [allComments]="comments" [replying]="replying"></app-nested-comments>
+            </div>
+        </ng-container>
+        <div class="comment-form">
+            <form [formGroup]="commentForm" (ngSubmit)="onSubmit()">
+                <mat-form-field class="comment-input">
+                    <input matInput placeholder="Add a comment" formControlName="comment">
+                    <mat-error *ngIf="commentForm.controls['comment'].hasError('required')">
+                        Comment is required
+                    </mat-error>
+                </mat-form-field>
+                <div class="movie-buttons">
+                    <button *ngIf="!replying && !editing" mat-raised-button type="submit" class="movie-button"
+                    (click)="onSubmit()">Add
+                    comment</button>
+                <button *ngIf="replying && !editing" mat-raised-button class="movie-button"
+                    (click)="onSubmit()">Reply</button>
+                <button *ngIf="editing && !replying" mat-raised-button class="movie-button"
+                    (click)="onSubmit()">Edit</button>
+                <button *ngIf="replying || editing" mat-raised-button class="movie-button"
+                    (click)="cancelReplyOrEdit()">Cancel</button>
+                </div>
+                
+            </form>
+        </div>
     </div>
+    </div>
+    
 </div>

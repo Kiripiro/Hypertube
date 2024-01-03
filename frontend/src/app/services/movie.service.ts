@@ -55,7 +55,7 @@ export class MoviesService {
     return this.http.post<any>(this.url + '/movie/addMovieHistory/', { imdbId, title, timestamp }, { withCredentials: true });
   }
 
-  getMovieDetails(imdbId: Number): Observable<MovieDetailsResponse> {
+  getMovieDetails(imdbId: String): Observable<MovieDetailsResponse> {
     return this.http.get<MovieDetailsResponse>(this.url + '/movie/fetchMovieDetails/' + imdbId, { withCredentials: true });
   }
 

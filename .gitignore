@@ -10,6 +10,9 @@ backend/imagesSaved/*.png
 !backend/imagesSaved/baseAvatar.pngs
 backend/imagesSaved/*.jpg
 backend/imagesSaved/*.jpeg
-!backend/donwload/.gitkeep
+!backend/download/.gitkeep
+backend/download/*
 !backend/subtitles/srt/.gitkeep
+backend/subtitles/srt/*
 !backendsubtitles/vtt/.gitkeep
+backend/subtitles/vtt/*
