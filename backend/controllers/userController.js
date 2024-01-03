@@ -212,7 +212,7 @@ class UserController {
                 });
                 res.cookie('accessToken', this._generateToken(newUser.id), { httpOnly: true, maxAge: maxAgeAccessToken });
                 res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: maxAgeRefreshToken });
-                return res.redirect(process.env.FRONTEND_URL + '/auth/redirect');
+                return res.redirect(process.env.FRONTEND_URL + '/auth/redirect?id=' + newUser.id + '&username=' + newUser.username + '&firstName=' + newUser.firstName + '&lastName=' + newUser.lastName + '&emailVerified=' + newUser.emailVerified + '&avatar=' + newUser.avatar);
             } else {
                 const dataToUpdate = {
                     token: refreshToken,
@@ -646,7 +646,7 @@ class UserController {
             } else {
                 const hashedPassword = await bcrypt.hash(password, 10);
                 const token = uuidv4();
-    
+
                 const newUser = await User.create({
                     username: username,
                     firstName: "",
@@ -784,7 +784,7 @@ class UserController {
                 };
                 console.log("dataToUpdate = ", dataToUpdate);
                 console.log("req.params.id = ", req.params.id);
-                await User.update(dataToUpdate, { where: { id: req.params.id  } });
+                await User.update(dataToUpdate, { where: { id: req.params.id } });
                 console.log("User updated");
                 return res.status(200).json();
             }

@@ -117,7 +117,7 @@ userRouter.post('/resetPasswordValidate', userMiddleware.validateResetPasswordVa
     }
 });
 
-userRouter.post('/oauth/token', validateApiRegister, async (req, res) => {
+userRouter.post('/oauth/token', userMiddleware.validateApiRegister, async (req, res) => {
     try {
         await UserController.apiRegister(req, res);
     } catch (error) {

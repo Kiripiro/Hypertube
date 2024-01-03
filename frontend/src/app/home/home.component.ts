@@ -30,7 +30,7 @@ export class HomeComponent implements OnInit {
     sort_by: 'download_count',
     order_by: 'desc',
     quality: 'all',
-    minimum_rating: '0',
+    minimum_rating: 0,
   };
   isModalOpen = false;
 
@@ -38,7 +38,7 @@ export class HomeComponent implements OnInit {
   sortBy: string = '';
   order: string = '';
   quality: string = '';
-  minimum_rating: string = '';
+  minimum_rating: number = 0;
 
   private searchTerms$ = new Subject<string>();
 
@@ -92,18 +92,17 @@ export class HomeComponent implements OnInit {
       sort_by: 'download_count',
       order_by: 'desc',
       quality: 'all',
-      minimum_rating: '0',
+      minimum_rating: 0,
     };
     this.search = '';
-    this.sortBy = '';
-    this.order = '';
-    this.quality = '';
-    this.minimum_rating = '';
+    // this.sortBy = '';
+    // this.order = '';
+    // this.quality = '';
+    // this.minimum_rating = '';
     this.loadMovies();
   }
 
   loadMovies() {
-    console.log("loadMovies");
     this.loading = true;
     this.homeService.getMovies(this.params).subscribe({
       next: (response) => {

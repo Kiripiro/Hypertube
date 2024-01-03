@@ -13,7 +13,7 @@ BACKEND_NODE_VTT_FILES := $(wildcard $(BACKEND_DIR)/subtitles/vtt/*.*)
 
 all:	start
 
-start:	check_node_modules 
+start:	check_node_modules
 		docker-compose up --build
 
 stop:	docker-compose down

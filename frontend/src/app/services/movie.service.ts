@@ -78,4 +78,17 @@ export class MoviesService {
   getMovieTest(): Observable<any> { // FOR TEST, TO DELETE
     return this.http.get<MovieDetailsResponse>(this.url + '/movies/testMovies', { withCredentials: true });
   }
+  _convertTime(time: string): number {
+    console.log("time", time);
+    const regExp = new RegExp(/^\d+$/);
+    console.log("regExp.test(time)", regExp.test(time));
+    if (!regExp.test(time)) {
+      return -1;
+    }
+    const timeConverted = parseInt(time);
+    if (isNaN(timeConverted)) {
+      return -1;
+    }
+    return timeConverted;
+  }
 }
