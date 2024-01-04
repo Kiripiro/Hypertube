@@ -6,6 +6,7 @@ import { Comment } from 'src/app/models/models';
 import { LocalStorageService } from 'src/app/services/local-storage.service';
 import { MoviesService } from 'src/app/services/movie.service';
 import { HomeService } from 'src/app/services/home.service';
+import { DialogService } from 'src/app/services/dialog.service';
 
 @Component({
   selector: 'app-film-modal',
@@ -35,6 +36,7 @@ export class MovieModalComponent {
     private commentsService: CommentsService,
     private movieService: MoviesService,
     private localStorageService: LocalStorageService,
+    private dialogService: DialogService,
     private homeService: HomeService,
   ) {
     this.homeService.getMovieDetails(dataReceived.imdb_id).subscribe({
@@ -72,6 +74,15 @@ export class MovieModalComponent {
               console.error('Invalid response format:', response);
             }
           }, error: (error) => {
+            
+            const dialogData = {
+              title: "Error",
+              content: "An error occured, please try again later",
+              positive: "Ok",
+              negative: "",
+              action: "error"
+            };
+            this.dialogService.openDialog(dialogData);
           }
         });
         
@@ -167,6 +178,16 @@ export class MovieModalComponent {
           this.replying = false;
           this.selectedComment = null;
         }, error: (error) => {
+          const dialogData = {
+            title: 'Error',
+            text: 'An error has occured',
+            text_yes_button: "",
+            text_no_button: "Close",
+            yes_callback: () => { },
+            no_callback: () => { },
+            reload: true
+          };
+          this.dialogService.openDialog(dialogData);
         }
       });
     } else if (this.selectedComment && this.editing) {
@@ -178,6 +199,16 @@ export class MovieModalComponent {
           this.editing = false;
           this.selectedComment = null;
         }, error: (error) => {
+          const dialogData = {
+            title: 'Error',
+            text: 'An error has occured',
+            text_yes_button: "",
+            text_no_button: "Close",
+            yes_callback: () => { },
+            no_callback: () => { },
+            reload: true
+          };
+          this.dialogService.openDialog(dialogData);
         }
       });
     } else {
@@ -185,6 +216,16 @@ export class MovieModalComponent {
         next: (response: any) => {
           this.comments.push(response.comment);
         }, error: (error) => {
+          const dialogData = {
+            title: 'Error',
+            text: 'An error has occured',
+            text_yes_button: "",
+            text_no_button: "Close",
+            yes_callback: () => { },
+            no_callback: () => { },
+            reload: true
+          };
+          this.dialogService.openDialog(dialogData);
         }
       });
     }

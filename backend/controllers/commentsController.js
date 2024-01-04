@@ -10,6 +10,11 @@ class CommentsController {
                 return res.status(400).json({ error: "User not found" });
             }
             let username = user.dataValues.username;
+            if (parent_id) {
+                const parent_comment = await Comments.findOne({where: parent_id})
+                if (!parent_comment)
+                    return res.status(400).json({error: "Comment parent doesn't exist, cannot add your comment"});
+            }
             const comment = await Comments.create({ author_id, author_username: username, text, imdb_id, parent_id: parent_id || null });
             if (!comment) {
                 return res.status(400).json({ error: "Comment could not be added" });
