@@ -46,9 +46,12 @@
             padding-bottom: 1rem;
         }
 
-        // .videoDiv {
-        //     height: fit-content;
-        // }
+        .videoDiv {
+            @media (max-width: 500px) {
+                margin-left: 0.2rem;
+                margin-right: 0.2rem;
+            }
+        }
 
         .detailsHeader {
 

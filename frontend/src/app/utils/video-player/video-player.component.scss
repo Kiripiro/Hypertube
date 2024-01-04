@@ -69,6 +69,9 @@ video {
 }
 
 .topControl {
+    @media (max-width: 500px) {
+        display: none;
+    }
     #progressRange {
         width: calc(100% - 30px);
         height: 8px;
@@ -129,6 +132,9 @@ video {
             height: fit-content;
             width: fit-content;
             color: white;
+            @media (max-width: 500px) {
+                font-size: 2rem;
+            }
         }
 
         #videoTime {
@@ -138,6 +144,9 @@ video {
             align-items: center;
             margin-bottom: 0;
             margin-left: 0.5rem;
+            @media (max-width: 500px) {
+                display: none;
+            }
         }
     }
 
@@ -151,6 +160,9 @@ video {
             height: fit-content;
             width: fit-content;
             color: white;
+            @media (max-width: 500px) {
+                display: none;
+            }
         }
     
         .volume-control {
@@ -180,6 +192,10 @@ video {
                     --mdc-slider-active-track-color: rgb(243, 118, 20);
                     --mdc-slider-inactive-track-color: rgb(243, 118, 20);
                 }
+
+                @media (max-width: 500px) {
+                    display: none;
+                }
             }
     
             #volumeButton {
@@ -188,11 +204,17 @@ video {
                 width: fit-content;
                 color: white;
                 margin-right: 0.5rem;
+                @media (max-width: 500px) {
+                    display: none;
+                }
             }
         }
 
         #subtitlesButton {
             color: white;
+            @media (max-width: 500px) {
+                display: none;
+            }
         }
 
     }

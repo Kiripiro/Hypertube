@@ -101,7 +101,7 @@ export class WaitComponent implements OnInit {
           this.text = "Error";
           const dialogData = {
             title: 'Password reset',
-            text: error.error,
+            text: "Error",
             text_yes_button: "",
             text_no_button: "Close",
             yes_callback: () => { },

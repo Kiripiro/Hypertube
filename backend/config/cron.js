@@ -13,7 +13,7 @@ const cleanupTask = async () => {
         oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
 
         // Fake date for testing purposes, use 5min ago instead
-        // oneMonthAgo.setMinutes(oneMonthAgo.getMinutes() - 1);
+        // oneMonthAgo.setMinutes(oneMonthAgo.getMinutes() - 5);
 
         const rows = await MoviesHistory.findAll({
             attributes: ['imdbId'],
