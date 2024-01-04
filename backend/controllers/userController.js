@@ -388,12 +388,11 @@ class UserController {
             if (userData.username && (await User.findOne({ where: { username: userData.username } })) !== null) {
                 res.status(400).json({ error: 'Username already in use' });
                 return;
-            }
+            } 
             if (userData.email && (await User.findOne({ where: { email: userData.email } })) !== null) {
                 res.status(400).json({ error: 'Email already in use' });
                 return;
             }
-
             if (file) {
                 try {
                     const avatar = await this._savePicture(file, userId);
@@ -413,6 +412,9 @@ class UserController {
             } else if (userData.password && !userData.confirm_password || !userData.password && userData.confirm_password) {
                 res.status(400).json({ error: 'Missing password or confirmation' });
                 return;
+            }
+            if (userData.username && userData.username.length > 25 || userData.firstName && userData.firstName.length > 25 || userData.lastName && userData.lastName.length > 25) {
+                return res.status(401).json({error: "Username, firstName and lastName cannot be longer than 25 char"});
             }
             await User.update(userData, { where: { id: userId } });
             const user = await User.findOne({ where: { id: userId } });

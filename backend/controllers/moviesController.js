@@ -63,6 +63,7 @@ class MoviesController {
                     const movieRet = await this._omdbMovieData(userId, movie.imdbId, null, null);
                     if (movieRet != null) {
                         if (this._checkQueryMatchForMovie(params, movieRet)) {
+                            console.log(movieRet);
                             freeTorrentMovies.push(movieRet);
                         }
                     }
@@ -117,10 +118,6 @@ class MoviesController {
             const lowercaseQueryTerm = params.query_term.toLowerCase();
     
             return lowercaseMovieTitle.includes(lowercaseQueryTerm);
-        }
-        if (params.genre !== 'all') {
-            const isGenreMatched = (!filters.genre || filters.genre === 'all' || 
-                movie.genre.some(genre => genre.toLowerCase() === filters.genre.toLowerCase()));
         }
         return true;
     };

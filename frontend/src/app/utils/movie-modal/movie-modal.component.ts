@@ -82,6 +82,10 @@ export class MovieModalComponent {
     });
   }
 
+  isStringType(data: any): boolean {
+    return typeof data === 'string';
+  }
+
   handleReplyToNestedComment(selectedComment: Comment) {
     this.replying = true;
     this.replyToComment(selectedComment);
