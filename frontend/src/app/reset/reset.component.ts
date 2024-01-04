@@ -53,7 +53,6 @@ export class ResetComponent implements OnInit {
           this.dialogService.openDialog(dialogData);
         },
         error: (error) => {
-          console.error('sendPasswordResetRequest failed:', error);
           if (error && error.message && error.message == "User not found") {
             const dialogData = {
               title: 'Error',

@@ -66,7 +66,6 @@ class StreamController {
                     if (ytsId > 0) {
                         const ytsApiResponse = await axios.get(`${process.env.TORRENT_API}${YTS_MOVIE_DETAUILS_URL}${ytsId}`);
                         if (!ytsApiResponse || !ytsApiResponse.data || !ytsApiResponse.data.data || !ytsApiResponse.data.data.movie) {
-                            console.error('Error streamLauncher with YTS API response');
                             return res.status(400).json({ error: 'Error with YTS API response' });
                         }
                         sortedTorrents = TorrentHelper.sortTorrents(
@@ -74,7 +73,6 @@ class StreamController {
                             ytsApiResponse.data.data.movie.title_long
                         );
                         if (sortedTorrents == null) {
-                            console.error('Error streamLauncher with YTS API response');
                             return res.status(400).json({ error: 'Error with YTS API torrent response' });
                         }
                     } else {
@@ -86,7 +84,6 @@ class StreamController {
                             seeds: 1000
                         }]
                         if (sortedTorrents[0].magnet == null || sortedTorrents[0].magnet == undefined) {
-                            console.error('Error streamLauncher with FreeTorrentScrapper');
                             return res.status(400).json({ error: 'Error with FreeTorrentScrapper' });
                         }
                     }

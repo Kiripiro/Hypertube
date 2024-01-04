@@ -66,7 +66,6 @@ export class AuthService {
         this.logEmitChange(true);
       },
       error: (error) => {
-        console.error('User not log:', error);
         if (error == 'User not found') {
           this._frontLogOut('');
         } else {
@@ -102,7 +101,6 @@ export class AuthService {
                 no_callback: () => { },
                 reload: false
               };
-              console.error('Registration failed:', error);
               this.dialogService.openDialog(dialogData);
           } else {
             const dialogData = {
@@ -114,7 +112,6 @@ export class AuthService {
               no_callback: () => { },
               reload: false
             };
-            console.error('Registration failed:', error);
             this.dialogService.openDialog(dialogData);
           }
         }
@@ -194,7 +191,6 @@ export class AuthService {
         },
         complete: () => {
           this._frontLogOut('');
-          // window.open("/", "_self");
         }
       });
   }

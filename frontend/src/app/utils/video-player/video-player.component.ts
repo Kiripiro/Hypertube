@@ -294,9 +294,7 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
     const percentage = (clickPosition / progressRangeWidth) * 100;
     const videoTimeSelected = (percentage * this.videoDurationSeconds) / 100;
     const videoTimeMax = this.maxProgressBar * this.videoDurationSeconds / 100;
-    // console.log("percentage = " + percentage + ", maxProgressBar = " + this.maxProgressBar + ", videoTimeSelected = " + videoTimeSelected + ", videoTimeMax = " + videoTimeMax + ", this.totalSize = " + this.totalSize);
     if ((videoTimeSelected + this.SECU_TIME) < videoTimeMax) {
-      // console.log("this.video.currentTime = " + this.video.currentTime + ", videoTimeSelected = " + videoTimeSelected + ", videoTimeMax = " + videoTimeMax + ", this.video.duration = " + this.video.duration)
       if (this.isMKV) {
         this._realoadWithTime(Math.floor(videoTimeSelected));
       } else {

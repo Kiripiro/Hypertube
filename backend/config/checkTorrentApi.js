@@ -4,7 +4,7 @@ let cf = new NodeCloudflareBypasser();
 
 _pingTorrentApi = async () => {
     try {
-        console.log('Pinging Torrent API');
+        console.log('Pinging Torrent API...');
         const response = cf.request({
             url: process.env.TORRENT_API + 'list_movies.json',
             headers: {

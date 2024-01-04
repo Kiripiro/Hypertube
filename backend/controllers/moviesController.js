@@ -63,7 +63,6 @@ class MoviesController {
                     const movieRet = await this._omdbMovieData(userId, movie.imdbId, null, null);
                     if (movieRet != null) {
                         if (this._checkQueryMatchForMovie(params, movieRet)) {
-                            console.log(movieRet);
                             freeTorrentMovies.push(movieRet);
                         }
                     }

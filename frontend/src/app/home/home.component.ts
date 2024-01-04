@@ -136,7 +136,6 @@ export class HomeComponent implements OnInit {
   }
 
   sortFilms() {
-    console.log(this.sortBy);
     this.params = {
       ...this.params,
       sort_by: this.sortBy,
