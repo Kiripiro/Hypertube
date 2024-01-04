@@ -92,17 +92,31 @@ export class AuthService {
           this.dialogService.openDialog(dialogData);
         },
         error: (error) => {
-          const dialogData = {
-            title: 'Registration failed',
-            text: "Username, Lastname and Firstname must have at least 3 characters. Password must be at least 8 characters long and contain at least 1 lowercase, 1 uppercase, 1 number and 1 symbol.",
-            text_yes_button: "",
-            text_no_button: "Close",
-            yes_callback: () => { },
-            no_callback: () => { },
-            reload: false
-          };
-          console.error('Registration failed:', error);
-          this.dialogService.openDialog(dialogData);
+          if (error.error) {
+            const dialogData = {
+                title: 'Registration failed',
+                text: error.error,
+                text_yes_button: "",
+                text_no_button: "Close",
+                yes_callback: () => { },
+                no_callback: () => { },
+                reload: false
+              };
+              console.error('Registration failed:', error);
+              this.dialogService.openDialog(dialogData);
+          } else {
+            const dialogData = {
+              title: 'Registration failed',
+              text: "Username, Lastname and Firstname must have at least 3 characters. Password must be at least 8 characters long and contain at least 1 lowercase, 1 uppercase, 1 number and 1 symbol.",
+              text_yes_button: "",
+              text_no_button: "Close",
+              yes_callback: () => { },
+              no_callback: () => { },
+              reload: false
+            };
+            console.error('Registration failed:', error);
+            this.dialogService.openDialog(dialogData);
+          }
         }
       });
   }
