@@ -440,8 +440,7 @@ class UserController {
     deleteUser = async (req, res) => {
         try {
             const userId = req.user.userId;
-            const id = req.body.userdId;
-
+            const id = req.body.userId;
             if (userId != id)
                 return res.status(401).json({message: 'Cannot delete someone\'s else account'})
             const user = await User.findOne({ where: { id: userId } });
