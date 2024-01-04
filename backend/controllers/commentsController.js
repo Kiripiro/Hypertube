@@ -14,7 +14,6 @@ class CommentsController {
             }
             return res.status(200).json({ message: "Comment added", comment });
         } catch (error) {
-            console.log(error);
             return res.status(500).json({ error: error.message });
         }
     }
@@ -51,7 +50,6 @@ class CommentsController {
                 return res.status(400).json({ error: "Comment not found" });
             }
             const updatedComment = await Comments.update({ text: comment.text, updated_at: new Date() }, { where: { id: comment.id } });
-            console.log(updatedComment);
             if (!updatedComment) {
                 return res.status(400).json({ error: "Comment could not be updated" });
             }
@@ -63,8 +61,6 @@ class CommentsController {
 
     deleteComment = async (req, res) => {
         const { id } = req.params;
-        console.log(req.params);
-        console.log(req.user);
         try {
             const commentExists = await Comments.findOne({ where: { id: id, author_id: req.user.userId } });
             const commentId = commentExists.dataValues.id;

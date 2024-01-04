@@ -39,7 +39,6 @@ export class GoogleButtonComponent implements OnInit, OnDestroy {
     }
 
     handleSignIn(): void {
-        console.log('handleSignIn');
 
     }
 }

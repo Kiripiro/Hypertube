@@ -10,7 +10,6 @@ moviesRouter.get('/fetchYTSMovies', auth, movieMiddleware.fetchYTSMovies, async 
     try {
         await MoviesController.fetchYTSMovies(req, res);
     } catch (error) {
-        console.log("test")
     }
 });
 
@@ -85,16 +84,5 @@ moviesRouter.get('/getMovieHistoryById/:id', auth, movieMiddleware.getMovieHisto
         console.error(error);
     }
 });
-
-
-moviesRouter.get('/testMovies', auth, async (req, res) => { // FOR TEST, TO DELETE
-    try {
-        console.log("testMovies");
-        await MoviesController.getTestMovies(req, res);
-    } catch (error) {
-        console.error(error);
-    }
-});
-
 
 module.exports = moviesRouter;

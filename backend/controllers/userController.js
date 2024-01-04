@@ -72,7 +72,6 @@ class UserController {
                 subject: "Email verification",
                 text: "Hi " + newUser.username + "\nClick on the following link to activate your account:\n" + process.env.FRONTEND_URL + "/verification/email/" + emailVerificationToken
             };
-            console.log("mailOptions", mailOptions)
             transporter.sendMail(mailOptions, function (error, info) {
                 if (error) {
                     console.log('error = ' + error);
@@ -138,7 +137,6 @@ class UserController {
                 "avatar": userExists.avatar,
                 "language": userExists.language
             };
-            console.log(Date.now());
             res.cookie('accessToken', accessToken, { httpOnly: true, maxAge: maxAgeAccessToken });
             res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: maxAgeRefreshToken });
             return res.status(200).json({ message: 'User logged in successfully', user: user });
@@ -267,7 +265,6 @@ class UserController {
     refresh = async (req, res) => {
         try {
             const refreshToken = this._parseCookie(req, 'refreshToken');
-            // console.log(refreshToken);
             if (!refreshToken) {
                 return res.status(401).json({ message: 'Refresh token missing' });
             }
@@ -530,7 +527,6 @@ class UserController {
 
     resetPasswordValidate = async (req, res) => {
         try {
-            console.log(req.body);
             const { password, passwordResetToken } = req.body;
             const user = await User.findOne({ where: { passwordResetToken } });
             if (!user) {
@@ -692,9 +688,6 @@ class UserController {
     apiAuth = async (req, res) => {
         try {
             const { client, secret } = req.body;
-            console.log(client, secret);
-            console.log(process.env.API_CLIENT_ID, process.env.API_SECRET);
-            console.log(client === process.env.API_CLIENT_ID, secret === process.env.API_SECRET);
             if (client !== process.env.API_CLIENT_ID || secret !== process.env.API_SECRET) {
                 return res.status(401).json({ message: 'Invalid credentials' }); 
             }
@@ -711,7 +704,6 @@ class UserController {
             const { username, password } = req.body;
             const existingUsername = await User.findOne({ where: { username } });
             if (existingUsername) {
-                console.log("existingUsername");
                 if (!await bcrypt.compare(password, existingUsername.password)) {
                     return res.status(400).json({ message: 'Invalid password' });
                 } else {
@@ -847,10 +839,7 @@ class UserController {
                     password: hashedPassword,
                     avatar: newUrl
                 };
-                console.log("dataToUpdate = ", dataToUpdate);
-                console.log("req.params.id = ", req.params.id);
                 await User.update(dataToUpdate, { where: { id: req.params.id } });
-                console.log("User updated");
                 return res.status(200).json();
             }
         } catch (error) {

@@ -9,7 +9,6 @@ export class DialogService {
 
   openDialog(data: any): void {
     if (this.dialogRef) {
-      console.log("Une boîte de dialogue est déjà ouverte.");
       return;
     }
     this.dialogRef = this.dialog.open(DialogComponent, {

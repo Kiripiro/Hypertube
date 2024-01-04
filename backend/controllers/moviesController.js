@@ -108,7 +108,6 @@ class MoviesController {
 
     async _omdbMovieData(userId, imdb_code, thumbnail, ytsId) {
         try {
-            // console.log("imdb_code", imdb_code);
             const omdbApiUrl = 'http://www.omdbapi.com/';
             const omdbResponse = await axios.get(`${omdbApiUrl}?i=${imdb_code}&apikey=${process.env.OMDB_API_KEY}`);
             const omdbData = omdbResponse.data;
@@ -144,7 +143,6 @@ class MoviesController {
             const omdbData = omdbResponse.data;
             return res.status(200).json({ movie: this._filteredMovieData(omdbData) });
         } catch (error) {
-            console.log("error", error);
             console.error(`Error fetching OMDB data for movie with imdb_id ${imdb_id}: ${error.message}`);
             return res.status(200).json({ movie: {} });
         }
@@ -329,7 +327,6 @@ class MoviesController {
                     }
                 }
             }
-            console.log("comments");
             const comments = await Comments.findAll({
                 where: { imdb_id: omdbData.imdbID },
                 include: [
@@ -346,7 +343,6 @@ class MoviesController {
                 ],
             });
             const commentsCount = comments ? comments.length : 0;
-            console.log("commentsCount", commentsCount);
             const movieData = {
                 title: omdbData.Title,
                 id: omdbData.imdbID,

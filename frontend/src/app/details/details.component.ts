@@ -48,7 +48,6 @@ export class DetailsComponent implements OnInit {
     this.route.params.subscribe(params => {
       this.ytsId = params['ytsId'];
       this.imdbId = params['imdbId'];
-      console.log(this.imdbId);
       this.moviesService.getMovieDetails(this.imdbId).subscribe({
         next: (response) => {
           this.imdbData = response.movie;
@@ -70,7 +69,6 @@ export class DetailsComponent implements OnInit {
           console.error('Invalid response format:', response);
         }
       }, error: (error) => {
-        console.log(error);
       }
     });
   }
@@ -133,12 +131,10 @@ export class DetailsComponent implements OnInit {
               console.error('Invalid response format:', response);
             }
           }, error: (error) => {
-            console.log(error);
           }
         });
 
       }, error: (error) => {
-        console.log(error);
       }
     });
   }
@@ -155,21 +151,17 @@ export class DetailsComponent implements OnInit {
           this.replying = false;
           this.selectedComment = null;
         }, error: (error) => {
-          console.log(error);
         }
       });
     } else if (this.selectedComment && this.editing) {
       const updatedComment: Comment = { ...this.selectedComment as Comment, text: comment };
       this.commentsService.updateComment(updatedComment).subscribe({
         next: (response: any) => {
-          console.log(response);
           const updatedComment: Comment = { ...response.comment, updatedAt: new Date() };
           this.comments = this.comments.map(comment => comment.id === response.comment.id ? updatedComment : comment);
-          console.log(this.comments);
           this.editing = false;
           this.selectedComment = null;
         }, error: (error) => {
-          console.log(error);
         }
       });
     } else {
@@ -177,7 +169,6 @@ export class DetailsComponent implements OnInit {
         next: (response: any) => {
           this.comments.push(response.comment);
         }, error: (error) => {
-          console.log(error);
         }
       });
     }

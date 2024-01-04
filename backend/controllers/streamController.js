@@ -128,7 +128,6 @@ class StreamController {
         } else {
             const file = this.fileTab.find(it => it.fileName == torrent.torrentName);
             if (!file) {
-                console.log("error file not found")
                 return;
             }
             var filePath = file.filePath;
@@ -141,7 +140,6 @@ class StreamController {
                 if (time > 0) {
                     startTime = time;
                 }
-                console.log("startTime", startTime);
                 const startTimeString = startTime.toString();
                 ffmpeg()
                     .input(readStream)
@@ -164,11 +162,9 @@ class StreamController {
                         readStream.destroy()
                     })
                     .on('error', (err) => {
-                        console.log(`ERROR: ${err.message}`)
                     })
                     .pipe(res)
                 res.on('close', () => {
-                    console.log('res.on close')
                 })
             } else {
                 if (range) {
@@ -210,7 +206,6 @@ class StreamController {
                             end = fileSize - 1;
                         }
                         if (start > end) {
-                            console.log("start" + start + " end" + end + " fileSize" + fileSize);
                             start = end - 1;
                         }
                         this.lastByteSent = end;
@@ -308,19 +303,16 @@ class StreamController {
 
     downloadSubtitles = async (req, res) => {
         try {
-            console.log("downloadSubtitles");
             const imdbId = req.params.imdbId;
             const lang = req.params.lang;
             const tabLang = lang.split("-");
             const time = req.params.time;
             const userId = req.user.userId;
-            console.log('time', time);
             if (tabLang.length <= 0) {
                 return res.status(400).json({ message: 'Missing language parameter' });
             } else if (tabLang.length > 2) {
                 return res.status(400).json({ message: 'Max two language parameters' });
             }
-            console.log("tabLang", tabLang);
             let retTab = [];
             for (let i = 0; i < tabLang.length; i++) {
                 if (languages.indexOf(tabLang[i]) == -1) {
@@ -452,12 +444,9 @@ class StreamController {
                 }
                 return true;
             });
-            console.log("newSegments.length", newSegments.length);
 
             let newContent = newSegments.join('\n\n');
             await fsPromises.writeFile(outputPath, newContent);
-            console.log("File was saved as", outputPath);
-            console.log("ret 1", outputPath);
             return outputPath;
         } catch (err) {
             console.error("An error occurred:", err);
@@ -467,8 +456,6 @@ class StreamController {
 
     removeMovie = async (imdbId) => {
         try {
-            console.log("removeMovie", imdbId);
-            console.log("this.torrentTab", this.torrentTab);
             if (this.torrentTab.length <= 0) {
                 return false;
             }
@@ -490,7 +477,6 @@ class StreamController {
             }
             return true;
         } catch (error) {
-            console.error('Error removeMoveFile:', error);
         }
     }
 }

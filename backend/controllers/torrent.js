@@ -63,7 +63,6 @@ class Torrent {
 
     checkDownload() {
         const currentSize = this.getDownloadedSize();
-        console.log("currentSize = " + currentSize + ", lastFileSize = " + this.lastFileSize);
         if (this.error) {
             return true;
         }
@@ -71,7 +70,6 @@ class Torrent {
             return false;
         }
         if (currentSize == this.lastFileSize && currentSize < this.fileSize) {
-            console.log("this.countBeforeError", this.countBeforeError)
             if (this.downloadStarted) {
                 if (this.countBeforeError > COUNT_BEFORE_ERROR_WHEN_DOWNLOADSTARTED) {
                     return false;
@@ -124,7 +122,6 @@ class Torrent {
             console.error("TORRENT torrents empty or null")
             throw Error("TORRENT torrents empty or null");
         }
-
         if (this.torrents[0].seeds < 5) { //TODO
             console.log(red + 'TORRENT torrent.seeds = ' + this.torrents[0].seeds);
         }
@@ -178,7 +175,10 @@ class Torrent {
                         callbackWriteStreamFinish();
                     });
                     writeStream.on('error', function (err) {
-                        console.error('Error writing file', err);
+                        console.log(green + 'TORRENT writeStream error' + reset);
+                        if (err.code === 'ENOSPC') {
+                            console.log(green + 'TORRENT writeStream error no space left on device' + reset);
+                        }
                         this.error = true;
                         this.downloadStarted = false;
                         if (this.engine != null) {

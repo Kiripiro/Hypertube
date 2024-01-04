@@ -37,7 +37,6 @@ const validateUserRegistration = [
         .isLength({ min: 2, max: 2 }).withMessage('Language must 2 characters long'),
 
     (req, res, next) => {
-        console.log("validateUserRegistration", req.body);
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
@@ -72,7 +71,6 @@ const validateUserLogin42 = [
         .notEmpty().withMessage('Code is required'),
 
     (req, res, next) => {
-        console.log("validateUserLogin42", req.body);
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(401).json({ errors: errors.array() });
@@ -132,7 +130,6 @@ const validateSettingsUpdateInfos = [
         .notEmpty().withMessage('User data is required'),
 
     (req, res, next) => {
-        console.log("validateSettingsUpdateInfos", req.body);
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(401).json({ errors: errors.array() });
@@ -177,7 +174,6 @@ const validateResetPasswordValidate = [
         .isLength({ min: 8 }).withMessage('Token must be set'),
 
     (req, res, next) => {
-        console.log("validateResetPasswordValidate", req.body);
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });

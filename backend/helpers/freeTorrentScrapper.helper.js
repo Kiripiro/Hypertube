@@ -46,7 +46,6 @@ class freeTorrentScrapper {
                     magnetLinks.push(href);
                 }
                 });
-                // console.log(magnetLinks);
                 this.data = [];
                 magnetLinks.forEach(async (magnet) => {
                     const movie = FREE_TORRENTS_FILES_TO_COLLECT.find(file => magnet.includes(file.name));
@@ -67,8 +66,6 @@ class freeTorrentScrapper {
 
     getMovieMagnet(id) {
         try {
-            console.log("freeTorrentScrapper getMovieMagnet", id)
-            console.log("freeTorrentScrapper getMovieMagnet", this.data)
             const movie = this.data.find(movie => movie.imdbId == id);
             if (movie == null || movie == undefined) {
                 return null;
