@@ -31,7 +31,6 @@ module.exports = (req, res, next) => {
             return res.status(401).send({ error: "You do not have permission to use this endpoint" });
         }
     } catch (error) {
-        console.error("error = " + error);
         if (error.name === "TokenExpiredError")
             return res.status(401).send({ error: "Token expired" });
         res.status(400).send({ error: "Invalid token" });

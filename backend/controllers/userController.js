@@ -799,7 +799,12 @@ class UserController {
             if (!user) {
                 return res.status(404).json({ message: 'User not found' });
             } else {
-                let avatar = "/app/imagesSaved/" + user.avatar;
+                let avatar = "";
+                if (user.avatar && !user.avatar.includes("http://") && !user.avatar.includes("https://")) {
+                    avatar = "/app/imagesSaved/" + user.avatar;
+                } else {
+                    avatar = user.avatar;
+                }
                 const userData = {
                     "username": user.username,
                     "email": user.email ? user.email : "",
@@ -824,9 +829,12 @@ class UserController {
                 if (emailUser && emailUser.id != user.id) {
                     return res.status(409).json({ message: 'Email already in use' });
                 }
-                const usernameUser = await User.findOne({ where: { email } });
+                const usernameUser = await User.findOne({ where: { username } });
                 if (usernameUser && usernameUser.id != user.id) {
                     return res.status(409).json({ message: 'Username already in use' });
+                }
+                if (email && user.loginApi && user.email !== email) {
+                    return res.status(409).json({ message: 'You can\'t change email (42 or google register)' });
                 }
                 if (!fs.existsSync(url)) {
                     return res.status(404).json({ message: 'Profile picture not found' });

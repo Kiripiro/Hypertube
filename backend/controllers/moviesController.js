@@ -62,7 +62,6 @@ class MoviesController {
                     let movie = freeTorrentMoviesBrut[i];
                     const movieRet = await this._omdbMovieData(userId, movie.imdbId, null, null);
                     if (movieRet != null) {
-                        console.log(movie);
                         if (this._checkQueryMatchForMovie(params, movieRet)) {
                             freeTorrentMovies.push(movieRet);
                         }
@@ -122,7 +121,6 @@ class MoviesController {
         if (params.genre !== 'all') {
             const isGenreMatched = (!filters.genre || filters.genre === 'all' || 
                 movie.genre.some(genre => genre.toLowerCase() === filters.genre.toLowerCase()));
-            console.log(isGenreMatched);
         }
         return true;
     };

@@ -9,7 +9,6 @@ module.exports = (req, res, next) => {
         }
         const accessToken = authHeader.split(' ')[1];
         const decoded = jwt.verify(accessToken, process.env.JWT_SECRET);
-        console.log(decoded);
         if (decoded.role == 2 || decoded.role == 1) {
             req.user = decoded;
             next();

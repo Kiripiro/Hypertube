@@ -8,11 +8,6 @@ FREE_TORRENTS_FILES_TO_COLLECT = [
         magnet: ""
     },
     {
-        name: "cosmos-laundromat",
-        imdbId: "tt4957236",
-        magnet: ""
-    },
-    {
         name: "sintel",
         imdbId: "tt1727587",
         magnet: ""
@@ -56,10 +51,8 @@ class freeTorrentScrapper {
                 });
                 return this.data;
             })
-            .catch(console.error);
             return movies;
         } catch (error) {
-            console.error('freeTorrentScrapper init', error);
             return null;
         }
     }
@@ -72,7 +65,6 @@ class freeTorrentScrapper {
             }
             return movie.magnet;
         } catch (error) {
-            console.error('freeTorrentScrapper getMovieMagnet', error);
             return null;
         }
     }
