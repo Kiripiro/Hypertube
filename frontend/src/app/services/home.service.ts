@@ -15,7 +15,6 @@ import { HttpParams } from '@angular/common/http';
 })
 export class HomeService {
   url: string;
-  // ombdUrl: string;
   constructor(
     private http: HttpClient,
     private router: Router,
@@ -23,7 +22,6 @@ export class HomeService {
     private dialogService: DialogService,
   ) {
     this.url = environment.backendUrl || 'http://localhost:3000';
-    // this.ombdUrl = 'http://www.omdbapi.com/?apikey=' + environment.ombd_api_key;
   }
 
   getMovies(params: getMoviesParams | undefined): Observable<any> {

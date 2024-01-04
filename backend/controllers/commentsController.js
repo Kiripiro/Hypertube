@@ -1,4 +1,6 @@
 const { Comments, User } = require("../models");
+const axios = require('axios');
+
 class CommentsController {
     addComment = async (req, res) => {
         const { author_id, text, imdb_id, parent_id } = req.body;
@@ -147,7 +149,7 @@ class CommentsController {
                 return res.status(404).json({ message: 'Username doesn\'t exist' });
             }
             const updatedComment = await Comments.update({ author_username: username, text: comment }, { where: { id: id } });
-            return res.status(200).json();
+            return res.status(200).json({message: 'Comment has been updated'});
         } catch (error) {
             return res.status(500).json({ error: error.message });
         }
@@ -164,7 +166,7 @@ class CommentsController {
             if (!deletedComment) {
                 return res.status(400).json({ error: "Comment could not be deleted" });
             }
-            return res.status(200).json();
+            return res.status(200).json({message: 'Comment has been deleted'});
         } catch (error) {
             return res.status(500).json({ error: error.message });
         }
@@ -193,7 +195,7 @@ class CommentsController {
             if (!comment) {
                 return res.status(400).json({ error: "Comment could not be added" });
             }
-            return res.status(200).json();
+            return res.status(200).json({message: 'Comment has been created'});
         } catch (error) {
             return res.status(500).json({ error: error.message });
         }
@@ -223,7 +225,7 @@ class CommentsController {
             if (!comment) {
                 return res.status(400).json({ error: "Comment could not be added" });
             }
-            return res.status(200).json();
+            return res.status(200).json({message: 'Comment has been created'});
         } catch (error) {
             return res.status(500).json({ error: error.message });
         }

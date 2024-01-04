@@ -43,9 +43,9 @@ export class SettingsComponent implements OnInit {
 
   ngOnInit(): void {
     this.updateForm = this.fb.group({
-      username: ['', [Validators.pattern("^[a-zA-Z0-9]*$")]],
-      firstName: ['', [Validators.pattern("^[A-Z][a-zA-Z- ]*$")]],
-      lastName: ['', [Validators.pattern("^[A-Z][a-zA-Z- ]*$")]],
+      username: ['', [Validators.pattern("^[a-zA-Z0-9]*$"), Validators.minLength(3), Validators.maxLength(25)]],
+      firstName: ['', [Validators.pattern("^[A-Z][a-zA-Z- ]*$"), Validators.minLength(3), Validators.maxLength(25)]],
+      lastName: ['', [Validators.pattern("^[A-Z][a-zA-Z- ]*$"), Validators.minLength(3), Validators.maxLength(25)]],
       email: ['', [Validators.pattern("^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$")]],
       password: ['', Validators.minLength(8)],
       confirm_password: ['', Validators.minLength(8)],

@@ -55,22 +55,27 @@ class MoviesController {
                     minimum_rating: params.minimum_rating
                 }
             });
-            const responseBody = JSON.parse(response.body);
-            const { movie_count, movies } = responseBody.data;
-            if (movie_count === 0) {
-                return res.status(200).json({ movies: [], hasMore: false });
-            }
-            const hasMore = movie_count > params.limit * params.page;
             const freeTorrentMoviesBrut = await FreeTorrentScrapper.init();
             let freeTorrentMovies = [];
             if (freeTorrentMoviesBrut && freeTorrentMoviesBrut.length > 0) {
-                freeTorrentMoviesBrut.forEach(async movie => {
+                for (let i = 0; i < freeTorrentMoviesBrut.length; i++) {
+                    let movie = freeTorrentMoviesBrut[i];
                     const movieRet = await this._omdbMovieData(userId, movie.imdbId, null, null);
                     if (movieRet != null) {
-                        freeTorrentMovies.push(movieRet);
+                        console.log(movie);
+                        if (this._checkQueryMatchForMovie(params, movieRet)) {
+                            freeTorrentMovies.push(movieRet);
+                        }
                     }
-                });
+                }
             }
+            const responseBody = JSON.parse(response.body);
+            const { movie_count, movies } = responseBody.data;
+            if (movie_count === 0 && freeTorrentMovies.length === 0) {
+                return res.status(200).json({ movies: [], hasMore: false });
+            }
+            const hasMore = movie_count > params.limit * params.page;
+            
             var ytsMovies = [];
             if (movies) {
                 ytsMovies = await Promise.all(
@@ -106,6 +111,23 @@ class MoviesController {
         }
     };
 
+    
+    _checkQueryMatchForMovie = (params, movie) => {
+        if (params.query_term !== '0') {
+            const lowercaseMovieTitle = movie.title.toLowerCase();
+            const lowercaseQueryTerm = params.query_term.toLowerCase();
+    
+            return lowercaseMovieTitle.includes(lowercaseQueryTerm);
+        }
+        if (params.genre !== 'all') {
+            const isGenreMatched = (!filters.genre || filters.genre === 'all' || 
+                movie.genre.some(genre => genre.toLowerCase() === filters.genre.toLowerCase()));
+            console.log(isGenreMatched);
+        }
+        return true;
+    };
+    
+    
     async _omdbMovieData(userId, imdb_code, thumbnail, ytsId) {
         try {
             const omdbApiUrl = 'http://www.omdbapi.com/';

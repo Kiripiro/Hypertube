@@ -36,7 +36,6 @@ export class HomeComponent implements OnInit {
 
   search: string = '';
   sortBy: string = '';
-  order: string = '';
   quality: string = '';
   minimum_rating: number = 0;
 
@@ -53,8 +52,6 @@ export class HomeComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.authService.getLocationWithIp();
-    this.authService.getIpInfos();
     if (this.authService.checkLog()) {
       this.loadMovies();
 
@@ -77,6 +74,7 @@ export class HomeComponent implements OnInit {
             this.hasMore = response.hasMore;
           },
           error: (error) => {
+            console.log(error);
           },
         });
     }
@@ -94,10 +92,9 @@ export class HomeComponent implements OnInit {
       minimum_rating: 0,
     };
     this.search = '';
-    // this.sortBy = '';
-    // this.order = '';
-    // this.quality = '';
-    // this.minimum_rating = '';
+    this.sortBy = '';
+    this.quality = '';
+    this.minimum_rating = 0;
     this.loadMovies();
   }
 
@@ -110,6 +107,7 @@ export class HomeComponent implements OnInit {
         this.loading = false;
       },
       error: (error) => {
+        console.log(error);
       }
     });
   }
@@ -122,11 +120,12 @@ export class HomeComponent implements OnInit {
       };
       this.homeService.getMovies(this.params).subscribe({
         next: (response) => {
-          const newMovies = response.movies.filter((movie: any) => !this.films.find((film: any) => film.imdb_id === movie.imdb_id));
+          let newMovies = response.movies.filter((movie: any) => !this.films.find((film: any) => film.imdb_id === movie.imdb_id));
           this.films = this.films.concat(newMovies);
           this.hasMore = response.hasMore;
         },
         error: (error) => {
+          console.log(error);
         }
       });
     }
@@ -137,10 +136,10 @@ export class HomeComponent implements OnInit {
   }
 
   sortFilms() {
+    console.log(this.sortBy);
     this.params = {
       ...this.params,
       sort_by: this.sortBy,
-      order_by: this.order,
       quality: this.quality,
       minimum_rating: this.minimum_rating,
     };

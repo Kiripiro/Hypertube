@@ -194,3 +194,38 @@
         }
     }
 }
+
+@media (max-width: 400px) {
+    .profileCard {
+        width: 90vw;
+        height: auto;
+
+        .avatarDiv {
+            height: fit-content;
+            width: 90vw;
+            .profilePicture {
+                width: 85vw;
+                height: auto;
+            }
+        }
+
+        .mainDivProfil {
+            #nameAge {
+                font-size: 1.2rem;
+                margin: 0.5rem;
+            }
+
+            button {
+                padding: 0.4rem 0.8rem;
+            }
+        }
+    }
+
+    .errorCard,
+    .loadingCard {
+        p {
+            font-size: 1.2rem;
+            margin: 1rem 0;
+        }
+    }
+}

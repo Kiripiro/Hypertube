@@ -14,34 +14,12 @@
                     <mat-option>None</mat-option>
                     <mat-option value="title">Title</mat-option>
                     <mat-option value="date_added">Date added</mat-option>
-                    <mat-option value="imdb_rating">IMDb Rating</mat-option>
                     <mat-option value="download_count">Download Count</mat-option>
                     <mat-option value="like_count">Like Count</mat-option>
                     <mat-option value="year">Release date</mat-option>
                 </mat-select>
             </mat-form-field>
         </div>
-        <div class="filmListFilter">
-            <mat-form-field>
-                <mat-label>Order</mat-label>
-                <mat-select [(value)]="order" (selectionChange)="sortFilms()">
-                    <mat-option value="asc">Ascending</mat-option>
-                    <mat-option value="desc">Descending</mat-option>
-                </mat-select>
-            </mat-form-field>
-        </div>
-        <!-- <div class="filmListFilter">
-            <mat-form-field>
-                <mat-label>Quality</mat-label>
-                <mat-select [(value)]="quality" (selectionChange)="sortFilms()">
-                    <mat-option value="all">All</mat-option>
-                    <mat-option value="720p">720p</mat-option>
-                    <mat-option value="1080p">1080p</mat-option>
-                    <mat-option value="2160p">2160p</mat-option>
-                    <mat-option value="3D">3D</mat-option>
-                </mat-select>
-            </mat-form-field>
-        </div> -->
         <div class="filmListFilter">
             <mat-form-field>
                 <mat-label>Imdb Rating</mat-label>

@@ -7,7 +7,15 @@ mat-label {
     margin-bottom: 0.3rem;
 }
 
+.formCard {
+    height: 80vh;
+}
 
+@media (min-height: 900px) and (min-width: 850px){
+    .formCard {
+        height: 80vh !important;
+    }
+}
 
 .settings-container {
     display: flex;

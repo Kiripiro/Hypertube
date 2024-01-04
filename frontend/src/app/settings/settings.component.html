@@ -6,15 +6,15 @@
 				<div class="userInfos">
 					<mat-label>Username</mat-label>
 					<mat-form-field>
-						<input matInput formControlName="username" placeholder="{{user.username}}">
+						<input matInput formControlName="username" placeholder="{{user.username}}" maxlength="25">
 					</mat-form-field>
 					<mat-label>Last name</mat-label>
 					<mat-form-field>
-						<input matInput formControlName="lastName" placeholder="{{user.lastName}}">
+						<input matInput formControlName="lastName" placeholder="{{user.lastName}}" maxlength="25">
 					</mat-form-field>
 					<mat-label>First name</mat-label>
 					<mat-form-field>
-						<input matInput formControlName="firstName" placeholder="{{user.firstName}}">
+						<input matInput formControlName="firstName" placeholder="{{user.firstName}}" maxlength="25">
 					</mat-form-field>
 					<mat-form-field *ngIf="!user.loginApi">
 						<input matInput formControlName="email" placeholder="Email" type="email">
