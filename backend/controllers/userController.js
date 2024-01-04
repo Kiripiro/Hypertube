@@ -92,7 +92,7 @@ class UserController {
     login = async (req, res) => {
         try {
             const { username, password } = req.body;
-            const userExists = await User.findOne({ where: { username } });
+            const userExists = await User.findOne({ where: { username: username, loginApi: false } });
             if (!userExists) {
                 return res.status(401).json({ message: 'Invalid credentials' });
             }
