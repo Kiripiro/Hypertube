@@ -86,7 +86,7 @@ class MoviesController {
                             let data = {
                                 title: movie.title,
                                 poster_path: movie.medium_cover_image,
-                                genre: movie.genre,
+                                genre: movie.genres,
                                 imdb_id: movie.imdb_code,
                                 imdb_rating: movie.rating,
                                 plot: movie.synopsis,

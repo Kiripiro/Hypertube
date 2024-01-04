@@ -21,7 +21,7 @@
                         <p><strong>Director:</strong> {{ data.director || 'N/A' }}</p>
                         <p><strong>Writer:</strong> {{ data.writer || 'N/A' }}</p>
                         <p><strong>Actors:</strong> {{ data.actors || 'N/A' }}</p>
-                        <p><strong>Genre:</strong> {{ data.genre || 'N/A' }}</p>
+                        <p><strong>Genre:</strong> {{ data.genre.join(', ')  || 'N/A' }}</p>
                         <p><strong>Language:</strong> {{ data.language }}</p>
                         <p><strong>Release Date:</strong> {{ data.release_date }}</p>
                         <p *ngIf="data.awards"><strong>Awards:</strong> {{ data.awards }}</p>
