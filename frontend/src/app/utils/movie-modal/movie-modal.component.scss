@@ -5,6 +5,11 @@
     width: 80vw;
     color: $second_onSurface;
 
+    .waitModal {
+        display: flex;
+        justify-content: center;
+    }
+
     h2 {
         color: $second_onSurface;
         font-size: 2rem;
