@@ -39,6 +39,7 @@ class Torrent {
     isMKV;
     isWebm;
     noFilesToDownload;
+    error;
 
     constructor(ytsId, freeId, imdbId, sortedTorrents) {
         this.ytsId = ytsId;
@@ -57,11 +58,15 @@ class Torrent {
         this.isMKV = false;
         this.isWebm = false;
         this.noFilesToDownload = false;
+        this.error = false;
     }
 
     checkDownload() {
         const currentSize = this.getDownloadedSize();
         console.log("currentSize = " + currentSize + ", lastFileSize = " + this.lastFileSize);
+        if (this.error) {
+            return true;
+        }
         if (this.noFilesToDownload) {
             return false;
         }
@@ -150,7 +155,7 @@ class Torrent {
             var checkAcceptedFiles = false;
             this.engine.files.forEach(async (file) => {
                 console.log(green + 'TORRENT ready file ' + file.name + ', path: ' + file.path + reset);
-                if (path.extname(file.name) == '.mp4' || path.extname(file.name) == '.webm' || path.extname(file.name) == '.mkv') { 
+                if (path.extname(file.name) == '.mp4' || path.extname(file.name) == '.webm' || path.extname(file.name) == '.mkv') {
                     if (path.extname(file.name) == '.mkv') {
                         this.isMKV = true;
                     }
@@ -171,6 +176,15 @@ class Torrent {
                         console.log(green + 'TORRENT writeStream finish' + reset);
                         this.downloaded = true;
                         callbackWriteStreamFinish();
+                    });
+                    writeStream.on('error', function (err) {
+                        console.error('Error writing file', err);
+                        this.error = true;
+                        this.downloadStarted = false;
+                        if (this.engine != null) {
+                            this.engine.destroy();
+                        }
+                        writeStream.close();
                     });
                     callbackTorrentReady();
                 }

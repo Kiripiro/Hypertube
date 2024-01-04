@@ -315,7 +315,6 @@ export class VideoPlayerComponent implements OnInit, AfterViewInit {
     if (!this.videoLoaded)
       return;
     const videoTimeMax = this.maxProgressBar * this.videoDurationSeconds / 100;
-    // console.log("this.video.currentTime = " + this.video.currentTime + ", videoTimeMax = " + videoTimeMax + ", this.video.duration = " + this.video.duration)
     if (this.isMKV && this.video.currentTime >= this.video.duration) {
       this.video.pause();
       this.videoPlaying = false;

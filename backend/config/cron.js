@@ -3,6 +3,7 @@ const path = require('path');
 const { CronJob } = require('cron');
 const { MoviesHistory } = require('../models');
 const { Op } = require('sequelize');
+const StreamController = require('../controllers/streamController');
 
 const cleanupTask = async () => {
     try {
@@ -12,7 +13,7 @@ const cleanupTask = async () => {
         oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
 
         // Fake date for testing purposes, use 5min ago instead
-        // oneMonthAgo.setMinutes(oneMonthAgo.getMinutes() - 5);
+        // oneMonthAgo.setMinutes(oneMonthAgo.getMinutes() - 1);
 
         const rows = await MoviesHistory.findAll({
             attributes: ['imdbId'],
@@ -40,11 +41,11 @@ const cleanupTask = async () => {
                 },
             });
 
-            console.log(count);
             const mp4Path = path.join(__dirname, `../download/${imdbId}.mp4`);
             const mkvPath = path.join(__dirname, `../download/${imdbId}.mkv`);
-            const filePath = fs.existsSync(mp4Path) ? mp4Path : fs.existsSync(mkvPath) ? mkvPath : null;
-
+            const webmPath = path.join(__dirname, `../download/${imdbId}.webm`);
+            const filePath = fs.existsSync(mp4Path) ? mp4Path : fs.existsSync(mkvPath) ? mkvPath : fs.existsSync(webmPath) ? webmPath : null;
+            StreamController.removeMovie(imdbId);
             if (filePath && count === 0) {
                 console.log(`Deleting movie with imdb_id '${imdbId}'`);
                 const files = fs.existsSync(filePath) ? [filePath] : [];

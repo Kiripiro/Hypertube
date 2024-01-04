@@ -464,6 +464,35 @@ class StreamController {
             return null;
         }
     }
+
+    removeMovie = async (imdbId) => {
+        try {
+            console.log("removeMovie", imdbId);
+            console.log("this.torrentTab", this.torrentTab);
+            if (this.torrentTab.length <= 0) {
+                return false;
+            }
+            const torrentToRemove = this.torrentTab.find(it => it.imdbId == imdbId);
+            if (!torrentToRemove) {
+                return false;
+            }
+            torrentToRemove.stopDownload();
+            if (this.fileTab.length > 0) {
+                const fileToRemove = this.fileTab.find(it => it.torrentName == torrentToRemove.torrentName);
+                const fileIndex = this.fileTab.indexOf(fileToRemove);
+                if (fileIndex > -1) {
+                    this.MovieFile.splice(fileIndex, 1);
+                }
+            }
+            const torrentIndex = this.torrentTab.indexOf(torrentToRemove);
+            if (torrentIndex > -1) {
+                this.torrentTab.splice(torrentIndex, 1);
+            }
+            return true;
+        } catch (error) {
+            console.error('Error removeMoveFile:', error);
+        }
+    }
 }
 
 module.exports = new StreamController();

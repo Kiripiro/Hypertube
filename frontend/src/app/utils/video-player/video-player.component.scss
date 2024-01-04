@@ -5,6 +5,10 @@
     height: 100%;
 }
 
+#videoPlayerDiv {
+    min-height: auto;
+}
+
 video {
     border-radius: 20px;
 }

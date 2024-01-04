@@ -71,7 +71,7 @@ class freeTorrentScrapper {
             console.log("freeTorrentScrapper getMovieMagnet", this.data)
             const movie = this.data.find(movie => movie.imdbId == id);
             if (movie == null || movie == undefined) {
-                throw Error("No movie found");
+                return null;
             }
             return movie.magnet;
         } catch (error) {
