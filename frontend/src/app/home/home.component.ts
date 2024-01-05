@@ -85,7 +85,7 @@ export class HomeComponent implements OnInit {
       limit: 20,
       page: 1,
       query_term: '0',
-      genre: 'Sci-Fi',
+      genre: 'all',
       sort_by: 'download_count',
       order_by: 'desc',
       quality: 'all',
